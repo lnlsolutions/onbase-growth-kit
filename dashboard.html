@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONBASE Athlete — Waitlist & Growth Dashboard</title>
+<style>
+:root{--ink:#1A1A1A;--cream:#EFEDE6;--paper:#FBFAF6;--orange:#DC5726;--green:#1E8A5A;--line:#DAD6CB;--mut:#6E6A60}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1280px;margin:0 auto;padding:22px 24px 60px}
+header{display:flex;align-items:flex-end;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:18px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:10px;background:var(--ink);color:var(--cream);display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.04em}
+h1{font-size:19px;letter-spacing:-.01em}
+.sub{font-size:11.5px;color:var(--mut)}
+.pill{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--orange);color:#fff;padding:6px 11px;border-radius:99px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
+.kpi .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:700;margin-bottom:6px}
+.kpi .v{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.kpi .d{font-size:10.5px;color:var(--mut);margin-top:3px}
+.kpi.hi{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.kpi.hi .l,.kpi.hi .d{color:#B9B4A6}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+.card h2{font-size:12.5px;margin-bottom:3px}
+.card .hint{font-size:10.5px;color:var(--mut);margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:0 6px 7px;border-bottom:1px solid var(--line);font-weight:700}
+td{padding:8px 6px;border-bottom:1px solid #E9E5DA}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.04em}
+.t-a{background:#E4F3EA;color:#1E8A5A}.t-b{background:#FBEBD9;color:#B4652C}.t-c{background:#EEEAE0;color:#7A7568}
+.bars{display:flex;align-items:flex-end;gap:5px;height:158px;margin-top:8px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.bar i{display:block;width:100%;background:var(--orange);border-radius:3px 3px 0 0;min-height:3px}
+.bar.past i{background:#C9C3B4}
+.bar b{font-size:8.5px;color:var(--mut);font-weight:600}
+.bar span{font-size:9px;font-weight:700}
+.legend{display:flex;gap:14px;font-size:10px;color:var(--mut);margin-top:8px;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
+.sim{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.sim label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+input[type=range]{width:100%;accent-color:var(--orange);margin-top:9px}
+.simout{display:flex;justify-content:space-between;font-size:11px;margin-top:6px;color:var(--mut)}
+.simout b{color:var(--ink)}
+.funnel{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.frow{display:grid;grid-template-columns:1fr 96px;align-items:center;gap:10px;font-size:11.5px}
+.fbar{height:28px;border-radius:6px;background:var(--ink);color:var(--cream);display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden}
+.frow .m{font-size:10.5px;color:var(--mut);text-align:right}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
+.node{background:#F3F0E7;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:10.5px;line-height:1.35}
+.node b{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:3px}
+footer{margin-top:20px;font-size:10px;color:var(--mut);border-top:1px solid var(--line);padding-top:10px;line-height:1.5}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="logo">OB</div>
+  <div><h1>Waitlist &amp; Growth Dashboard</h1><div class="sub">ONBASE Athlete · 8150 E Germann Rd, Mesa AZ · 60-day pre-opening sprint</div></div>
+  <span class="pill">Live model</span>
+</header>
+
+<div class="kpis" id="kpis"></div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Waitlist growth, week by week</h2>
+    <div class="hint">Cumulative signups against the 1,000 target. Grey bars are the weeks already banked.</div>
+    <div class="bars" id="bars"></div>
+    <div class="legend">
+      <span><i class="dot" style="background:#C9C3B4"></i>Weeks to date</span>
+      <span><i class="dot" style="background:#DC5726"></i>Planned sprint weeks</span>
+      <span><i class="dot" style="background:#1E8A5A"></i>Target pace</span>
+    </div>
+    <div class="sim">
+      <label for="budget">Monthly ad budget: <span id="bval">$5,500</span></label>
+      <input type="range" id="budget" min="2000" max="12000" step="250" value="5500">
+      <div class="simout"><span>Projected waitlist at day 60</span><b id="simout">1,040</b></div>
+      <div class="simout"><span>Blended cost per waitlist signup</span><b id="simcpl">$12.70</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>From waitlist to member</h2>
+    <div class="hint">Modelled on a 60-day sprint. Every stage is measured in the same dashboard.</div>
+    <div class="funnel" id="funnel"></div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Where signups come from</h2>
+    <div class="hint">Two months of spend and outreach, by channel.</div>
+    <table id="chan"></table>
+  </div>
+  <div class="card">
+    <h2>East Valley ZIP priority</h2>
+    <div class="hint">Where the waitlist is already coming from, and where the drive time works.</div>
+    <table id="zips"></table>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Bookings and assessments</h2>
+    <div class="hint">Waitlist signups who booked a facility tour or swing assessment.</div>
+    <table id="book"></table>
+  </div>
+  <div class="card">
+    <h2>Partner pipeline</h2>
+    <div class="hint">Teams, schools and facilities that feed the waitlist in bulk.</div>
+    <table id="partners"></table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>How the data reaches this screen</h2>
+  <div class="hint">One place for site traffic, CRM, bookings and the waitlist, so nothing is counted twice.</div>
+  <div class="flow">
+    <div class="node"><b>Site</b>Shopify forms, page views, source and UTM on every signup.</div>
+    <div class="node"><b>Ads</b>Meta lead forms, Google Search and Local Services Ads, spend by campaign.</div>
+    <div class="node"><b>CRM</b>Every lead with stage, owner, next follow-up and activity history.</div>
+    <div class="node"><b>Bookings</b>Tours and assessments, show rate, no-show recovery.</div>
+    <div class="node"><b>Dashboard</b>Waitlist pace, cost per signup, conversion to membership.</div>
+  </div>
+</div>
+
+<footer>
+  Model assumptions: $12 blended cost per waitlist signup at the current mix, 35% of the waitlist books a tour or assessment, 45% of those convert to a membership. Numbers are planning estimates for the 60-day sprint, replaced by live data from week one.
+</footer>
+</div>
+
+<script>
+const TARGET=1000, NOW=100, WEEKS=9;
+const state={budget:5500};
+const K=()=>({});
+function money(n){return '$'+Math.round(n).toLocaleString()}
+
+function projected(){
+  const base=state.budget*2;                 // two months of spend
+  const perLead=base/11.5;                   // blended cost per signup at current mix
+  return Math.round(NOW+perLead*0.92);       // 0.92 accounts for organic and partner overlap
+}
+
+function renderKpis(){
+  const proj=projected();
+  const cpl=(state.budget*2)/((proj-NOW)||1);
+  document.getElementById('kpis').innerHTML=`
+  <div class="kpi"><div class="l">Waitlist today</div><div class="v">${NOW}</div><div class="d">baseline at sprint start</div></div>
+  <div class="kpi hi"><div class="l">Day 60 target</div><div class="v">1,000</div><div class="d">900 net new signups</div></div>
+  <div class="kpi"><div class="l">Pace needed</div><div class="v">15/day</div><div class="d">105 per week</div></div>
+  <div class="kpi"><div class="l">Projected day 60</div><div class="v">${proj.toLocaleString()}</div><div class="d">at ${money(state.budget)}/mo</div></div>
+  <div class="kpi"><div class="l">Cost per signup</div><div class="v">${money(cpl)}</div><div class="d">blended, all channels</div></div>
+  <div class="kpi"><div class="l">Projected members</div><div class="v">${Math.round(proj*0.35*0.45)}</div><div class="d">35% book, 45% close</div></div>`;
+  document.getElementById('simout').textContent=proj.toLocaleString();
+  document.getElementById('simcpl').textContent=money(cpl);
+  document.getElementById('bval').textContent=money(state.budget);
+}
+
+function renderBars(){
+  const proj=projected();
+  const past=[12,18,22,26,22];                 // weeks already banked
+  let cum=0; const rows=[];
+  past.forEach((v,i)=>{cum+=v; rows.push({v,label:'W'+(i+1),past:true,cum})});
+  const remaining=Math.max(proj-NOW,1);
+  const left=WEEKS-past.length;
+  for(let i=0;i<left;i++){
+    const v=Math.round(remaining/left);
+    cum+=v; rows.push({v,label:'W'+(past.length+i+1),past:false,cum});
+  }
+  const max=Math.max(...rows.map(r=>r.cum));
+  document.getElementById('bars').innerHTML=rows.map(r=>`
+    <div class="bar ${r.past?'past':''}">
+      <span>${r.cum>=1000?'1k':r.cum}</span>
+      <i style="height:${Math.max(6,(r.cum/max)*118)}px"></i>
+      <b>${r.label}</b>
+    </div>`).join('');
+}
+
+function renderFunnel(){
+  const proj=projected();
+  const book=Math.round(proj*0.35), show=Math.round(book*0.8), close=Math.round(show*0.55), mem=Math.round(proj*0.35*0.45);
+  const rows=[
+    {l:'Waitlist signups',v:proj,p:100},
+    {l:'Tours or assessments booked',v:book,p:Math.round(book/proj*100)},
+    {l:'Showed up',v:show,p:Math.round(show/proj*100)},
+    {l:'Membership conversations',v:close,p:Math.round(close/proj*100)},
+    {l:'New members',v:mem,p:Math.round(mem/proj*100)}
+  ];
+  document.getElementById('funnel').innerHTML=rows.map(r=>`
+    <div class="frow"><div class="fbar" style="width:${Math.max(18,r.p)}%">${r.v.toLocaleString()} · ${r.l}</div><div class="m">${r.p}%</div></div>`).join('');
+}
+
+function renderChan(){
+  const rows=[
+    {c:'Meta (Facebook + Instagram)',s:4800,w:520,note:'Families, 30-50 mi radius'},
+    {c:'Google Search',s:2400,w:190,note:'“baseball lessons Mesa” intent'},
+    {c:'Local Services Ads',s:1600,w:110,note:'Pay per call, verified'},
+    {c:'Partnerships + teams',s:0,w:140,note:'12 orgs, commission-free'},
+    {c:'Organic + content + GBP',s:0,w:80,note:'Compounds past day 60'}
+  ];
+  document.getElementById('chan').innerHTML='<tr><th>Channel</th><th class="num">Spend</th><th class="num">Signups</th><th class="num">Cost</th></tr>'+
+  rows.map(r=>`<tr><td>${r.c}<div style="font-size:10px;color:var(--mut)">${r.note}</div></td><td class="num">${r.s?money(r.s):'—'}</td><td class="num">${r.w}</td><td class="num">${r.s?money(r.s/r.w):'—'}</td></tr>`).join('')+
+  `<tr><td><b>Total</b></td><td class="num"><b>${money(8800)}</b></td><td class="num"><b>1,040</b></td><td class="num"><b>$8.46</b></td></tr>`;
+}
+
+function renderZips(){
+  const rows=[
+    {z:'85212',a:'Mesa · Eastmark',w:186,t:'t-a'},
+    {z:'85209',a:'Mesa · Superstition',w:154,t:'t-a'},
+    {z:'85206',a:'Mesa · Alta Mesa',w:121,t:'t-a'},
+    {z:'85143',a:'San Tan Valley',w:108,t:'t-b'},
+    {z:'85234',a:'Gilbert',w:96,t:'t-b'},
+    {z:'85295',a:'Gilbert · Agritopia',w:74,t:'t-b'},
+    {z:'85297',a:'Gilbert · Power Ranch',w:63,t:'t-c'},
+    {z:'85249',a:'Chandler · Ocotillo',w:48,t:'t-c'}
+  ];
+  document.getElementById('zips').innerHTML='<tr><th>ZIP</th><th>Area</th><th class="num">Signups</th><th class="num">Share</th></tr>'+
+  rows.map(r=>`<tr><td><b>${r.z}</b></td><td>${r.a}</td><td class="num">${r.w}</td><td class="num"><span class="tag ${r.t}">${Math.round(r.w/1040*100)}%</span></td></tr>`).join('');
+}
+
+function renderBook(){
+  const rows=[
+    {k:'Tour booked',v:364,n:'This week: 41'},
+    {k:'Assessment booked',v:210,n:'Full Swing KIT session'},
+    {k:'Showed up',v:459,n:'80% of all bookings'},
+    {k:'Rescheduled',v:63,n:'Recovery texts at 2h'},
+    {k:'Membership signed',v:164,n:'45% of shows'}
+  ];
+  document.getElementById('book').innerHTML='<tr><th>Stage</th><th class="num">Count</th><th>Note</th></tr>'+
+  rows.map(r=>`<tr><td>${r.k}</td><td class="num"><b>${r.v}</b></td><td style="font-size:10.5px;color:var(--mut)">${r.n}</td></tr>`).join('');
+}
+
+function renderPartners(){
+  const rows=[
+    {n:'East Valley travel ball orgs',s:'In conversation',n2:'4 of 12',t:'t-b'},
+    {n:'High school programs',s:'Season outreach',n2:'2 of 3',t:'t-b'},
+    {n:'Club softball programs',s:'Signed',n2:'1 of 2',t:'t-a'},
+    {n:'Facility cross-promos',s:'Proposal out',n2:'2 of 4',t:'t-c'},
+    {n:'Tournament sponsorships',s:'Planned',n2:'1 of 2',t:'t-c'}
+  ];
+  document.getElementById('partners').innerHTML='<tr><th>Partner type</th><th>Status</th><th class="num">Progress</th></tr>'+
+  rows.map(r=>`<tr><td>${r.n}</td><td><span class="tag ${r.t}">${r.s}</span></td><td class="num">${r.n2}</td></tr>`).join('');
+}
+
+document.getElementById('budget').addEventListener('input',e=>{
+  state.budget=Number(e.target.value); renderKpis(); renderBars(); renderFunnel();
+});
+
+function render(){renderKpis();renderBars();renderFunnel();renderChan();renderZips();renderBook();renderPartners()}
+render();
+</script>
+</body>
+</html>
