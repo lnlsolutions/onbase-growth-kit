@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>GTM Engineering — Scope and Questions for Tonight</title>
+<style>
+@page{size:8.5in 11in;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1A1A1A;background:#EFEDE6;-webkit-font-smoothing:antialiased}
+.page{width:816px;height:1056px;background:#EFEDE6;padding:44px 52px;position:relative;overflow:hidden;page-break-after:always}
+.eyebrow{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#DC5726;font-weight:800;margin-bottom:8px}
+h1{font-size:30px;line-height:1.06;letter-spacing:-.025em;font-weight:800;margin-bottom:8px}
+h2{font-size:14px;font-weight:800;letter-spacing:-.01em;margin:16px 0 6px}
+p{font-size:10.5px;line-height:1.55;color:#3A3833;margin-bottom:6px}
+.lead{font-size:12px;line-height:1.5;color:#1A1A1A;max-width:660px}
+ul{margin:0 0 8px 16px}
+li{font-size:10.3px;line-height:1.5;color:#3A3833;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-top:6px}
+th{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#6E695D;text-align:left;padding:6px 8px;border-bottom:1.5px solid #C9C3B4}
+td{font-size:9.6px;line-height:1.42;padding:6px 8px;border-bottom:1px solid #D8D3C6;vertical-align:top}
+td b{font-weight:800}
+.box{background:#E5E1D5;border-left:3px solid #DC5726;padding:11px 14px;margin:10px 0}
+.box p{margin:0;font-size:10.2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.foot{position:absolute;bottom:24px;left:52px;right:52px;display:flex;justify-content:space-between;font-size:7.6px;letter-spacing:.1em;text-transform:uppercase;color:#8A8578;border-top:1px solid #D5D0C3;padding-top:8px}
+.tag{display:inline-block;font-size:7.6px;letter-spacing:.09em;text-transform:uppercase;font-weight:800;background:#1A1A1A;color:#EFEDE6;padding:3px 7px;border-radius:3px;margin-bottom:10px}
+</style></head><body>
+
+<div class="page">
+  <div class="tag">For the 9pm call</div>
+  <div class="eyebrow">PlateOps · ONBASE Athlete</div>
+  <h1>GTM engineering: what we own, and what to ask their dev team</h1>
+  <p class="lead">Go-to-market engineering is the plumbing between demand and revenue: the tracking, capture, routing, automation and reporting that make a marketing dollar traceable to a booked athlete. It is the layer most sports facilities never build, and it is exactly what LNL already runs.</p>
+
+  <h2>The six workstreams</h2>
+  <table>
+    <tr><th style="width:26%">Workstream</th><th>What ships</th><th style="width:26%">How we know it works</th></tr>
+    <tr><td><b>01 Tracking and attribution</b></td><td>GA4 events and conversions, Meta CAPI, Google Ads conversions, UTM standard, server-side where possible</td><td>Every waitlist and booking has a source, campaign and sport attached</td></tr>
+    <tr><td><b>02 Capture and routing</b></td><td>Forms, AI text and chat, missed-call text-back, webhooks into the CRM, five-minute first reply</td><td>Zero leads sitting unowned; median first response under 5 minutes</td></tr>
+    <tr><td><b>03 CRM and lifecycle</b></td><td>Pipeline stages, owner assignment, task queues, no-show recovery, reactivation of assessed-but-not-sold</td><td>Show rate and close rate both rise without more spend</td></tr>
+    <tr><td><b>04 Data layer and dashboard</b></td><td>One schema for leads, bookings, memberships; a single screen for waitlist, spend, bookings, revenue</td><td>Monday numbers take one screen and match platform spend within 5%</td></tr>
+    <tr><td><b>05 Partner and outbound pipeline</b></td><td>Org and school target lists, sequenced outreach, pipeline tracking, partner attribution</td><td>Team and partner revenue has its own cost per acquisition</td></tr>
+    <tr><td><b>06 Experiment loop</b></td><td>Two tests a month on offer, creative, page or sequence, with a decision written before launch</td><td>Winners scale, losers get cut, nothing runs on opinion</td></tr>
+  </table>
+
+  <div class="box"><p><b>One clarification worth having early:</b> if they mean the Google Tag Manager container specifically, that is a small piece of workstream 01, not the whole job. Worth confirming which one they mean in the first two minutes, because the two answers lead to very different conversations.</p></div>
+
+  <h2>What we need from their dev team</h2>
+  <ul>
+    <li><b>Stack inventory:</b> what PlateOps runs on, what the signup hook calls, where the waitlist actually lives, and whether Coach Skip writes to a database or only to a phone.</li>
+    <li><b>Event schema:</b> the names and payloads they already fire, so we extend rather than duplicate.</li>
+    <li><b>Source of truth:</b> which system owns a lead record, and who can write to it. This decides everything downstream.</li>
+    <li><b>Access:</b> Shopify admin and theme, GA4 and Search Console, Meta Business and pixel, Google Ads, domain DNS, CRM, booking calendar.</li>
+    <li><b>Constraints:</b> what they refuse to change, and any timeline tied to opening.</li>
+  </ul>
+
+  <div class="foot"><span>LNL Solutions · GTM engineering scope</span><span>Prepared for the 9pm intro</span></div>
+</div>
+
+<div class="page">
+  <div class="eyebrow">The first 30 days</div>
+  <h1>Prove it in a month, not a quarter</h1>
+  <p class="lead">A short, dated sequence so the value is visible before anyone commits to a longer engagement. Each week ends with something they can look at.</p>
+
+  <table>
+    <tr><th style="width:16%">Week</th><th>What ships</th><th style="width:30%">What they see Friday</th></tr>
+    <tr><td><b>Week 1</b></td><td>Audit of current tracking and lead flow, event spec written, source-of-truth decision made, access granted</td><td>A diagram of where leads are lost today, with counts</td></tr>
+    <tr><td><b>Week 2</b></td><td>Tracking live end to end, UTM standard enforced, forms and AI text routing into one CRM with owner assignment</td><td>Every new lead landing in the CRM with a source attached</td></tr>
+    <tr><td><b>Week 3</b></td><td>Follow-up sequences, no-show recovery, task queues, dashboard built on real data</td><td>The dashboard, with their numbers, not modeled ones</td></tr>
+    <tr><td><b>Week 4</b></td><td>First experiment live on offer or page, partner pipeline loaded with targets and sequences</td><td>First read on what to scale, plus a partner list ready to work</td></tr>
+  </table>
+
+  <h2>How this differs from a marketing hire</h2>
+  <p>A marketer buys attention. This builds the machine that converts attention into booked athletes and tells you which dollar did it. It is the reason a 1,000-person waitlist becomes 130 members instead of a list nobody called.</p>
+
+  <h2>Questions to ask tonight</h2>
+  <ul>
+    <li>Which systems are already paid for, and which are still being chosen?</li>
+    <li>Where does a lead live today, and who is allowed to change that record?</li>
+    <li>What does Coach Skip do with a conversation it cannot answer?</li>
+    <li>Is the opening date fixed, and what has to be true the week before?</li>
+    <li>Who on their side owns the data after we build it?</li>
+  </ul>
+
+  <div class="box"><p><b>Positioning line:</b> "You already have the product, the coaches and the data. What you do not have yet is the system that turns interest into booked athletes and tells you which dollar did it. That is what I build."</p></div>
+
+  <div class="foot"><span>LNL Solutions · GTM engineering scope</span><span>Prepared for the 9pm intro</span></div>
+</div>
+
+</body></html>
