@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>ONBASE Athlete — GTM and Campaign Optimization</title><style>
+@page{size:13.333in 7.5in;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#1A1A1A;background:#EFEDE6;-webkit-font-smoothing:antialiased}
+.slide{width:1280px;height:720px;background:#EFEDE6;padding:52px 60px;position:relative;overflow:hidden;page-break-after:always}
+.slide.dark{background:#1A1A1A;color:#EFEDE6}
+.eyebrow{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#DC5726;font-weight:800;margin-bottom:14px}
+.dark .eyebrow{color:#E8825B}
+h1{font-size:56px;line-height:1.02;letter-spacing:-.03em;font-weight:800}
+h2{font-size:34px;line-height:1.1;letter-spacing:-.02em;font-weight:800;margin-bottom:10px}
+h3{font-size:15px;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+p{font-size:14px;line-height:1.55;color:#3A3833}
+.dark p{color:#BEB9AC}
+.lead{font-size:17px;line-height:1.5;max-width:820px}
+.foot{position:absolute;bottom:26px;left:60px;right:60px;display:flex;justify-content:space-between;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8A8578;border-top:1px solid #D5D0C3;padding-top:9px}
+.dark .foot{border-color:#333;color:#7A7568}
+.cols{display:grid;gap:26px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:#FBFAF6;border:1px solid #DAD6CB;border-radius:14px;padding:20px 22px}
+.dark .card{background:#22211E;border-color:#333}
+.card .big{font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.card .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8A8578;font-weight:800;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A8578;padding:0 8px 8px;border-bottom:1.5px solid #1A1A1A;font-weight:800}
+.dark th{border-color:#EFEDE6}
+td{padding:9px 8px;border-bottom:1px solid #DAD6CB}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.total td{border-top:1.5px solid #1A1A1A;border-bottom:0;font-weight:800}
+.phase{border-left:3px solid #DC5726;padding-left:14px;margin-bottom:16px}
+.phase .wk{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#DC5726;font-weight:800;margin-bottom:4px}
+.phase b{display:block;font-size:15px;margin-bottom:3px}
+.phase span{font-size:12px;line-height:1.45;color:#4A473F;display:block}
+.arrow{display:flex;align-items:center;gap:12px;margin-top:6px}
+.chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:99px;background:#1A1A1A;color:#EFEDE6}
+.chip.o{background:#DC5726;color:#fff}
+.chip.g{background:#1E8A5A;color:#fff}
+.shot{border:1px solid #DAD6CB;border-radius:10px;overflow:hidden;background:#fff}
+.shot img{width:100%;display:block}
+ul{list-style:none}
+li{font-size:13px;line-height:1.5;color:#3A3833;padding-left:18px;position:relative;margin-bottom:7px}
+li:before{content:"—";position:absolute;left:0;color:#DC5726;font-weight:800}
+.dark li{color:#BEB9AC}
+.big-num{font-size:64px;font-weight:800;letter-spacing:-.04em;line-height:.95}
+.rule{height:1px;background:#D5D0C3;margin:16px 0}
+
+.cmp{width:100%;border-collapse:collapse;margin-top:8px}
+.cmp th,.cmp td{text-align:left;padding:9px 10px;border-bottom:1px solid #D5D0C3;font-size:12.5px;vertical-align:top}
+.cmp th{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#8A8578;font-weight:800;border-bottom:1px solid #1A1A1A}
+.cmp td.y{color:#1A1A1A;font-weight:700}
+.cmp td.n{color:#9A9488}
+.cmp td.us{background:#1A1A1A;color:#EFEDE6;font-weight:700}
+.cmp td.usn{background:#1A1A1A;color:#8E887C}
+.chip{display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;padding:3px 7px;border-radius:3px;background:#DC5726;color:#fff}
+.chip.g{background:#2E6B4F}
+.rival{border:1px solid #D5D0C3;padding:14px 15px;border-radius:4px}
+.rival b{display:block;font-size:14px;margin-bottom:4px}
+.rival span{font-size:11.5px;color:#6E695D;line-height:1.45;display:block}
+.rival i{font-style:normal;font-size:11px;color:#DC5726;font-weight:700;display:block;margin-top:8px;line-height:1.4}
+
+.cmp{width:100%;border-collapse:collapse;margin-top:8px}
+.cmp th,.cmp td{text-align:left;padding:9px 10px;border-bottom:1px solid #D5D0C3;font-size:12.5px;vertical-align:top}
+.cmp th{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#8A8578;font-weight:800;border-bottom:1px solid #1A1A1A}
+.cmp td.y{color:#1A1A1A;font-weight:700}
+.cmp td.n{color:#9A9488}
+.cmp td.us{background:#1A1A1A;color:#EFEDE6;font-weight:700}
+.cmp td.usn{background:#1A1A1A;color:#8E887C}
+.chip{display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;padding:3px 7px;border-radius:3px;background:#DC5726;color:#fff}
+.chip.g{background:#2E6B4F}
+.rival{border:1px solid #D5D0C3;padding:14px 15px;border-radius:4px}
+.rival b{display:block;font-size:14px;margin-bottom:4px}
+.rival span{font-size:11.5px;color:#6E695D;line-height:1.45;display:block}
+.rival i{font-style:normal;font-size:11px;color:#DC5726;font-weight:700;display:block;margin-top:8px;line-height:1.4}
+
+.cmp{width:100%;border-collapse:collapse;margin-top:8px}
+.cmp th,.cmp td{text-align:left;padding:9px 10px;border-bottom:1px solid #D5D0C3;font-size:12.5px;vertical-align:top}
+.cmp th{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#8A8578;font-weight:800;border-bottom:1px solid #1A1A1A}
+.cmp td.y{color:#1A1A1A;font-weight:700}
+.cmp td.n{color:#9A9488}
+.cmp td.us{background:#1A1A1A;color:#EFEDE6;font-weight:700}
+.cmp td.usn{background:#1A1A1A;color:#8E887C}
+.chip{display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;padding:3px 7px;border-radius:3px;background:#DC5726;color:#fff}
+.chip.g{background:#2E6B4F}
+.rival{border:1px solid #D5D0C3;padding:14px 15px;border-radius:4px}
+.rival b{display:block;font-size:14px;margin-bottom:4px}
+.rival span{font-size:11.5px;color:#6E695D;line-height:1.45;display:block}
+.rival i{font-style:normal;font-size:11px;color:#DC5726;font-weight:700;display:block;margin-top:8px;line-height:1.4}
+</style></head><body><section class="slide dark">
+<div class="eyebrow">Prepared for ONBASE Athlete</div>
+<h1>Turn East Valley demand<br>into booked athletes.</h1><p class="lead" style="margin-top:20px;max-width:760px">A go-to-market system and paid media plan: capture every interested family, route them to a real appointment, and measure what each channel actually produces. Built to run alongside your site, your AI, and PlateOps rather than replacing them.</p>
+<div class="cols c3" style="margin-top:38px"><div class="card"><div class="lbl">The system</div><div class="big" style="font-size:22px">Capture · Route<br>Convert · Measure</div></div><div class="card"><div class="lbl">The media</div><div class="big" style="font-size:22px">Meta · Google<br>LSA · Partners</div></div><div class="card"><div class="lbl">The proof</div><div class="big" style="font-size:22px">One dashboard<br>every Monday</div></div></div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide ">
+<div class="eyebrow">Where the gap is</div>
+<h2>You have the facility, the coaches, and the data. What is missing is the path.</h2>
+<div class="cols c2" style="margin-top:18px">
+<div><ul>
+<li>A parent lands on the site and has one door: join the waitlist. No booking, no response time, no next step.</li>
+<li>Paid traffic, if it ran today, would arrive with nowhere to land that speaks to softball or to a specific age group.</li>
+<li>Texts through PlateOps start a conversation, but a conversation is not an appointment on a calendar.</li>
+<li>Nothing currently ties a signup back to the campaign, ZIP or keyword that produced it.</li>
+</ul></div>
+<div class="card"><div class="lbl">What this costs</div><p style="font-size:13.5px;margin-bottom:12px">Interest leaks at three points: the first click, the first reply, and the first follow-up. Every leak is a family who chose a competitor with an easier next step.</p><div class="rule"></div><p style="font-size:13.5px"><b>The fix is not more traffic.</b> It is a shorter, instrumented path from ad to booked assessment, then follow-up that runs without anyone remembering to send it.</p></div>
+</div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide dark">
+<div class="eyebrow">The architecture</div>
+<h2>Four layers, one record per family.</h2>
+<table class="cmp" style="margin-top:10px">
+<tr><th style="width:22%">Layer</th><th style="width:39%">What it does</th><th>What it replaces</th></tr>
+<tr><td class="y">Capture</td><td>Sport-specific landing pages, four-field forms, click-to-text, call tracking</td><td>A single waitlist button</td></tr>
+<tr><td class="y">Route</td><td>AI text reply inside five minutes, qualification by age and sport, booking link</td><td>Replies that wait for a human</td></tr>
+<tr><td class="y">Convert</td><td>Assessment slots, reminders, no-show recovery, membership offer</td><td>Manual follow-up</td></tr>
+<tr><td class="y">Measure</td><td>Source, campaign, sport and ZIP written to one record, surfaced on one dashboard</td><td>Guessing which channel works</td></tr>
+</table>
+<div class="card" style="margin-top:16px"><p style="font-size:13px">Every lead carries five fields from the moment it arrives: source, campaign, sport, age group, ZIP. That is what makes the weekly report trustworthy.</p></div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide ">
+<div class="eyebrow">Campaign structure</div>
+<h2>Three channels, cleanly separated.</h2>
+<table class="cmp" style="margin-top:8px">
+<tr><th>Channel</th><th>Structure</th><th>What it is for</th></tr>
+<tr><td class="y">Meta</td><td>Two campaigns: cold waitlist and assessment, plus retargeting. Three ad sets per campaign by age group. Lead form and site both live.</td><td>Volume and video proof. Parents see real swings and real feedback.</td></tr>
+<tr><td class="y">Google Search</td><td>Four themes: brand, cage and lesson intent, softball-specific, competitor comparison. Tight match types, aggressive negatives.</td><td>Families already looking for a place to train.</td></tr>
+<tr><td class="y">Local Services Ads</td><td>Applied for at kickoff, live once verified. Pay per lead, Google Guaranteed badge.</td><td>Trust at the top of the page and phone calls that connect.</td></tr>
+<tr><td class="y">Partners</td><td>Club, school and rec programs tracked as their own source with a named contact.</td><td>The cheapest, warmest signups in the market.</td></tr>
+</table>
+<p style="margin-top:14px;font-size:12.5px;color:#6E695D">Naming convention set before launch so every campaign, ad set and creative is readable in the dashboard without a decoder ring.</p>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide dark">
+<div class="eyebrow">Creative</div>
+<h2>Four angles, refreshed weekly.</h2>
+<div class="cols c2" style="margin-top:16px">
+<div class="card"><div class="lbl">Angles</div><ul style="margin-top:4px">
+<li><b>Proof.</b> Full Swing KIT numbers on screen: bat speed before and after.</li>
+<li><b>Coach credibility.</b> Faces and playing history, short and unpolished.</li>
+<li><b>Softball.</b> Speaks directly to families who assume this place is baseball only.</li>
+<li><b>Family logistics.</b> One roof, one schedule, one bill.</li>
+</ul></div>
+<div class="card"><div class="lbl">Formats and cadence</div><ul style="margin-top:4px">
+<li>Vertical video, 15 to 30 seconds, captioned, shot on a phone in the cages.</li>
+<li>Three new pieces a week, two tested, one held back.</li>
+<li>Every ad points at a page that matches its promise.</li>
+<li>Nothing runs longer than two weeks without a decision.</li>
+</ul></div>
+</div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide ">
+<div class="eyebrow">The optimization loop</div>
+<h2>What changes every week, and who decides.</h2>
+<table class="cmp" style="margin-top:8px">
+<tr><th style="width:18%">Day</th><th style="width:32%">What happens</th><th>Decision rule</th></tr>
+<tr><td class="y">Monday</td><td>Numbers reviewed against target</td><td>Pace behind by 15% or more: reallocate to the channel producing bookings, not clicks.</td></tr>
+<tr><td class="y">Tuesday</td><td>Campaign changes shipped</td><td>Scale what clears the cost-per-booking bar. Hold what is close. Cut what misses twice.</td></tr>
+<tr><td class="y">Wednesday</td><td>New creative launched</td><td>Replace the weakest performer, never pause a winner to test.</td></tr>
+<tr><td class="y">Thursday</td><td>Partner and team outreach</td><td>Every conversation gets a next date or it is closed out.</td></tr>
+<tr><td class="y">Friday</td><td>Lead quality audit</td><td>Wrong-age and out-of-area leads reviewed so spend does not drift toward cheap but useless.</td></tr>
+</table>
+<div class="card" style="margin-top:14px"><p style="font-size:13px">Rules are written before launch, so decisions are arithmetic rather than opinion. Nothing is optimized against clicks or impressions.</p></div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide dark">
+<div class="eyebrow">Measurement</div>
+<h2>Six events, one source of truth.</h2>
+<div class="cols c3" style="margin-top:14px">
+<div class="card"><div class="lbl">Events tracked</div><p style="font-size:12.5px;line-height:1.7">Page view<br>Form start<br>Waitlist submitted<br>Text started<br>Assessment booked<br>Assessment showed<br>Membership sold</p></div>
+<div class="card"><div class="lbl">Attribution</div><p style="font-size:12.5px;line-height:1.7">UTM on every link<br>Call tracking on LSA and search<br>Hidden fields on forms<br>CRM source overrides platform claims</p></div>
+<div class="card"><div class="lbl">Dashboard</div><p style="font-size:12.5px;line-height:1.7">Waitlist against target<br>Spend by channel and ZIP<br>Cost per waitlist and per booking<br>Booked, showed, sold<br>Pipeline by owner</p></div>
+</div>
+<p style="margin-top:16px;font-size:12.5px;color:#6E695D">Platform dashboards always overstate results. The CRM record is the number we report from, because it is the only one that knows whether the family actually walked in.</p>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide ">
+<div class="eyebrow">The plan</div>
+<h2>Sixty days, four phases, dated checkpoints.</h2>
+<div style="margin-top:8px">
+<div class="phase"><div class="wk">Phase 01 · Nov 20 to Nov 30</div><b>Foundation</b><span>Access and tracking, three landing pages, booking flow live, AI reply wired to the calendar, Google Business Profile rebuilt, review requests to the first 100 families.</span></div>
+<div class="phase"><div class="wk">Phase 02 · Dec 1 to Dec 14</div><b>Demand</b><span>Meta and Search live, creative shipped weekly, partner outreach begins, first checkpoint at 250.</span></div>
+<div class="phase"><div class="wk">Phase 03 · Dec 15 to Dec 31</div><b>Opening push</b><span>Holiday camp offer, founding member window, local sports media, retargeting at full volume, checkpoint at 800.</span></div>
+<div class="phase"><div class="wk">Phase 04 · Jan 1 to Jan 18</div><b>Fill and convert</b><span>Assessment days, no-show recovery, membership conversion, referral loop, final checkpoint at 1,000.</span></div>
+</div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide dark">
+<div class="eyebrow">What we need</div>
+<h2>Access in 48 hours, and nothing after that.</h2>
+<div class="cols c2" style="margin-top:14px">
+<div><h3 style="margin-bottom:8px">Access</h3><ul>
+<li>Shopify admin and theme access</li>
+<li>GA4, Search Console, Google Business Profile</li>
+<li>Meta Business Manager and ad account</li>
+<li>PlateOps and the booking calendar</li>
+<li>Domain DNS for landing pages and tracking</li>
+</ul></div>
+<div><h3 style="margin-bottom:8px">Decisions only you can make</h3><ul>
+<li>Which membership offer leads the campaign</li>
+<li>Assessment days and hours</li>
+<li>Who answers texts when the AI hands off</li>
+<li>Founding member terms for the opening window</li>
+<li>Approval on creative before it runs</li>
+</ul></div>
+</div>
+<div class="card" style="margin-top:18px"><p style="font-size:13px">Everything else, from tracking to reporting, sits with us. You review numbers on Monday and approve creative. That is the full weekly commitment.</p></div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section><section class="slide ">
+<div class="eyebrow">Next steps</div>
+<h2>Week one, in order.</h2>
+<div class="cols c2" style="margin-top:16px">
+<div><ul>
+<li>Access checklist completed and verified</li>
+<li>Event map and UTM convention signed off</li>
+<li>Baseball, softball and membership pages live</li>
+<li>Booking and AI reply tested end to end with a real phone</li>
+<li>Campaign structures built, not yet spending</li>
+</ul></div>
+<div class="card"><div class="lbl">Definition of done for week one</div><p style="font-size:13px;margin-bottom:10px">A stranger can find the site, tap an ad, get a reply in under five minutes, book a real slot, and appear on the dashboard with the campaign that brought them.</p><div class="rule"></div><p style="font-size:13px">Until that loop works on a real phone, no media spend goes live.</p></div>
+</div>
+<div class="foot"><span>ONBASE Athlete · GTM and campaign optimization</span><span>LNL Solutions · November 2026</span></div>
+</section></body></html>
