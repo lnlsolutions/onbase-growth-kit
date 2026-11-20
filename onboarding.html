@@ -25,6 +25,7 @@ button{font:inherit;font-size:12px;font-weight:700;padding:10px 16px;border-radi
 button.alt{background:#fff;color:#1A1A1A}
 .note{font-size:11px;color:#6E695D;margin-top:8px}
 @media print{
+ .noprint{display:none !important}
  body{background:#fff}.wrap{padding:0 0 0}
  .bar,.note{display:none}
  .sec{break-inside:avoid;page-break-inside:avoid;border:1px solid #CCC;margin-bottom:9px;padding:11px 13px;border-radius:0}
@@ -113,7 +114,7 @@ button.alt{background:#fff;color:#1A1A1A}
 <div class="q"><label>What counts as a qualified signup, in your words?</label><input type="text" id="qualified"></div>
 </div>
 
-<div class="sec"><h2>7 · Skip and PlateOps</h2>
+<div class="sec noprint"><h2>7 · Skip and PlateOps</h2>
 <div class="q"><label>What can Skip answer today?</label><textarea id="skip_today" placeholder="memberships, pricing, hours, booking..."></textarea></div>
 <div class="q"><label>Does PlateOps have an API, webhook or export we can connect to?</label><input type="text" id="plateops_api"></div>
 <div class="q"><label>Who owns that system, and who can authorize the connection?</label><input type="text" id="plateops_owner"></div>
