@@ -182,4 +182,18 @@ function download(){
   a.href=URL.createObjectURL(blob); a.download='onbase-onboarding-answers.json'; a.click();
   document.getElementById('status').textContent='Downloaded. Send the file back and we will load it.';
 }
+const ENDPOINT='https://superagent-c4c9cb88.base44.app/functions/onbaseIntake';
+function submitForm(){
+  const name=(document.getElementById('name')||{}).value||'';
+  const email=(document.getElementById('email')||{}).value||'';
+  const btn=document.getElementById('submitBtn'), st=document.getElementById('status');
+  if(!name.trim()||!email.trim()){st.textContent='Add your name and email at the top so we know who this came from.';window.scrollTo({top:0,behavior:'smooth'});return}
+  btn.disabled=true; btn.textContent='Sending...'; st.textContent='Sending to LNL Solutions...';
+  const data=collect(); data.name=name.trim(); data.email=email.trim();
+  fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers:data})})
+   .then(r=>r.json())
+   .then(j=>{ if(j&&j.ok){btn.textContent='Submitted';btn.style.background='#1E7A4D';st.textContent='Sent. We have it. You will hear from us today, usually within the hour.'} else {throw new Error((j&&j.error)||'failed')} })
+   .catch(e=>{btn.disabled=false;btn.textContent='Submit to LNL Solutions';st.textContent='That did not go through ('+e.message+'). Use Copy all answers and send it to us instead.';});
+}
+
 </script></body></html>
