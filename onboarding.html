@@ -37,6 +37,11 @@ button.alt{background:#fff;color:#1A1A1A}
 <div class="head"><div><div class="eyebrow">Onboarding · Week 0</div><h1>ONBASE Athlete — Intake Questionnaire</h1></div>
 <div class="brand">LNL Solutions LLC<br>Nov 19, 2026</div></div>
 <p class="intro">This sets up your ad campaigns and the KPI dashboard. It takes about fifteen minutes. Answer what you know, leave the rest, and we will fill the gaps on the kickoff call. Anything you would rather not type, mark it and we will collect it live.</p>
+<div class="sec" style="border-color:#1A1A1A"><h2 style="color:#1A1A1A">Who is submitting</h2>
+<div class="q"><label>Your name</label><input type="text" id="name" placeholder="First and last"></div>
+<div class="q"><label>Email</label><input type="text" id="email" placeholder="you@onbaseathlete.com"></div>
+<div class="q"><label>Mobile</label><input type="text" id="phone"></div>
+</div>
 <div class="sec"><h2>1 · Business and billing</h2>
 <div class="q"><label>Legal entity name <span class="hint">as it should appear on invoices</span></label><input type="text" id="entity"></div>
 <div class="q"><label>Business address</label><input type="text" id="address" value="8150 E Germann Rd, Mesa, AZ 85212"></div>
@@ -131,11 +136,12 @@ button.alt{background:#fff;color:#1A1A1A}
 </div>
 
 <div class="bar">
-<button onclick="copyAll()">Copy all answers</button>
+<button onclick="submitForm()" id="submitBtn">Submit to LNL Solutions</button>
+<button class="alt" onclick="copyAll()">Copy all answers</button>
 <button class="alt" onclick="download()">Download answers</button>
 <button class="alt" onclick="window.print()">Print or save PDF</button>
 </div>
-<p class="note" id="status">Fill it in and copy the answers back to us, or print to PDF and send it. Nothing is submitted anywhere until you send it.</p>
+<p class="note" id="status">Hit Submit when you are done and it lands with us immediately. You can also copy or print it if you prefer.</p>
 </div>
 <script>
 const secs=[...document.querySelectorAll('.sec')];
