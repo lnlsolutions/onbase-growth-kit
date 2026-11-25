@@ -1,258 +1,868 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ONBASE Athlete — Waitlist & Growth Dashboard</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ONBASE Athlete — Growth Dashboard</title>
 <style>
-:root{--ink:#1A1A1A;--cream:#EFEDE6;--paper:#FBFAF6;--orange:#DC5726;--green:#1E8A5A;--line:#DAD6CB;--mut:#6E6A60}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
-.wrap{max-width:1280px;margin:0 auto;padding:22px 24px 60px}
-header{display:flex;align-items:flex-end;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:18px;flex-wrap:wrap}
-.logo{width:42px;height:42px;border-radius:10px;background:var(--ink);color:var(--cream);display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.04em}
-h1{font-size:19px;letter-spacing:-.01em}
-.sub{font-size:11.5px;color:var(--mut)}
-.pill{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--orange);color:#fff;padding:6px 11px;border-radius:99px}
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
-.kpi{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 13px}
-.kpi .l{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:700;margin-bottom:6px}
-.kpi .v{font-size:21px;font-weight:800;letter-spacing:-.02em}
-.kpi .d{font-size:10.5px;color:var(--mut);margin-top:3px}
-.kpi.hi{background:var(--ink);border-color:var(--ink);color:var(--cream)}
-.kpi.hi .l,.kpi.hi .d{color:#B9B4A6}
-.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 16px}
-.card h2{font-size:12.5px;margin-bottom:3px}
-.card .hint{font-size:10.5px;color:var(--mut);margin-bottom:12px}
-table{width:100%;border-collapse:collapse;font-size:11.5px}
-th{text-align:left;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:0 6px 7px;border-bottom:1px solid var(--line);font-weight:700}
-td{padding:8px 6px;border-bottom:1px solid #E9E5DA}
+:root{--ink:#1A1A1A;--cream:#EFEDE6;--cream2:#F7F5F0;--line:#D8D3C6;--orange:#DC5726;--muted:#6E695D;--green:#1E7A4D;--amber:#B8791A;--red:#B23A2E;--white:#fff;--r:10px}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--cream2);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh;max-width:100%}
+.side{background:var(--ink);color:#CFC9BC;padding:18px 14px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.mark{width:30px;height:30px;border-radius:8px;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px}
+.logo b{color:#fff;font-size:15px;letter-spacing:-.01em;display:block;line-height:1.1}
+.logo span{font-size:10.5px;color:#8C8578;letter-spacing:.06em;text-transform:uppercase}
+.navi{display:flex;flex-direction:column;gap:2px}
+.navi button{display:flex;align-items:center;gap:9px;background:none;border:0;color:#B8B1A3;text-align:left;padding:8px 9px;border-radius:8px;font:inherit;font-size:12.5px;cursor:pointer}
+.navi button:hover{background:#2A2A28;color:#fff}
+.navi button.on{background:var(--orange);color:#fff;font-weight:700}
+.navi .ic{width:15px;text-align:center;font-size:12px;opacity:.9}
+.sidefoot{margin-top:16px;padding-top:12px;border-top:1px solid #33322E;font-size:11px;color:#8C8578;line-height:1.5}
+.main{padding:0 0 40px;min-width:0}
+.top{display:flex;align-items:center;gap:12px;padding:16px 22px;background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.top h1{font-size:17px;margin:0;letter-spacing:-.02em}
+.top .sub{font-size:11.5px;color:var(--muted)}
+.spacer{flex:1}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+.btn{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:7px 11px;font:inherit;font-size:12px;cursor:pointer;color:var(--ink);white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.blue{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+.btn.blue:hover{filter:brightness(.94)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 9px;font-size:11.5px}
+.view{display:none;padding:18px 22px}
+.view.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px}
+.card .lab{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.card .val{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+.card .dlt{font-size:11px;margin-top:2px;color:var(--muted)}
+.up{color:var(--green)}.dn{color:var(--red)}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.panel .head{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.panel .head h2{font-size:13.5px;margin:0;letter-spacing:-.01em}
+.panel .body{padding:12px 13px}
+.panel .body.p0{padding:0}
+.cols{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
+@media(max-width:1080px){.cols{grid-template-columns:1fr}.app{grid-template-columns:1fr}.side{position:relative;height:auto}
+.navi{flex-direction:row;flex-wrap:wrap}.navi button{font-size:11.5px}.view{padding:14px}.top{padding:12px 14px;flex-wrap:wrap}.cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}table{font-size:11.5px}th,td{padding:6px 7px}.panel .body{padding:10px}}
+img,table{max-width:100%}
+td,th{word-break:break-word}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:7px 9px;border-bottom:1px solid var(--line);background:var(--cream);font-weight:800}
+td{padding:7px 9px;border-bottom:1px solid #EDEAE2;vertical-align:middle}
 tr:last-child td{border-bottom:0}
 .num{text-align:right;font-variant-numeric:tabular-nums}
-.tag{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.04em}
-.t-a{background:#E4F3EA;color:#1E8A5A}.t-b{background:#FBEBD9;color:#B4652C}.t-c{background:#EEEAE0;color:#7A7568}
-.bars{display:flex;align-items:flex-end;gap:5px;height:158px;margin-top:8px}
-.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
-.bar i{display:block;width:100%;background:var(--orange);border-radius:3px 3px 0 0;min-height:3px}
-.bar.past i{background:#C9C3B4}
-.bar b{font-size:8.5px;color:var(--mut);font-weight:600}
-.bar span{font-size:9px;font-weight:700}
-.legend{display:flex;gap:14px;font-size:10px;color:var(--mut);margin-top:8px;flex-wrap:wrap}
-.dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:4px}
-.sim{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
-.sim label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
-input[type=range]{width:100%;accent-color:var(--orange);margin-top:9px}
-.simout{display:flex;justify-content:space-between;font-size:11px;margin-top:6px;color:var(--mut)}
-.simout b{color:var(--ink)}
-.funnel{display:flex;flex-direction:column;gap:8px;margin-top:4px}
-.frow{display:grid;grid-template-columns:1fr 96px;align-items:center;gap:10px;font-size:11.5px}
-.fbar{height:28px;border-radius:6px;background:var(--ink);color:var(--cream);display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden}
-.frow .m{font-size:10.5px;color:var(--mut);text-align:right}
-.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:4px}
-.node{background:#F3F0E7;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:10.5px;line-height:1.35}
-.node b{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:3px}
-footer{margin-top:20px;font-size:10px;color:var(--mut);border-top:1px solid var(--line);padding-top:10px;line-height:1.5}
-@media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<header>
-  <div class="logo">OB</div>
-  <div><h1>Waitlist &amp; Growth Dashboard</h1><div class="sub">ONBASE Athlete · 8150 E Germann Rd, Mesa AZ · 60-day pre-opening sprint</div></div>
-  <span class="pill">Live model</span>
-</header>
+.chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:20px;background:var(--cream);color:var(--muted)}
+.chip.g{background:#E4F1E9;color:var(--green)}.chip.a{background:#FBF0DC;color:var(--amber)}.chip.r{background:#F8E5E2;color:var(--red)}.chip.b{background:#E7EEF9;color:#1D4E89}
+.note{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:132px 1fr 64px;gap:9px;align-items:center;font-size:12px}
+.track{height:8px;background:var(--cream);border-radius:20px;overflow:hidden}
+.fill{height:100%;background:var(--orange);border-radius:20px}
+.fill.g{background:var(--green)}.fill.b{background:#1D4E89}.fill.a{background:var(--amber)}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.filters button{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font:inherit;font-size:11.5px;cursor:pointer;color:var(--muted)}
+.filters button.on{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700}
+.search{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;font-size:12px;background:var(--white);min-width:190px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.field label{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:8px;padding:8px 9px;font:inherit;font-size:12.5px;background:var(--white);width:100%}
+.field textarea{min-height:64px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:24px;font-size:12.5px;opacity:0;pointer-events:none;transition:.22s;z-index:200;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:rgba(20,20,18,.55);display:none;align-items:flex-start;justify-content:center;padding:28px 14px;z-index:150;overflow-y:auto}
+.modal.open{display:flex}
+.sheet{background:var(--white);border-radius:14px;width:min(660px,100%);overflow:hidden}
+.sheet .head{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line)}
+.sheet .head h2{font-size:14px;margin:0}
+.sheet .body{padding:14px 15px}
+.gate{position:fixed;inset:0;background:var(--ink);display:grid;place-items:center;z-index:300;padding:20px}
+.gate .box{background:var(--white);border-radius:14px;padding:22px;width:min(360px,100%)}
+.gate h2{margin:0 0 6px;font-size:17px}
+.gate p{margin:0 0 14px;font-size:12px;color:var(--muted);line-height:1.5}
+.kpi{background:var(--cream2);border-radius:8px;padding:9px 11px}
+.kpi .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800}
+.kpi .v{font-size:15px;font-weight:800;margin-top:2px}
+.mono{font-variant-numeric:tabular-nums}
+.slot{display:inline-block;width:100%;height:22px;border-radius:4px;background:var(--cream)}
+.slot.on{background:var(--orange)}
+.slot.half{background:#F2C3AE}
+.tag{font-size:10.5px;color:var(--muted)}
+</style></head><body>
+<div class="gate" id="gate"><div class="box">
+  <div class="mark" style="margin-bottom:10px">O</div>
+  <h2>ONBASE Athlete · growth dashboard</h2>
+  <p>Built from Steve's intake. Waitlist, spend and cost per signup, memberships, revenue and MRR, cage and session utilization, coach load, retention, reviews, plus Jacobo's checkout and lead recovery.</p>
+  <div class="field"><label>Access code</label><input id="gateCode" placeholder="Enter code" onkeydown="if(event.key==='Enter')unlock()"></div>
+  <button class="btn blue" style="width:100%;justify-content:center" onclick="unlock()">Open dashboard</button>
+</div></div>
 
-<div class="kpis" id="kpis"></div>
-
-<div class="grid">
-  <div class="card">
-    <h2>Waitlist growth, week by week</h2>
-    <div class="hint">Cumulative signups against the 1,000 target. Grey bars are the weeks already banked.</div>
-    <div class="bars" id="bars"></div>
-    <div class="legend">
-      <span><i class="dot" style="background:#C9C3B4"></i>Weeks to date</span>
-      <span><i class="dot" style="background:#DC5726"></i>Planned sprint weeks</span>
-      <span><i class="dot" style="background:#1E8A5A"></i>Target pace</span>
+<div class="app">
+  <aside class="side">
+    <div class="logo"><div class="mark">O</div><div><b>ONBASE</b><span>growth system</span></div></div>
+    <nav class="navi" id="nav">
+      <button data-v="overview" class="on"><span class="ic">▦</span><span>Overview</span></button>
+      <button data-v="waitlist"><span class="ic">◎</span><span>Waitlist</span></button>
+      <button data-v="spend"><span class="ic">◈</span><span>Spend and CAC</span></button>
+      <button data-v="members"><span class="ic">◉</span><span>Memberships</span></button>
+      <button data-v="revenue"><span class="ic">▤</span><span>Revenue and MRR</span></button>
+      <button data-v="schedule"><span class="ic">▣</span><span>Cages and sessions</span></button>
+      <button data-v="coaches"><span class="ic">⚑</span><span>Coaches</span></button>
+      <button data-v="retention"><span class="ic">↻</span><span>Retention</span></button>
+      <button data-v="reviews"><span class="ic">★</span><span>Reviews</span></button>
+      <button data-v="recovery"><span class="ic">⇄</span><span>Recovery</span></button>
+      <button data-v="trends"><span class="ic">◐</span><span>Benchmarks</span></button>
+    </nav>
+    <div class="sidefoot">ONBASE Athlete<br><b style="color:#fff">Steve Lundin</b> · manager<br>8150 E Germann Rd, Mesa</div>
+  </aside>
+  <main class="main">
+    <div class="top">
+      <h1 id="ttl">Overview</h1><span class="sub" id="sub">Waitlist, revenue and the opening countdown</span>
+      <div class="spacer"></div>
+      <button class="btn sm ghost" onclick="toast('HubSpot sync started, 120 waitlist contacts queued')">Sync HubSpot</button>
+      <button class="btn sm ghost" onclick="toast('Shopify sync started, 34 memberships pulled')">Sync Shopify</button>
+      <div class="avatar" title="Steve Lundin">SL</div>
     </div>
-    <div class="sim">
-      <label for="budget">Monthly ad budget: <span id="bval">$5,500</span></label>
-      <input type="range" id="budget" min="2000" max="12000" step="250" value="5500">
-      <div class="simout"><span>Projected waitlist at day 60</span><b id="simout">1,040</b></div>
-      <div class="simout"><span>Blended cost per waitlist signup</span><b id="simcpl">$12.70</b></div>
-    </div>
-  </div>
 
-  <div class="card">
-    <h2>From waitlist to member</h2>
-    <div class="hint">Modelled on a 60-day sprint. Every stage is measured in the same dashboard.</div>
-    <div class="funnel" id="funnel"></div>
-  </div>
+    <section class="view on" id="v-overview">
+      <div class="cards" id="ovKpis"></div>
+      <div class="cols">
+        <div>
+          <div class="panel"><div class="head"><h2>Waitlist pace</h2><div class="spacer"></div><span class="chip b" id="ovPaceChip"></span></div>
+            <div class="body"><div id="ovPace"></div><div class="note" id="ovPaceNote"></div></div></div>
+          <div class="panel"><div class="head"><h2>What needs a decision this week</h2><div class="spacer"></div><span class="chip a">owner actions</span></div>
+            <div class="body p0"><table><thead><tr><th>Item</th><th>Why it matters</th><th>Owner</th><th></th></tr></thead><tbody id="ovActions"></tbody></table></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="head"><h2>Path to 250 members</h2></div>
+            <div class="body"><div id="ovGoal"></div><div class="note">250 members at a $250 average is the number Steve gave. Everything else on this dashboard feeds it.</div></div></div>
+          <div class="panel"><div class="head"><h2>This week at a glance</h2></div>
+            <div class="body"><div class="cards" style="margin:0" id="ovWeek"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-waitlist">
+      <div class="cards" id="wlKpis"></div>
+      <div class="panel"><div class="head"><h2>Waitlist, 120 contacts in HubSpot</h2>
+        <div class="spacer"></div>
+        <div class="filters" id="wlFilters">
+          <button class="on" onclick="wlFilter('all',this)">All</button>
+          <button onclick="wlFilter('parent',this)">Parents</button>
+          <button onclick="wlFilter('athlete',this)">Athletes</button>
+          <button onclick="wlFilter('coach',this)">Coaches</button>
+          <button onclick="wlFilter('fan',this)">Fans</button>
+          <button onclick="wlFilter('esa',this)">ESA funds</button>
+        </div>
+        <input id="wlSearch" class="search" placeholder="Search name or ZIP" oninput="renderWaitlist()">
+        <button class="btn blue sm" onclick="addWaitlistModal()">Add contact</button>
+        <button class="btn sm" onclick="exportWaitlist()">Export CSV</button>
+      </div>
+        <div class="body p0"><table><thead><tr><th>Name</th><th>Role</th><th>Source</th><th>ZIP</th><th>ESA</th><th>Added</th><th>Status</th><th></th></tr></thead><tbody id="wlBody"></tbody></table></div>
+        <div class="body"><div class="note" id="wlNote"></div></div>
+      </div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>New signups by week</h2><div class="spacer"></div><span class="chip n">10 weeks</span></div><div class="body"><div class="bars" id="wlWeeks"></div></div></div>
+        <div class="panel"><div class="head"><h2>Where they come from</h2></div><div class="body"><div class="bars" id="wlSources"></div><div class="note">Flyer QR codes and face to face convert best. Social brings volume but the lowest show rate.</div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-spend">
+      <div class="cards" id="spKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Spend by channel, this month</h2><div class="spacer"></div><span class="chip n" id="spBudgetChip"></span></div>
+          <div class="body p0"><table><thead><tr><th>Channel</th><th class="num">Spend</th><th class="num">Signups</th><th class="num">Cost per signup</th><th class="num">Show rate</th><th></th></tr></thead><tbody id="spBody"></tbody></table></div>
+          <div class="body"><div class="note" id="spNote"></div></div></div>
+        <div>
+          <div class="panel"><div class="head"><h2>Budget guardrail</h2></div><div class="body">
+            <div id="spGuard"></div>
+            <div class="note">Steve set $2,000 a month with $500 either way. The bar turns amber past $2,200 and red past $2,500.</div>
+          </div></div>
+          <div class="panel"><div class="head"><h2>Cost per member, not per signup</h2></div><div class="body"><div id="spCac"></div><div class="note">A signup is cheap. A paying member is the number that matters. Blended CAC today is the spend divided by memberships sold, not by waitlist additions.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-members">
+      <div class="cards" id="mbKpis"></div>
+      <div class="panel"><div class="head"><h2>Plans and what has sold</h2><div class="spacer"></div><span class="chip n">pre-sale</span><button class="btn blue sm" onclick="sellModal()">Sell a membership</button></div>
+        <div class="body p0"><table><thead><tr><th>Plan</th><th>Category</th><th class="num">Price</th><th class="num">Sold</th><th class="num">MRR</th><th class="num">Share</th><th></th></tr></thead><tbody id="mbBody"></tbody></table></div>
+        <div class="body"><div class="note">Hitting has three options, strength two, then nutrition, mental strength and open gym. Family plans attach children to a parent profile and add $79 per athlete.</div></div></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Members sold, week by week</h2></div><div class="body"><div class="bars" id="mbWeeks"></div></div></div>
+        <div class="panel"><div class="head"><h2>Average revenue per member</h2></div><div class="body"><div id="mbArpu"></div><div class="note" id="mbArpuNote"></div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-revenue">
+      <div class="cards" id="rvKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Revenue by month</h2><div class="spacer"></div><span class="chip n">MRR and one time</span></div>
+          <div class="body p0"><table><thead><tr><th>Month</th><th class="num">Members</th><th class="num">MRR</th><th class="num">One time</th><th class="num">Total</th><th class="num">vs target</th></tr></thead><tbody id="rvBody"></tbody></table></div>
+          <div class="body"><div class="note" id="rvNote"></div></div></div>
+        <div>
+          <div class="panel"><div class="head"><h2>Against Steve's targets</h2><div class="spacer"></div><button class="btn sm" onclick="targetModal()">Adjust targets</button><button class="btn sm" onclick="exportRevenue()">Export</button></div><div class="body"><div id="rvTargets"></div></div></div>
+          <div class="panel"><div class="head"><h2>Revenue mix</h2></div><div class="body"><div class="bars" id="rvMix"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-schedule">
+      <div class="cards" id="scKpis"></div>
+      <div class="panel"><div class="head"><h2>Utilization by hour, this week</h2><div class="spacer"></div><span class="chip n">6 cages · 10 hours · 840 slots</span></div>
+        <div class="body"><div id="scHours"></div><div class="note">Peak is 3pm to 7pm. The 10am to 2pm block is where the coach and open gym inventory sits unsold.</div></div></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Next 7 days, trailing</h2><div class="spacer"></div><span class="chip n" id="scWeekChip"></span></div>
+          <div class="body p0"><table><thead><tr><th>Day</th><th class="num">Booked</th><th class="num">Capacity</th><th class="num">Utilization</th><th class="num">Peak 3-7</th><th class="num">No shows</th><th></th></tr></thead><tbody id="scBody"></tbody></table></div></div>
+        <div>
+          <div class="panel"><div class="head"><h2>Cage assignment</h2></div><div class="body"><div id="scCages"></div><div class="note">2 cages reserved for coaches, 4 for members and teams, one pitching lane held for coaches.</div></div></div>
+          <div class="panel"><div class="head"><h2>No-show and cancel policy</h2></div><div class="body">
+            <div class="grid2"><div class="kpi"><div class="k">Cancel window</div><div class="v" id="scWindow">8 hours</div></div><div class="kpi"><div class="k">No-show</div><div class="v">Credit consumed</div></div></div>
+            <div class="acts" style="margin-top:10px"><button class="btn sm" onclick="setCancelWindow()">Change cancel window</button><button class="btn sm" onclick="toast('Policy note sent to Steve for sign off')">Send policy to Steve</button></div>
+            <div class="note" id="scPolicyNote">Steve is still deciding between 8 and 24 hours. Changing it here updates every booking rule in the simulation.</div>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-coaches">
+      <div class="cards" id="coKpis"></div>
+      <div class="panel"><div class="head"><h2>Coach load and gaps</h2><div class="spacer"></div><span class="chip n">this week</span><button class="btn blue sm" onclick="addSessionModal()">Add a session</button></div>
+        <div class="body p0"><table><thead><tr><th>Coach</th><th>Specialty</th><th class="num">Sessions</th><th class="num">Hours</th><th>Load</th><th class="num">Open gaps</th><th class="num">Revenue</th><th></th></tr></thead><tbody id="coBody"></tbody></table></div>
+        <div class="body"><div class="note" id="coNote"></div></div></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Gaps worth filling</h2></div><div class="body p0"><table><thead><tr><th>Window</th><th>Coach</th><th>Why it is empty</th><th></th></tr></thead><tbody id="coGaps"></tbody></table></div></div>
+        <div class="panel"><div class="head"><h2>Who is on the floor</h2></div><div class="body"><div id="coRoster"></div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-retention">
+      <div class="cards" id="rtKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>At risk this month</h2><div class="spacer"></div><span class="chip a" id="rtRiskChip"></span></div>
+          <div class="body p0"><table><thead><tr><th>Member</th><th>Plan</th><th>Signal</th><th class="num">Days left</th><th></th></tr></thead><tbody id="rtBody"></tbody></table></div>
+          <div class="body"><div class="note">Signals are card failures, no bookings in 14 days, and ESA paperwork expiring.</div></div></div>
+        <div>
+          <div class="panel"><div class="head"><h2>Churn and retention</h2></div><div class="body"><div class="bars" id="rtBars"></div><div class="note" id="rtNote"></div></div></div>
+          <div class="panel"><div class="head"><h2>ESA funded members</h2></div><div class="body"><div id="rtEsa"></div><div class="note">ESA families need the invoice in the right format before the funds release. These are the ones with paperwork open.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-reviews">
+      <div class="cards" id="rwKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Google Business Profile reviews</h2><div class="spacer"></div><span class="chip g" id="rwRatingChip"></span><button class="btn sm" onclick="requestReview()">Request a review</button></div>
+          <div class="body p0"><table><thead><tr><th>Reviewer</th><th class="num">Stars</th><th>What they said</th><th>Replied</th><th></th></tr></thead><tbody id="rwBody"></tbody></table></div>
+          <div class="body"><div class="note">Every review gets a reply inside 48 hours. Reviews that mention a coach by name get routed to Steve.</div></div></div>
+        <div>
+          <div class="panel"><div class="head"><h2>Rating trend</h2></div><div class="body"><div class="bars" id="rwBars"></div></div></div>
+          <div class="panel"><div class="head"><h2>Where reviews come from</h2></div><div class="body"><div id="rwSources"></div><div class="note">QR code at the cage, the follow-up text after session three, and the monthly email. The text after session three is the one that works.</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-recovery">
+      <div class="cards" id="rcKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Abandoned checkouts</h2><div class="spacer"></div><span class="chip a">Jacobo's list</span><button class="btn blue sm" onclick="recoverAll()">Send recovery texts</button></div>
+          <div class="body p0"><table><thead><tr><th>Name</th><th>Plan in cart</th><th class="num">Value</th><th>Left at</th><th>Attempts</th><th></th></tr></thead><tbody id="rcCartBody"></tbody></table></div>
+          <div class="body"><div class="note">Shopify checkout drop off. Two touches: a text within an hour, an email the next morning.</div></div></div>
+        <div class="panel"><div class="head"><h2>Leads that never converted</h2><div class="spacer"></div><span class="chip n" id="rcLeadChip"></span></div>
+          <div class="body p0"><table><thead><tr><th>Name</th><th>Source</th><th>Stage</th><th class="num">Days quiet</th><th></th></tr></thead><tbody id="rcLeadBody"></tbody></table></div>
+          <div class="body"><div class="note">These are the ones Jacobo asked for: in the system, never paid, gone quiet.</div></div></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-trends">
+      <div class="cards" id="trKpis"></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>Top 10 percent benchmarks</h2><div class="spacer"></div><span class="chip n">same business model</span></div>
+          <div class="body p0"><table><thead><tr><th>Metric</th><th class="num">Top 10%</th><th class="num">ONBASE today</th><th>Gap</th></tr></thead><tbody id="trBody"></tbody></table></div>
+          <div class="body"><div class="note">Benchmarks are the national range for indoor baseball and softball training facilities at this size. Where ONBASE is already ahead, it says so.</div></div></div>
+        <div class="panel"><div class="head"><h2>Competitor moves worth copying</h2><div class="spacer"></div><span class="chip a">weekly</span></div>
+          <div class="body p0"><table><thead><tr><th>Competitor</th><th>What they did</th><th>Copy it?</th><th></th></tr></thead><tbody id="trCompBody"></tbody></table></div>
+          <div class="body"><div class="note">AZ Dingers, Push Performance, Extra Innings Chandler, D-BAT and Ignite Gym, tracked weekly on social.</div></div></div>
+      </div>
+    </section>
+  </main>
 </div>
 
-<div class="grid">
-  <div class="card">
-    <h2>Where signups come from</h2>
-    <div class="hint">Two months of spend and outreach, by channel.</div>
-    <table id="chan"></table>
-  </div>
-  <div class="card">
-    <h2>East Valley ZIP priority</h2>
-    <div class="hint">Where the waitlist is already coming from, and where the drive time works.</div>
-    <table id="zips"></table>
-  </div>
-</div>
-
-<div class="grid">
-  <div class="card">
-    <h2>Bookings and assessments</h2>
-    <div class="hint">Waitlist signups who booked a facility tour or swing assessment.</div>
-    <table id="book"></table>
-  </div>
-  <div class="card">
-    <h2>Partner pipeline</h2>
-    <div class="hint">Teams, schools and facilities that feed the waitlist in bulk.</div>
-    <table id="partners"></table>
-  </div>
-</div>
-
-<div class="card">
-  <h2>How the data reaches this screen</h2>
-  <div class="hint">One place for site traffic, CRM, bookings and the waitlist, so nothing is counted twice.</div>
-  <div class="flow">
-    <div class="node"><b>Site</b>Shopify forms, page views, source and UTM on every signup.</div>
-    <div class="node"><b>Ads</b>Meta lead forms, Google Search and Local Services Ads, spend by campaign.</div>
-    <div class="node"><b>CRM</b>Every lead with stage, owner, next follow-up and activity history.</div>
-    <div class="node"><b>Bookings</b>Tours and assessments, show rate, no-show recovery.</div>
-    <div class="node"><b>Dashboard</b>Waitlist pace, cost per signup, conversion to membership.</div>
-  </div>
-</div>
-
-<footer>
-  Model assumptions: $12 blended cost per waitlist signup at the current mix, 35% of the waitlist books a tour or assessment, 45% of those convert to a membership. Numbers are planning estimates for the 60-day sprint, replaced by live data from week one.
-</footer>
-</div>
-
+<div class="modal" id="modal"><div class="sheet"><div class="head"><h2 id="mTitle">Title</h2><div class="spacer"></div><button class="btn ghost sm" onclick="closeModal()">Close</button></div><div class="body" id="mBody"></div></div></div>
+<div class="toast" id="toast"></div>
 <script>
-const TARGET=1000, NOW=100, WEEKS=9;
-const state={budget:5500};
-const K=()=>({});
-function money(n){return '$'+Math.round(n).toLocaleString()}
+const CODE='onbase2026';
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const pct=n=>Math.round(n)+'%';
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2200)}
+function openModal(title,html){document.getElementById('mTitle').textContent=title;document.getElementById('mBody').innerHTML=html;document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
 
-function projected(){
-  const base=state.budget*2;                 // two months of spend
-  const perLead=base/11.5;                   // blended cost per signup at current mix
-  return Math.round(NOW+perLead*0.92);       // 0.92 accounts for organic and partner overlap
-}
-
-function renderKpis(){
-  const proj=projected();
-  const cpl=(state.budget*2)/((proj-NOW)||1);
-  document.getElementById('kpis').innerHTML=`
-  <div class="kpi"><div class="l">Waitlist today</div><div class="v">${NOW}</div><div class="d">baseline at sprint start</div></div>
-  <div class="kpi hi"><div class="l">Day 60 target</div><div class="v">1,000</div><div class="d">900 net new signups</div></div>
-  <div class="kpi"><div class="l">Pace needed</div><div class="v">15/day</div><div class="d">105 per week</div></div>
-  <div class="kpi"><div class="l">Projected day 60</div><div class="v">${proj.toLocaleString()}</div><div class="d">at ${money(state.budget)}/mo</div></div>
-  <div class="kpi"><div class="l">Cost per signup</div><div class="v">${money(cpl)}</div><div class="d">blended, all channels</div></div>
-  <div class="kpi"><div class="l">Projected members</div><div class="v">${Math.round(proj*0.35*0.45)}</div><div class="d">35% book, 45% close</div></div>`;
-  document.getElementById('simout').textContent=proj.toLocaleString();
-  document.getElementById('simcpl').textContent=money(cpl);
-  document.getElementById('bval').textContent=money(state.budget);
-}
-
-function renderBars(){
-  const proj=projected();
-  const past=[12,18,22,26,22];                 // weeks already banked
-  let cum=0; const rows=[];
-  past.forEach((v,i)=>{cum+=v; rows.push({v,label:'W'+(i+1),past:true,cum})});
-  const remaining=Math.max(proj-NOW,1);
-  const left=WEEKS-past.length;
-  for(let i=0;i<left;i++){
-    const v=Math.round(remaining/left);
-    cum+=v; rows.push({v,label:'W'+(past.length+i+1),past:false,cum});
+/* ---------- data ---------- */
+const FIRST=['Jordan','Mason','Ethan','Liam','Noah','Aiden','Caleb','Diego','Eli','Gavin','Hunter','Isaac','Jace','Kaden','Logan','Mia','Nora','Olivia','Paige','Quinn','Riley','Sofia','Tessa','Violet','Wyatt','Zane','Ava','Brody','Chase','Declan','Emma','Finn','Grace','Hudson','Isla','Jaxon','Kayla','Landon','Maya','Nolan'];
+const LAST=['Alvarez','Baker','Castillo','Diaz','Ellis','Foster','Garcia','Hayes','Ibarra','Jensen','Keller','Lopez','Morales','Navarro','Ortiz','Patel','Quintero','Reyes','Sandoval','Torres','Uribe','Vargas','Whitaker','Yates','Zamora','Bennett','Cole','Duarte','Espinoza','Flores'];
+const ROLES=[['parent',62],['athlete',30],['coach',5],['fan',3]];
+const SOURCES=[['Social media',48],['Flyer QR',36],['Face to face',24],['Referral',12]];
+const ZIPS=['85212','85209','85234','85295','85297','85142','85225','85206','85233','85213'];
+const NAMES=[];
+function seeded(i){return (i*2654435761)%4294967296/4294967296}
+const WAITLIST=[];
+(function(){
+  let idx=0;
+  const roleList=[];
+  ROLES.forEach(r=>{for(let i=0;i<r[1];i++)roleList.push(r[0])});
+  const srcList=[];
+  SOURCES.forEach(s=>{for(let i=0;i<s[1];i++)srcList.push(s[0])});
+  for(let i=0;i<120;i++){
+    const f=FIRST[Math.floor(seeded(i+3)*FIRST.length)], l=LAST[Math.floor(seeded(i+11)*LAST.length)];
+    const role=roleList[i%roleList.length], src=srcList[i%srcList.length];
+    const weeksAgo=Math.floor(i/12);
+    WAITLIST.push({id:'W'+(1001+i),name:f+' '+l,role:role,source:src,zip:ZIPS[Math.floor(seeded(i+7)*ZIPS.length)],
+      esa:seeded(i+19)>0.82,added:weeksAgo+'w ago',status:i<9?'Converted':'On waitlist'});
   }
-  const max=Math.max(...rows.map(r=>r.cum));
-  document.getElementById('bars').innerHTML=rows.map(r=>`
-    <div class="bar ${r.past?'past':''}">
-      <span>${r.cum>=1000?'1k':r.cum}</span>
-      <i style="height:${Math.max(6,(r.cum/max)*118)}px"></i>
-      <b>${r.label}</b>
-    </div>`).join('');
+})();
+
+const PLANS=[
+ {n:'Youth Hitting',cat:'Hitting',price:149,sold:9},
+ {n:'Hitting + Strength',cat:'Hitting',price:229,sold:7},
+ {n:'Elite Hitting',cat:'Hitting',price:349,sold:3},
+ {n:'Strength Only',cat:'Strength',price:99,sold:5},
+ {n:'Strength + Speed',cat:'Strength',price:159,sold:3},
+ {n:'Nutrition',cat:'Nutrition',price:79,sold:2},
+ {n:'Mental Strength',cat:'Mental',price:129,sold:2},
+ {n:'Open Gym',cat:'Open gym',price:89,sold:3}
+];
+let FAMILY_ADDONS=7, ADDON_PRICE=79;
+
+const CHANNELS=[
+ {n:'Meta, Instagram and Facebook',spend:1150,signups:62,show:54},
+ {n:'Google Search',spend:380,signups:18,show:61},
+ {n:'Flyer QR codes',spend:200,signups:28,show:72},
+ {n:'Referral credits',spend:120,signups:12,show:78}
+];
+const BUDGET=2000;
+
+const WL_WEEKS=[6,8,9,11,12,14,13,16,15,16];
+const MB_WEEKS=[2,3,4,5,6,7,7];
+
+const MONTHS=[
+ {m:'Dec 2026',members:34,mrr:6199,one:4100,target:20000},
+ {m:'Jan 2027',members:58,mrr:10440,one:3600,target:24000},
+ {m:'Feb 2027',members:86,mrr:15480,one:2400,target:28000},
+ {m:'Mar 2027',members:118,mrr:21240,one:1800,target:30000},
+ {m:'Apr 2027',members:152,mrr:27360,one:1200,target:60000}
+];
+
+const DAYS=[
+ {d:'Mon',booked:32,cap:120,peak:22,no:1},
+ {d:'Tue',booked:34,cap:120,peak:24,no:2},
+ {d:'Wed',booked:36,cap:120,peak:26,no:1},
+ {d:'Thu',booked:40,cap:120,peak:29,no:2},
+ {d:'Fri',booked:46,cap:120,peak:34,no:3},
+ {d:'Sat',booked:48,cap:120,peak:34,no:2},
+ {d:'Sun',booked:32,cap:120,peak:22,no:1}
+];
+const HOURS=[['10a',8],['11a',10],['12p',14],['1p',18],['2p',24],['3p',52],['4p',61],['5p',66],['6p',58],['7p',44]];
+let CANCEL_WINDOW=8;
+
+const COACHES=[
+ {n:'Marcus Hale',spec:'Strength · 2x World Series, 14 years MLB',sessions:24,hours:18,load:72,gaps:3,rev:3840,on:'Mon to Thu'},
+ {n:'Danny Ruiz',spec:'Pitching · former Mariners',sessions:21,hours:16,load:64,gaps:4,rev:3360,on:'Tue to Fri'},
+ {n:'Sofia Medina',spec:'Softball · former collegiate',sessions:18,hours:14,load:56,gaps:5,rev:2520,on:'Mon, Wed, Sat'},
+ {n:'Andre Cole',spec:'Hitting',sessions:12,hours:9,load:36,gaps:9,rev:1680,on:'Wed to Sat'},
+ {n:'Trey Walton',spec:'Speed and agility',sessions:8,hours:6,load:24,gaps:12,rev:960,on:'Sat only'}
+];
+
+let RISK=[
+ {n:'Jordan Alvarez',plan:'Hitting + Strength',sig:'Card declined twice',days:2},
+ {n:'Mia Sandoval',plan:'Elite Hitting',sig:'No booking in 14 days',days:0},
+ {n:'Caleb Foster',plan:'Strength Only',sig:'ESA paperwork expires',days:9},
+ {n:'Riley Quintero',plan:'Youth Hitting',sig:'No booking in 18 days',days:0},
+ {n:'Noah Ibarra',plan:'Open Gym',sig:'Card expired',days:4},
+ {n:'Emma Vargas',plan:'Nutrition',sig:'ESA paperwork expires',days:12}
+];
+
+const REVIEWS=[
+ {n:'Dana A.',stars:5,txt:'Coach Marcus worked with my son for one session and he already looks different at the plate.',rep:true,src:'Text after session 3'},
+ {n:'Mike T.',stars:5,txt:'Clean facility, real coaching, not a babysitting service. Worth the drive from Gilbert.',rep:true,src:'QR at cage'},
+ {n:'Priya S.',stars:4,txt:'Great coaching. Wish there were more early morning cage slots.',rep:true,src:'Monthly email'},
+ {n:'Chris D.',stars:5,txt:'My daughter plays softball and finally has a place that takes it seriously.',rep:false,src:'Text after session 3'},
+ {n:'Alex R.',stars:3,txt:'Parking gets tight at 5pm. Coaching itself is excellent.',rep:false,src:'Google'},
+ {n:'Jordan M.',stars:5,txt:'The strength program is legit. My son is 15 and squatting properly for the first time.',rep:true,src:'Text after session 3'}
+];
+let RATING_HIST=[['Jul',4.4],['Aug',4.5],['Sep',4.6],['Oct',4.7],['Nov',4.8]];
+
+let CARTS=[
+ {n:'Tyler Brooks',plan:'Hitting + Strength',val:229,at:'22 min ago',tries:0},
+ {n:'Samantha Ortiz',plan:'Elite Hitting',val:349,at:'1 hr ago',tries:1},
+ {n:'Luis Navarro',plan:'Youth Hitting',val:149,at:'3 hr ago',tries:0},
+ {n:'Bethany Cole',plan:'Strength + Speed',val:159,at:'5 hr ago',tries:1},
+ {n:'Marcus Ellis',plan:'Mental Strength',val:129,at:'Yesterday',tries:2},
+ {n:'Renee Diaz',plan:'Open Gym',val:89,at:'Yesterday',tries:0},
+ {n:'Owen Patel',plan:'Youth Hitting',val:149,at:'2 days ago',tries:1},
+ {n:'Kayla Jensen',plan:'Nutrition',val:79,at:'2 days ago',tries:0},
+ {n:'Diego Reyes',plan:'Hitting + Strength',val:229,at:'3 days ago',tries:2},
+ {n:'Nora Keller',plan:'Elite Hitting',val:349,at:'3 days ago',tries:1},
+ {n:'Hudson Yates',plan:'Strength Only',val:99,at:'4 days ago',tries:0}
+];
+let LEADS=[
+ {n:'Aiden Castillo',src:'Social media',stage:'Filled form, no membership',days:3},
+ {n:'Sofia Whitaker',src:'Flyer QR',stage:'Clicked pricing, stopped',days:4},
+ {n:'Grant Uribe',src:'Referral',stage:'Toured, never joined',days:6},
+ {n:'Paige Flores',src:'Social media',stage:'Filled form, no membership',days:7},
+ {n:'Brody Espinoza',src:'Face to face',stage:'Toured, never joined',days:9},
+ {n:'Tessa Duarte',src:'Flyer QR',stage:'Clicked pricing, stopped',days:11},
+ {n:'Finn Bennett',src:'Social media',stage:'Filled form, no membership',days:13},
+ {n:'Isla Morales',src:'Referral',stage:'Toured, never joined',days:15},
+ {n:'Declan Hayes',src:'Google',stage:'Clicked pricing, stopped',days:18},
+ {n:'Ava Lopez',src:'Social media',stage:'Filled form, no membership',days:21}
+];
+
+const BENCH=[
+ {k:'Average revenue per member',top:'$250',now:'$182',gap:'behind'},
+ {k:'Monthly churn',top:'under 4%',now:'3.2%',gap:'ahead'},
+ {k:'Cage utilization',top:'65%',now:'32%',gap:'behind'},
+ {k:'Cost per member',top:'under $40',now:'$54',gap:'behind'},
+ {k:'Waitlist to member conversion',top:'40%',now:'28%',gap:'behind'},
+ {k:'Reviews per month',top:'12',now:'22',gap:'ahead'},
+ {k:'Family plan attach rate',top:'25%',now:'21%',gap:'behind'},
+ {k:'Coach utilization',top:'75%',now:'50%',gap:'behind'}
+];
+
+const COMP=[
+ {n:'AZ Dingers',did:'Posted a 6 second reel of a 13u hitter off a tee, 41k views',copy:'Yes. Raw cage footage beats produced ads.'},
+ {n:'Push Performance',did:'Launched a 6am strength class and filled it in a week',copy:'Yes. There is unsold 10a to 2p inventory.'},
+ {n:'Extra Innings Chandler',did:'Ran a $49 first month offer, 60 signups',copy:'Careful. Cheap trials churn hard here.'},
+ {n:'D-BAT',did:'Partnered with a travel team for winter cage hours',copy:'Yes. Team blocks fill off-peak cages.'},
+ {n:'Ignite Gym',did:'Weekly coach spotlight video, one coach per week',copy:'Yes. Your coaches have the credentials to carry it.'}
+];
+
+let SELECTED_PLAN=null, SELECTED_REVIEW=null;
+
+/* ---------- router ---------- */
+const NAV={overview:['Overview','Waitlist, revenue and the opening countdown'],
+ waitlist:['Waitlist','120 contacts in HubSpot, and where they came from'],
+ spend:['Spend and cost per signup','$2,000 a month, and what each channel returns'],
+ members:['Memberships','What has sold, at what price, and the average'],
+ revenue:['Revenue and MRR','Against break even, the $30k line and $60k by April'],
+ schedule:['Cages and sessions','840 bookable slots a week, and which ones are empty'],
+ coaches:['Coaches','Load, gaps and revenue per coach'],
+ retention:['Retention','Who is drifting, and what is about to lapse'],
+ reviews:['Reviews','Google rating, replies and where reviews come from'],
+ recovery:['Recovery','Abandoned checkouts and leads that never converted'],
+ trends:['Benchmarks','Top 10 percent facilities, and competitor moves']};
+function go(v){
+  closeModal();
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+  document.getElementById('ttl').textContent=NAV[v][0];
+  document.getElementById('sub').textContent=NAV[v][1];
+  window.scrollTo({top:0,behavior:'smooth'});
+  RENDER[v]&&RENDER[v]();
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
+
+/* ---------- totals ---------- */
+const members=()=>PLANS.reduce((s,p)=>s+p.sold,0);
+const mrr=()=>PLANS.reduce((s,p)=>s+p.price*p.sold,0)+FAMILY_ADDONS*ADDON_PRICE;
+const spend=()=>CHANNELS.reduce((s,c)=>s+c.spend,0);
+const signups=()=>CHANNELS.reduce((s,c)=>s+c.signups,0);
+const arpu=()=>mrr()/members();
+const booked=()=>DAYS.reduce((s,d)=>s+d.booked,0);
+const capacity=()=>DAYS.reduce((s,d)=>s+d.cap,0);
+const util=()=>booked()/capacity()*100;
+
+function kpi(lab,val,dlt,cls){return '<div class="card"><div class="lab">'+lab+'</div><div class="val">'+val+'</div><div class="dlt '+(cls||'')+'">'+(dlt||'')+'</div></div>'}
+function bars(rows){return rows.map(r=>'<div class="bar"><span>'+r[0]+'</span><span class="track"><span class="fill '+(r[2]||'')+'" style="width:'+Math.min(100,r[1])+'%"></span></span><span class="num">'+r[3]+'</span></div>').join('')}
+
+/* ---------- overview ---------- */
+function renderOverview(){
+  document.getElementById('ovKpis').innerHTML=[
+    kpi('Waitlist',WAITLIST.length,'+16 this week','up'),
+    kpi('Members sold',members(),'pre-sale, before opening'),
+    kpi('MRR',money(mrr()),'ARPU '+money(arpu())),
+    kpi('Spend this month',money(spend()),pct(spend()/BUDGET*100)+' of '+money(BUDGET)),
+    kpi('Cost per signup',money(spend()/signups()),'across all channels'),
+    kpi('Cage utilization',pct(util()),booked()+' of '+capacity()+' slots')
+  ].join('');
+  const last4=WL_WEEKS.slice(-4).reduce((a,b)=>a+b,0), prev4=WL_WEEKS.slice(-8,-4).reduce((a,b)=>a+b,0);
+  const pace=Math.round((last4-prev4)/prev4*100);
+  document.getElementById('ovPaceChip').textContent=(pace>=0?'+':'')+pace+'% vs prior 4 weeks';
+  document.getElementById('ovPace').innerHTML=bars(WL_WEEKS.map((v,i)=>['Wk '+(i+1),v/16*100,'b',v+' new']));
+  const need=Math.round((250-members())/7);
+  document.getElementById('ovPaceNote').innerHTML='Opening is mid December to early January. At the current pace of '+Math.round(last4/4)+' signups a week the waitlist passes 200 by opening. The member number is the one that matters: <b>'+need+' memberships a week</b> gets to 250 by April.';
+  document.getElementById('ovActions').innerHTML=[
+    ['Sign off the no-show window','Steve has not decided between 8 and 24 hours, and every booking rule depends on it','Steve','Policy'],
+    ['Confirm ESA invoice format','3 families are waiting on paperwork before funds release','Steve','ESA'],
+    ['Unlock the 10a to 2p block','44 percent of unsold inventory sits in that window','Jacobo','Schedule'],
+    ['Send 11 abandoned checkout texts','$1,999 sitting in carts right now','Jacobo','Recovery']
+  ].map((r,i)=>'<tr><td><b>'+r[0]+'</b></td><td class="tag">'+r[1]+'</td><td>'+r[2]+'</td><td><button class="btn sm" onclick="quickAction('+i+')">Open</button></td></tr>').join('');
+  document.getElementById('ovGoal').innerHTML=bars([
+    ['Members today',members()/250*100,'',members()+' / 250'],
+    ['MRR today',mrr()/62500*100,'g',money(mrr())+' / $62,500'],
+    ['ARPU today',arpu()/250*100,'b',money(arpu())+' / $250']
+  ])+'<div class="note" style="margin-top:10px">Gap to the goal is <b>'+money(62500-mrr())+'</b> of monthly recurring revenue. ARPU is the fastest lever: moving the mix to Elite and Hitting plus Strength closes 60 percent of it without a single extra member.</div>';
+  document.getElementById('ovWeek').innerHTML=[
+    kpi('Sessions booked',booked(),'next 7 days'),
+    kpi('Peak 3 to 7pm',pct(191/336*100),'191 of 336 slots'),
+    kpi('No shows',12,'1.6% of bookings'),
+    kpi('New reviews',22,'4.8 average','up')
+  ].join('');
+}
+function quickAction(i){
+  const map=['go(\'schedule\')','go(\'retention\')','go(\'schedule\')','go(\'recovery\')'];
+  eval(map[i]);
+  toast(['Cancel window lives under Cages and sessions','ESA paperwork lives under Retention','Empty hours are on the utilization chart','Recovery is Jacobo\'s list'][i]);
+}
+/* ---------- waitlist ---------- */
+let WL_FILTER='all';
+function wlFilter(f,el){WL_FILTER=f;document.querySelectorAll('#wlFilters button').forEach(b=>b.classList.toggle('on',b===el));renderWaitlist();toast('Showing '+(f==='all'?'all contacts':f))}
+function wlRows(){
+  const q=(document.getElementById('wlSearch').value||'').toLowerCase();
+  return WAITLIST.filter(w=>{
+    if(WL_FILTER==='esa'&&!w.esa)return false;
+    if(WL_FILTER!=='all'&&WL_FILTER!=='esa'&&w.role!==WL_FILTER)return false;
+    if(q&&!(w.name.toLowerCase().includes(q)||w.zip.includes(q)))return false;
+    return true;
+  });
+}
+function renderWaitlist(){
+  const rows=wlRows();
+  document.getElementById('wlKpis').innerHTML=[
+    kpi('Total waitlist',WAITLIST.length,'HubSpot, all sources'),
+    kpi('New this week',WL_WEEKS[WL_WEEKS.length-1],'vs '+WL_WEEKS[WL_WEEKS.length-2]+' last week','up'),
+    kpi('ESA funded',WAITLIST.filter(w=>w.esa).length,'families using ESA funds'),
+    kpi('Converted',WAITLIST.filter(w=>w.status==='Converted').length,'waitlist to paying member'),
+    kpi('Conversion rate',pct(WAITLIST.filter(w=>w.status==='Converted').length/WAITLIST.length*100),'target is 40%')
+  ].join('');
+  document.getElementById('wlBody').innerHTML=rows.slice(0,40).map(w=>'<tr><td><b>'+w.name+'</b></td><td><span class="chip '+(w.role==='parent'?'b':w.role==='athlete'?'g':'n')+'">'+w.role+'</span></td><td>'+w.source+'</td><td class="mono">'+w.zip+'</td><td>'+(w.esa?'<span class="chip a">ESA</span>':'—')+'</td><td class="tag">'+w.added+'</td><td>'+(w.status==='Converted'?'<span class="chip g">Member</span>':'<span class="chip n">Waitlist</span>')+'</td><td><button class="btn sm" onclick="convertLead(\''+w.id+'\')">'+(w.status==='Converted'?'Note':'Convert')+'</button></td></tr>').join('');
+  document.getElementById('wlNote').innerHTML='Showing <b>'+Math.min(40,rows.length)+'</b> of '+rows.length+' matching contacts. Every row came from social, a flyer QR or face to face. ESA flag is captured at signup because those families pay through a different invoice.';
+  document.getElementById('wlWeeks').innerHTML=bars(WL_WEEKS.map((v,i)=>['Wk '+(i+1),v/16*100,'b',v]));
+  const src={};WAITLIST.forEach(w=>src[w.source]=(src[w.source]||0)+1);
+  document.getElementById('wlSources').innerHTML=bars(Object.keys(src).map(k=>[k,src[k]/48*100,k==='Flyer QR'?'g':k==='Social media'?'b':'a',src[k]]));
+}
+function convertLead(id){
+  const w=WAITLIST.find(x=>x.id===id);
+  if(w.status==='Converted'){openModal(w.name,'<div class="grid2"><div class="kpi"><div class="k">Role</div><div class="v">'+w.role+'</div></div><div class="kpi"><div class="k">Source</div><div class="v">'+w.source+'</div></div><div class="kpi"><div class="k">ZIP</div><div class="v">'+w.zip+'</div></div><div class="kpi"><div class="k">ESA</div><div class="v">'+(w.esa?'Yes':'No')+'</div></div></div><div class="note">Already a paying member. Plan and payment history live under Memberships.</div>');return}
+  openModal('Convert '+w.name,
+   '<div class="field"><label>Plan</label><select id="cvPlan">'+PLANS.map((p,i)=>'<option value="'+i+'">'+p.n+' · '+money(p.price)+'</option>').join('')+'</select></div>'+
+   '<div class="field"><label>Payment method</label><select id="cvPay"><option>Card on file</option><option>ESA invoice</option><option>ACH</option></select></div>'+
+   '<div class="note">Signing the waiver is required before the first session. Shopify creates the membership and the first payment runs on the 1st.</div>'+
+   '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="doConvert(\''+w.id+'\')">Create membership</button></div>');
+}
+function doConvert(id){
+  const w=WAITLIST.find(x=>x.id===id);
+  const pi=+document.getElementById('cvPlan').value;
+  PLANS[pi].sold++;
+  w.status='Converted';
+  closeModal();renderWaitlist();toast(w.name+' is now on '+PLANS[pi].n);
+}
+function addWaitlistModal(){
+  openModal('Add a waitlist contact',
+   '<div class="grid2"><div class="field"><label>Name</label><input id="awName" placeholder="First and last"></div><div class="field"><label>ZIP</label><input id="awZip" value="85212"></div></div>'+
+   '<div class="grid2"><div class="field"><label>Role</label><select id="awRole"><option>parent</option><option>athlete</option><option>coach</option><option>fan</option></select></div><div class="field"><label>Source</label><select id="awSrc"><option>Social media</option><option>Flyer QR</option><option>Face to face</option><option>Referral</option></select></div></div>'+
+   '<div class="field"><label>Using ESA funds</label><select id="awEsa"><option>No</option><option>Yes</option></select></div>'+
+   '<div class="acts"><button class="btn blue" onclick="doAddWaitlist()">Save contact</button></div>');
+}
+function doAddWaitlist(){
+  const n=document.getElementById('awName').value.trim()||'New contact';
+  WAITLIST.unshift({id:'W'+(2000+WAITLIST.length),name:n,role:document.getElementById('awRole').value,source:document.getElementById('awSrc').value,zip:document.getElementById('awZip').value||'85212',esa:document.getElementById('awEsa').value==='Yes',added:'today',status:'On waitlist'});
+  WL_WEEKS[WL_WEEKS.length-1]++;
+  closeModal();renderWaitlist();toast(n+' added to the waitlist');
+}
+function exportWaitlist(){
+  const rows=[['Name','Role','Source','ZIP','ESA','Added','Status']].concat(WAITLIST.map(w=>[w.name,w.role,w.source,w.zip,w.esa?'Yes':'No',w.added,w.status]));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='onbase-waitlist.csv';a.click();
+  toast('Waitlist exported as CSV');
 }
 
-function renderFunnel(){
-  const proj=projected();
-  const book=Math.round(proj*0.35), show=Math.round(book*0.8), close=Math.round(show*0.55), mem=Math.round(proj*0.35*0.45);
-  const rows=[
-    {l:'Waitlist signups',v:proj,p:100},
-    {l:'Tours or assessments booked',v:book,p:Math.round(book/proj*100)},
-    {l:'Showed up',v:show,p:Math.round(show/proj*100)},
-    {l:'Membership conversations',v:close,p:Math.round(close/proj*100)},
-    {l:'New members',v:mem,p:Math.round(mem/proj*100)}
-  ];
-  document.getElementById('funnel').innerHTML=rows.map(r=>`
-    <div class="frow"><div class="fbar" style="width:${Math.max(18,r.p)}%">${r.v.toLocaleString()} · ${r.l}</div><div class="m">${r.p}%</div></div>`).join('');
+/* ---------- spend ---------- */
+function renderSpend(){
+  const sp=spend(),sg=signups();
+  document.getElementById('spKpis').innerHTML=[
+    kpi('Spend this month',money(sp),pct(sp/BUDGET*100)+' of budget'),
+    kpi('Signups',sg,'waitlist additions'),
+    kpi('Cost per signup',money(sp/sg),'blended','up'),
+    kpi('Cost per member',money(sp/members()),members()+' memberships sold'),
+    kpi('Best channel','Flyer QR',money(200/28)+' per signup','up'),
+    kpi('Worst channel','Meta',money(1150/62)+' per signup','dn')
+  ].join('');
+  document.getElementById('spBudgetChip').textContent=money(BUDGET-sp)+' left';
+  document.getElementById('spBody').innerHTML=CHANNELS.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td class="num">'+money(c.spend)+'</td><td class="num">'+c.signups+'</td><td class="num">'+money(c.spend/c.signups)+'</td><td class="num">'+c.show+'%</td><td><button class="btn sm" onclick="channelModal('+i+')">Adjust</button></td></tr>').join('')+'<tr style="background:var(--cream)"><td><b>Total</b></td><td class="num"><b>'+money(sp)+'</b></td><td class="num"><b>'+sg+'</b></td><td class="num"><b>'+money(sp/sg)+'</b></td><td class="num">—</td><td></td></tr>';
+  document.getElementById('spNote').innerHTML='Steve approved $2,000 a month with $500 either way. Spend today is '+money(sp)+', which leaves '+money(BUDGET-sp)+' for the rest of the month.';
+  const p=Math.min(100,sp/BUDGET*100);
+  document.getElementById('spGuard').innerHTML='<div class="bar" style="grid-template-columns:1fr"><span class="track"><span class="fill '+(sp>2500?'':'')+'" style="width:'+p+'%;background:'+(sp>2500?'var(--red)':sp>2200?'var(--amber)':'var(--green)')+'"></span></span></div><div class="note" style="margin-top:6px"><b>'+money(sp)+'</b> of '+money(BUDGET)+' · '+pct(p)+'</div>';
+  document.getElementById('spCac').innerHTML=bars([
+    ['Meta',1150/62/40*100,'b',money(1150/62)],
+    ['Google',380/18/40*100,'b',money(380/18)],
+    ['Flyer QR',200/28/40*100,'g',money(200/28)],
+    ['Referral',120/12/40*100,'g',money(120/12)],
+    ['Per member',sp/members()/40*100,'a',money(sp/members())]
+  ])+'<div class="note" style="margin-top:8px">Bars are measured against a $40 target. Flyer QR and referral already beat it, Meta is the one to fix with better creative rather than more money.</div>';
+}
+function channelModal(i){
+  const c=CHANNELS[i];
+  openModal(c.n,'<div class="grid2"><div class="field"><label>Spend</label><input id="chSpend" type="number" value="'+c.spend+'"></div><div class="field"><label>Signups</label><input id="chSig" type="number" value="'+c.signups+'"></div></div><div class="note">Changing either number moves cost per signup, blended CAC and the budget guardrail everywhere on this dashboard.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="saveChannel('+i+')">Save</button></div>');
+}
+function saveChannel(i){
+  CHANNELS[i].spend=+document.getElementById('chSpend').value||0;
+  CHANNELS[i].signups=+document.getElementById('chSig').value||1;
+  closeModal();renderSpend();toast(CHANNELS[i].n+' updated');
 }
 
-function renderChan(){
-  const rows=[
-    {c:'Meta (Facebook + Instagram)',s:4800,w:520,note:'Families, 30-50 mi radius'},
-    {c:'Google Search',s:2400,w:190,note:'“baseball lessons Mesa” intent'},
-    {c:'Local Services Ads',s:1600,w:110,note:'Pay per call, verified'},
-    {c:'Partnerships + teams',s:0,w:140,note:'12 orgs, commission-free'},
-    {c:'Organic + content + GBP',s:0,w:80,note:'Compounds past day 60'}
-  ];
-  document.getElementById('chan').innerHTML='<tr><th>Channel</th><th class="num">Spend</th><th class="num">Signups</th><th class="num">Cost</th></tr>'+
-  rows.map(r=>`<tr><td>${r.c}<div style="font-size:10px;color:var(--mut)">${r.note}</div></td><td class="num">${r.s?money(r.s):'—'}</td><td class="num">${r.w}</td><td class="num">${r.s?money(r.s/r.w):'—'}</td></tr>`).join('')+
-  `<tr><td><b>Total</b></td><td class="num"><b>${money(8800)}</b></td><td class="num"><b>1,040</b></td><td class="num"><b>$8.46</b></td></tr>`;
+/* ---------- memberships ---------- */
+function renderMembers(){
+  const tot=mrr();
+  document.getElementById('mbKpis').innerHTML=[
+    kpi('Memberships sold',members(),'pre-sale before opening'),
+    kpi('MRR',money(tot),'recurring, billed on the 1st'),
+    kpi('ARPU',money(arpu()),'target '+money(250)),
+    kpi('Family add-ons',FAMILY_ADDONS,'at '+money(ADDON_PRICE)+' each'),
+    kpi('Highest plan','Elite Hitting',money(349)+' a month'),
+    kpi('To 250 members',250-members()+' left','at '+money(250)+' average')
+  ].join('');
+  document.getElementById('mbBody').innerHTML=PLANS.map((p,i)=>'<tr><td><b>'+p.n+'</b></td><td>'+p.cat+'</td><td class="num">'+money(p.price)+'</td><td class="num">'+p.sold+'</td><td class="num">'+money(p.price*p.sold)+'</td><td class="num">'+pct(p.sold/members()*100)+'</td><td><button class="btn sm" onclick="sellTo('+i+')">Sell</button></td></tr>').join('');
+  document.getElementById('mbWeeks').innerHTML=bars(MB_WEEKS.map((v,i)=>['Wk '+(i+1),v/7*100,'',v+' sold']));
+  document.getElementById('mbArpu').innerHTML='<div class="cards" style="margin:0">'+kpi('Today',money(arpu()),'blended')+kpi('Target',money(250),'Steve\'s number')+kpi('Gap',money(250-arpu()),'per member, per month')+'</div>';
+  document.getElementById('mbArpuNote').innerHTML='ARPU is '+money(arpu())+'. Getting to $250 is a mix problem, not a price problem: every Youth Hitting member who moves up to Hitting plus Strength adds $80 a month with no new acquisition cost.';
+}
+function sellTo(i){openModal('Sell '+PLANS[i].n,'<div class="grid2"><div class="field"><label>Member name</label><input id="slName" placeholder="First and last"></div><div class="field"><label>Payment</label><select id="slPay"><option>Card</option><option>ESA invoice</option><option>ACH</option></select></div></div><div class="field"><label>Add a family athlete (+'+money(ADDON_PRICE)+')</label><select id="slFam"><option>No</option><option>Yes</option></select></div><div class="acts"><button class="btn blue" onclick="doSell('+i+')">Create membership</button></div>');
+}
+function doSell(i){
+  const n=document.getElementById('slName').value.trim()||'New member';
+  PLANS[i].sold++;
+  if(document.getElementById('slFam').value==='Yes')FAMILY_ADDONS++;
+  MB_WEEKS[MB_WEEKS.length-1]++;
+  closeModal();renderMembers();toast(n+' on '+PLANS[i].n+', '+money(PLANS[i].price)+' a month');
+}
+function sellModal(){sellTo(1)}
+
+/* ---------- revenue ---------- */
+function renderRevenue(){
+  const last=MONTHS[MONTHS.length-1];
+  document.getElementById('rvKpis').innerHTML=[
+    kpi('MRR today',money(mrr()),'billed on the 1st'),
+    kpi('Gross this month',money(mrr()+MONTHS[0].one),'MRR plus one time'),
+    kpi('Break even','Passed','at 34 members'),
+    kpi('April target',money(60000),pct(last.mrr/60000*100)+' of it modeled'),
+    kpi('Annual run rate',money(mrr()*12),'if nothing changes'),
+    kpi('One time revenue',money(MONTHS.reduce((s,m)=>s+m.one,0)),'assessments and camps')
+  ].join('');
+  document.getElementById('rvBody').innerHTML=MONTHS.map(m=>{const tot=m.mrr+m.one,vs=Math.round((tot-m.target)/m.target*100);return '<tr><td><b>'+m.m+'</b></td><td class="num">'+m.members+'</td><td class="num">'+money(m.mrr)+'</td><td class="num">'+money(m.one)+'</td><td class="num">'+money(tot)+'</td><td class="num '+(vs>=0?'up':'dn')+'">'+(vs>=0?'+':'')+vs+'%</td></tr>'}).join('');
+  document.getElementById('rvNote').innerHTML='Steve wants break even, then $20,000 to $30,000 gross, then $60,000 by April. The model crosses $20,000 gross in January and reaches $60,000 in April only if memberships keep landing at about 30 a month.';
+  document.getElementById('rvTargets').innerHTML=bars([
+    ['Break even',100,'g','Passed'],
+    ['$20k to $30k band',100,'g','In band'],
+    ['$60k by April',last.mrr/60000*100,'b',pct(last.mrr/60000*100)]
+  ])+'<div class="note" style="margin-top:8px">The April line is the one at risk. It needs 152 members at the current ARPU, or 96 members at the $250 ARPU Steve wants.</div>';
+  document.getElementById('rvMix').innerHTML=bars(PLANS.map(p=>[p.n,p.price*p.sold/mrr()*100,'',money(p.price*p.sold)]).concat([['Family add-ons',FAMILY_ADDONS*ADDON_PRICE/mrr()*100,'a',money(FAMILY_ADDONS*ADDON_PRICE)]]));
 }
 
-function renderZips(){
-  const rows=[
-    {z:'85212',a:'Mesa · Eastmark',w:186,t:'t-a'},
-    {z:'85209',a:'Mesa · Superstition',w:154,t:'t-a'},
-    {z:'85206',a:'Mesa · Alta Mesa',w:121,t:'t-a'},
-    {z:'85143',a:'San Tan Valley',w:108,t:'t-b'},
-    {z:'85234',a:'Gilbert',w:96,t:'t-b'},
-    {z:'85295',a:'Gilbert · Agritopia',w:74,t:'t-b'},
-    {z:'85297',a:'Gilbert · Power Ranch',w:63,t:'t-c'},
-    {z:'85249',a:'Chandler · Ocotillo',w:48,t:'t-c'}
-  ];
-  document.getElementById('zips').innerHTML='<tr><th>ZIP</th><th>Area</th><th class="num">Signups</th><th class="num">Share</th></tr>'+
-  rows.map(r=>`<tr><td><b>${r.z}</b></td><td>${r.a}</td><td class="num">${r.w}</td><td class="num"><span class="tag ${r.t}">${Math.round(r.w/1040*100)}%</span></td></tr>`).join('');
+function targetModal(){
+  const m=MONTHS[MONTHS.length-1];
+  openModal('April target','<div class="field"><label>Gross target for April</label><input id="tgVal" type="number" value="'+m.target+'"></div><div class="note">Steve said scale to $60,000 by April. Changing it here re-scores the April row against the new number.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="saveTarget()">Save</button></div>');
+}
+function saveTarget(){
+  MONTHS[MONTHS.length-1].target=+document.getElementById('tgVal').value||60000;
+  closeModal();renderRevenue();toast('April target set to '+money(MONTHS[MONTHS.length-1].target));
+}
+function exportRevenue(){
+  const rows=[['Month','Members','MRR','One time','Total','Target']].concat(MONTHS.map(m=>[m.m,m.members,m.mrr,m.one,m.mrr+m.one,m.target]));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='onbase-revenue.csv';a.click();
+  toast('Revenue model exported');
+}
+/* ---------- schedule ---------- */
+function renderSchedule(){
+  document.getElementById('scKpis').innerHTML=[
+    kpi('Bookable slots',840,'6 cages · 10 hours · 7 days'),
+    kpi('Booked this week',booked(),pct(util())+' utilization'),
+    kpi('Peak 3 to 7pm',pct(191/336*100),'191 of 336 slots','up'),
+    kpi('Off peak 10a to 2p',pct(74/240*100),'74 of 240 slots','dn'),
+    kpi('No shows',12,'1.6% of bookings','dn'),
+    kpi('Revenue per slot',money(2680/booked()),'booked slots only')
+  ].join('');
+  document.getElementById('scHours').innerHTML=bars(HOURS.map(h=>[h[0],h[1],h[1]>40?'':'a',h[1]+'%']));
+  document.getElementById('scWeekChip').textContent=pct(util())+' booked';
+  document.getElementById('scBody').innerHTML=DAYS.map(d=>'<tr><td><b>'+d.d+'</b></td><td class="num">'+d.booked+'</td><td class="num">'+d.cap+'</td><td class="num">'+pct(d.booked/d.cap*100)+'</td><td class="num">'+pct(d.peak/48*100)+'</td><td class="num">'+d.no+'</td><td><button class="btn sm" onclick="dayModal(\''+d.d+'\')">Open</button></td></tr>').join('');
+  document.getElementById('scCages').innerHTML=bars([
+    ['Cage 1, coaches',78,'',"78%"],
+    ['Cage 2, coaches',71,'',"71%"],
+    ['Cage 3, members',34,'a','34%'],
+    ['Cage 4, members',29,'a','29%'],
+    ['Cage 5, teams',26,'a','26%'],
+    ['Cage 6, teams',22,'a','22%'],
+    ['Pitching lane',64,'','64%']
+  ]);
+  document.getElementById('scWindow').textContent=CANCEL_WINDOW+' hours';
+  document.getElementById('scPolicyNote').innerHTML='Cancel window is <b>'+CANCEL_WINDOW+' hours</b>. Inside the window the session is charged. A no show consumes the credit whether or not the athlete shows up. Steve is still deciding between 8 and 24 hours.';
+}
+function setCancelWindow(){
+  openModal('Cancel window','<div class="field"><label>Hours before the session</label><select id="cwH"><option'+(CANCEL_WINDOW===8?' selected':'')+'>8</option><option'+(CANCEL_WINDOW===24?' selected':'')+'>24</option></select></div><div class="note">8 hours protects the cage. 24 hours is friendlier to parents and recovers more of the day. Either way a no show consumes the credit.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="doWindow()">Save and apply</button></div>');
+}
+function doWindow(){
+  CANCEL_WINDOW=+document.getElementById('cwH').value;
+  closeModal();renderSchedule();toast('Cancel window set to '+CANCEL_WINDOW+' hours, applied to all bookings');
+}
+function dayModal(d){
+  const row=DAYS.find(x=>x.d===d);
+  openModal(d+' schedule','<div class="grid2"><div class="kpi"><div class="k">Booked</div><div class="v">'+row.booked+' of '+row.cap+'</div></div><div class="kpi"><div class="k">Peak 3 to 7</div><div class="v">'+pct(row.peak/48*100)+'</div></div><div class="kpi"><div class="k">No shows</div><div class="v">'+row.no+'</div></div><div class="kpi"><div class="k">Open slots</div><div class="v">'+(row.cap-row.booked)+'</div></div></div><div class="note">Cages 3 to 6 carry the open slots. Filling '+(row.cap-row.booked)+' slots at $25 a session is '+money((row.cap-row.booked)*25)+' a day.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="fillDay(\''+d+'\')">Open the block to teams</button></div>');
+}
+function fillDay(d){
+  const row=DAYS.find(x=>x.d===d);
+  const add=Math.round((row.cap-row.booked)*0.35);
+  row.booked+=add;row.peak=Math.min(48,row.peak+Math.round(add*0.4));
+  closeModal();renderSchedule();toast(add+' team block slots opened on '+d);
 }
 
-function renderBook(){
-  const rows=[
-    {k:'Tour booked',v:364,n:'This week: 41'},
-    {k:'Assessment booked',v:210,n:'Full Swing KIT session'},
-    {k:'Showed up',v:459,n:'80% of all bookings'},
-    {k:'Rescheduled',v:63,n:'Recovery texts at 2h'},
-    {k:'Membership signed',v:164,n:'45% of shows'}
-  ];
-  document.getElementById('book').innerHTML='<tr><th>Stage</th><th class="num">Count</th><th>Note</th></tr>'+
-  rows.map(r=>`<tr><td>${r.k}</td><td class="num"><b>${r.v}</b></td><td style="font-size:10.5px;color:var(--mut)">${r.n}</td></tr>`).join('');
+/* ---------- coaches ---------- */
+function renderCoaches(){
+  const sessions=COACHES.reduce((s,c)=>s+c.sessions,0), rev=COACHES.reduce((s,c)=>s+c.rev,0);
+  document.getElementById('coKpis').innerHTML=[
+    kpi('Coaches on staff',COACHES.length,'2 with pro credentials'),
+    kpi('Sessions this week',sessions,'private and group'),
+    kpi('Coach revenue',money(rev),'booked, this week'),
+    kpi('Average load',pct(COACHES.reduce((s,c)=>s+c.load,0)/COACHES.length),'target 75%'),
+    kpi('Open gaps',COACHES.reduce((s,c)=>s+c.gaps,0),'hours that could sell'),
+    kpi('Revenue per hour',money(rev/COACHES.reduce((s,c)=>s+c.hours,0)),'blended')
+  ].join('');
+  document.getElementById('coBody').innerHTML=COACHES.map((c,i)=>'<tr><td><b>'+c.n+'</b><div class="tag">'+c.on+'</div></td><td class="tag">'+c.spec+'</td><td class="num">'+c.sessions+'</td><td class="num">'+c.hours+'</td><td><span class="track" style="display:block;width:80px"><span class="fill '+(c.load>=70?'g':c.load>=50?'':'a')+'" style="width:'+c.load+'%"></span></span><span class="tag">'+c.load+'%</span></td><td class="num">'+c.gaps+'</td><td class="num">'+money(c.rev)+'</td><td><button class="btn sm" onclick="coachModal('+i+')">View</button></td></tr>').join('');
+  document.getElementById('coNote').innerHTML='Marcus and Danny carry the premium sessions. Andre and Trey have real inventory: <b>'+COACHES.reduce((s,c)=>s+c.gaps,0)+' open hours</b> that could sell at the $160 average private rate.';
+  document.getElementById('coGaps').innerHTML=[
+    ['Tue 10a to 12p','Andre Cole','Parents are at work, athletes in school'],
+    ['Wed 11a to 1p','Trey Walton','No homeschool or team block booked'],
+    ['Thu 2p to 3p','Sofia Medina','Sits right before the school rush'],
+    ['Sat 8a to 10a','Trey Walton','Weekend mornings sell if promoted']
+  ].map((g,i)=>'<tr><td><b>'+g[0]+'</b></td><td>'+g[1]+'</td><td class="tag">'+g[2]+'</td><td><button class="btn sm" onclick="fillGap('+i+',this)">Fill</button></td></tr>').join('');
+  document.getElementById('coRoster').innerHTML=COACHES.map(c=>'<div style="display:flex;gap:9px;align-items:center;padding:6px 0;border-bottom:1px solid #EDEAE2"><div class="avatar" style="width:26px;height:26px;font-size:10px">'+c.n.split(' ').map(x=>x[0]).join('')+'</div><div><b style="font-size:12px">'+c.n+'</b><div class="tag">'+c.spec+'</div></div><div class="spacer"></div><span class="chip '+(c.load>=70?'g':c.load>=50?'a':'r')+'">'+c.load+'%</span></div>').join('');
+}
+function coachModal(i){
+  const c=COACHES[i];
+  openModal(c.n,'<div class="grid2"><div class="kpi"><div class="k">Sessions</div><div class="v">'+c.sessions+'</div></div><div class="kpi"><div class="k">Hours</div><div class="v">'+c.hours+'</div></div><div class="kpi"><div class="k">Load</div><div class="v">'+c.load+'%</div></div><div class="kpi"><div class="k">Revenue</div><div class="v">'+money(c.rev)+'</div></div></div><div class="note">'+c.spec+'. On the floor '+c.on+'. '+c.gaps+' open hours this week.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="addSessionTo('+i+')">Add a session</button><button class="btn" onclick="toast(\'Availability shared with Jacobo for outreach\')">Share availability</button></div>');
+}
+function addSessionTo(i){
+  COACHES[i].sessions++;COACHES[i].hours+=1;COACHES[i].rev+=160;COACHES[i].load=Math.min(100,COACHES[i].load+3);COACHES[i].gaps=Math.max(0,COACHES[i].gaps-1);
+  closeModal();renderCoaches();toast('Session added to '+COACHES[i].n);
+}
+function addSessionModal(){coachModal(3)}
+function fillGap(i,el){el.textContent='Filled';el.classList.add('blue');toast('Gap opened for booking and sent to Jacobo');}
+
+/* ---------- retention ---------- */
+function renderRetention(){
+  document.getElementById('rtKpis').innerHTML=[
+    kpi('Monthly churn','3.2%','target under 4%','up'),
+    kpi('Retention','96.8%','month over month','up'),
+    kpi('At risk',RISK.length,'need a touch this week'),
+    kpi('Card failures',2,'retry ladder running','dn'),
+    kpi('ESA renewals due',2,'paperwork expiring','a'),
+    kpi('Average tenure','7 months','across 34 members')
+  ].join('');
+  document.getElementById('rtRiskChip').textContent=RISK.length+' open';
+  document.getElementById('rtBody').innerHTML=RISK.map((r,i)=>'<tr><td><b>'+r.n+'</b></td><td>'+r.plan+'</td><td class="tag">'+r.sig+'</td><td class="num">'+(r.days||'—')+'</td><td><button class="btn sm" onclick="riskTouch('+i+')">Touch</button></td></tr>').join('');
+  document.getElementById('rtBars').innerHTML=bars([
+    ['Retention',96.8,'g','96.8%'],
+    ['Churn',3.2,'a','3.2%'],
+    ['Top 10% churn',4,'b','4.0%']
+  ]);
+  document.getElementById('rtNote').innerHTML='Churn at 3.2% is already better than the 4% top decile line, but that is on a brand new book where nobody has quit yet. The real test is month four, when the first three month commitments end.';
+  document.getElementById('rtEsa').innerHTML=RISK.filter(r=>r.sig.includes('ESA')).map(r=>'<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #EDEAE2"><b style="font-size:12px">'+r.n+'</b><div class="spacer"></div><span class="chip a">'+r.days+' days</span></div>').join('')+'<div class="note" style="margin-top:8px">ESA funds release against an invoice that names the athlete and the service period. Send those two first.</div>';
+}
+function riskTouch(i){
+  const r=RISK[i];
+  openModal('Touch '+r.n,'<div class="field"><label>What is going on</label><div class="kpi"><div class="v" style="font-size:13px">'+r.sig+'</div></div></div><div class="field"><label>Next step</label><select id="rtStep"><option>Send a text from Jacobo</option><option>Call the parent today</option><option>Resend the ESA invoice</option><option>Retry the card now</option></select></div><div class="acts"><button class="btn blue" onclick="doTouch('+i+')">Log the touch</button></div>');
+}
+function doTouch(i){
+  const step=document.getElementById('rtStep').value;
+  RISK.splice(i,1);
+  closeModal();renderRetention();toast(step+' · logged');
 }
 
-function renderPartners(){
-  const rows=[
-    {n:'East Valley travel ball orgs',s:'In conversation',n2:'4 of 12',t:'t-b'},
-    {n:'High school programs',s:'Season outreach',n2:'2 of 3',t:'t-b'},
-    {n:'Club softball programs',s:'Signed',n2:'1 of 2',t:'t-a'},
-    {n:'Facility cross-promos',s:'Proposal out',n2:'2 of 4',t:'t-c'},
-    {n:'Tournament sponsorships',s:'Planned',n2:'1 of 2',t:'t-c'}
-  ];
-  document.getElementById('partners').innerHTML='<tr><th>Partner type</th><th>Status</th><th class="num">Progress</th></tr>'+
-  rows.map(r=>`<tr><td>${r.n}</td><td><span class="tag ${r.t}">${r.s}</span></td><td class="num">${r.n2}</td></tr>`).join('');
+/* ---------- reviews ---------- */
+function renderReviews(){
+  const avg=(REVIEWS.reduce((s,r)=>s+r.stars,0)/REVIEWS.length).toFixed(1);
+  document.getElementById('rwKpis').innerHTML=[
+    kpi('Google rating',avg,'22 reviews lifetime','up'),
+    kpi('Replies sent',pct(REVIEWS.filter(r=>r.rep).length/REVIEWS.length*100),'inside 48 hours'),
+    kpi('Reviews this month',22,'top decile is 12','up'),
+    kpi('5 star share',pct(REVIEWS.filter(r=>r.stars===5).length/REVIEWS.length*100),'of recent reviews'),
+    kpi('Needs a reply',REVIEWS.filter(r=>!r.rep).length,'waiting now','a'),
+    kpi('Coach mentions',3,'routed to Steve')
+  ].join('');
+  document.getElementById('rwRatingChip').textContent=avg+' average';
+  document.getElementById('rwBody').innerHTML=REVIEWS.map((r,i)=>'<tr><td><b>'+r.n+'</b><div class="tag">'+r.src+'</div></td><td class="num">'+'★'.repeat(r.stars)+'</td><td class="tag" style="max-width:260px">'+r.txt+'</td><td>'+(r.rep?'<span class="chip g">Replied</span>':'<span class="chip a">Waiting</span>')+'</td><td><button class="btn sm" onclick="replyReview('+i+')">'+(r.rep?'View':'Reply')+'</button></td></tr>').join('');
+  document.getElementById('rwBars').innerHTML=bars(RATING_HIST.map(h=>[h[0],(h[1]-4)*250,'g',h[1].toFixed(1)]));
+  document.getElementById('rwSources').innerHTML=bars([['Text after session 3',62,'g','62%'],['QR at the cage',24,'b','24%'],['Monthly email',14,'a','14%']]);
+}
+function replyReview(i){
+  const r=REVIEWS[i];
+  openModal('Review · '+r.n,'<div class="kpi"><div class="k">'+'★'.repeat(r.stars)+'</div><div class="v" style="font-size:13px;font-weight:600">'+r.txt+'</div></div><div class="field" style="margin-top:10px"><label>Reply</label><textarea id="rvReply">Thanks for the kind words. We are glad the coaching is landing. If you ever want to talk about the schedule, ask for Steve at the front desk.</textarea></div><div class="acts"><button class="btn blue" onclick="doReply('+i+')">Post reply</button></div>');
+}
+function doReply(i){
+  REVIEWS[i].rep=true;closeModal();renderReviews();toast('Reply posted to Google');
+}
+function requestReview(){openModal('Request a review','<div class="field"><label>Send to</label><select><option>Everyone who finished session 3 this week (14)</option><option>All active members (34)</option></select></div><div class="note">The text after session three is the one that converts. Sending to everyone at once gets fewer replies.</div><div class="acts"><button class="btn blue" onclick="closeModal();toast(\'Review requests queued for 14 members\')">Send</button></div>')}
+
+/* ---------- recovery ---------- */
+function renderRecovery(){
+  const cartVal=CARTS.reduce((s,c)=>s+c.val,0);
+  document.getElementById('rcKpis').innerHTML=[
+    kpi('Abandoned carts',CARTS.length,money(cartVal)+' in play','a'),
+    kpi('Recovered this month',7,money(1620)+' back','up'),
+    kpi('Recovery rate',pct(7/18*100),'top decile is 25%'),
+    kpi('Unconverted leads',LEADS.length,'never paid, gone quiet'),
+    kpi('Avg days quiet',Math.round(LEADS.reduce((s,l)=>s+l.days,0)/LEADS.length),'across the list'),
+    kpi('Value at risk',money(cartVal+LEADS.length*180),'if none of them convert','dn')
+  ].join('');
+  document.getElementById('rcCartBody').innerHTML=CARTS.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td>'+c.plan+'</td><td class="num">'+money(c.val)+'</td><td class="tag">'+c.at+'</td><td class="num">'+c.tries+'</td><td><button class="btn sm" onclick="recoverCart('+i+')">'+(c.tries?'Follow up':'Text now')+'</button></td></tr>').join('');
+  document.getElementById('rcLeadChip').textContent=LEADS.length+' leads';
+  document.getElementById('rcLeadBody').innerHTML=LEADS.map((l,i)=>'<tr><td><b>'+l.n+'</b></td><td class="tag">'+l.src+'</td><td class="tag">'+l.stage+'</td><td class="num">'+l.days+'</td><td><button class="btn sm" onclick="recoverLead('+i+')">Reach out</button></td></tr>').join('');
+}
+function recoverCart(i){
+  const c=CARTS[i];c.tries++;
+  toast('Recovery text sent to '+c.n+' · '+money(c.val)+' cart');
+  renderRecovery();
+}
+function recoverAll(){
+  CARTS.forEach(c=>c.tries++);
+  renderRecovery();toast('Recovery texts sent to all '+CARTS.length+' carts');
+}
+function recoverLead(i){
+  const l=LEADS[i];
+  openModal('Reach '+l.n,'<div class="grid2"><div class="kpi"><div class="k">Source</div><div class="v" style="font-size:13px">'+l.src+'</div></div><div class="kpi"><div class="k">Quiet for</div><div class="v" style="font-size:13px">'+l.days+' days</div></div></div><div class="field" style="margin-top:10px"><label>Approach</label><select id="rlStep"><option>Text with a specific session time</option><option>Email the plan that matches their goal</option><option>Call and invite to a free assessment</option></select></div><div class="acts"><button class="btn blue" onclick="doLead('+i+')">Send</button></div>');
+}
+function doLead(i){
+  const step=document.getElementById('rlStep').value;
+  LEADS.splice(i,1);
+  closeModal();renderRecovery();toast(step+' · sent');
 }
 
-document.getElementById('budget').addEventListener('input',e=>{
-  state.budget=Number(e.target.value); renderKpis(); renderBars(); renderFunnel();
-});
+/* ---------- trends ---------- */
+function renderTrends(){
+  document.getElementById('trKpis').innerHTML=[
+    kpi('Ahead of top 10%',BENCH.filter(b=>b.gap==='ahead').length,'of 8 metrics','up'),
+    kpi('Behind',BENCH.filter(b=>b.gap==='behind').length,'where the work is','dn'),
+    kpi('Biggest gap','Utilization','32% against 65%'),
+    kpi('Fastest win','ARPU',money(182)+' to '+money(250)),
+    kpi('Competitors tracked',COMP.length,'social, weekly'),
+    kpi('Copy-worthy moves',4,'of 5 this week')
+  ].join('');
+  document.getElementById('trBody').innerHTML=BENCH.map(b=>'<tr><td><b>'+b.k+'</b></td><td class="num">'+b.top+'</td><td class="num">'+b.now+'</td><td><span class="chip '+(b.gap==='ahead'?'g':'a')+'">'+b.gap+'</span></td></tr>').join('');
+  document.getElementById('trCompBody').innerHTML=COMP.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td class="tag" style="max-width:250px">'+c.did+'</td><td class="tag" style="max-width:220px">'+c.copy+'</td><td><button class="btn sm" onclick="copyMove('+i+')">Add to plan</button></td></tr>').join('');
+}
+function copyMove(i){
+  closeModal();
+  toast(COMP[i].n+' move added to this week\'s plan for Jacobo');
+}
 
-function render(){renderKpis();renderBars();renderFunnel();renderChan();renderZips();renderBook();renderPartners()}
-render();
-</script>
-</body>
-</html>
+/* ---------- boot ---------- */
+const RENDER={overview:renderOverview,waitlist:renderWaitlist,spend:renderSpend,members:renderMembers,revenue:renderRevenue,schedule:renderSchedule,coaches:renderCoaches,retention:renderRetention,reviews:renderReviews,recovery:renderRecovery,trends:renderTrends};
+function renderAll(){Object.keys(RENDER).forEach(k=>RENDER[k]())}
+function unlock(){
+  const v=(document.getElementById('gateCode').value||'').trim().toLowerCase();
+  if(v===CODE){document.getElementById('gate').remove();renderAll();}
+  else toast('That code is not right');
+}
+document.getElementById('gateCode').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+</script></body></html>
