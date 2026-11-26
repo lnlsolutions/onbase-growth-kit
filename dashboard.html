@@ -139,6 +139,7 @@ tr:last-child td{border-bottom:0}
     <div class="logo"><div class="mark">O</div><div><b>ONBASE</b><span>growth system</span></div></div>
     <nav class="navi" id="nav">
       <button data-v="overview" class="on"><span class="ic">▦</span><span>Overview</span></button>
+      <button data-v="gtmplan"><span class="ic">◎</span><span>GTM plan</span></button>
       <button data-v="skip"><span class="ic">⚡</span><span>Skip integration</span></button>
       <button data-v="server"><span class="ic">▤</span><span>Server</span></button>
       <button data-v="convos"><span class="ic">✉</span><span>Conversations</span></button>
@@ -156,6 +157,7 @@ tr:last-child td{border-bottom:0}
       <button data-v="reviews"><span class="ic">★</span><span>Reviews</span></button>
       <button data-v="recovery"><span class="ic">⇄</span><span>Recovery</span></button>
       <button data-v="trends"><span class="ic">◐</span><span>Benchmarks</span></button>
+      <button data-v="sources"><span class="ic">▤</span><span>Data sources</span></button>
     </nav>
     <div class="sidefoot">ONBASE Athlete<br><b style="color:#fff">Steve Lundin</b> · manager<br>8150 E Germann Rd, Mesa</div>
   </aside>
@@ -205,6 +207,37 @@ tr:last-child td{border-bottom:0}
             <div class="body p0" id="svLaunch"></div></div>
         </div>
       </div>
+    </section>
+
+    <section class="view" id="v-gtmplan">
+      <div class="cards" id="gpKpis"></div>
+      <div class="cols">
+        <div>
+          <div class="panel"><div class="head"><h2>The math, in four bars</h2><div class="spacer"></div><span class="chip a">priority one</span></div>
+            <div class="body"><div class="bars" id="gpMath"></div></div></div>
+          <div class="panel"><div class="head"><h2>Lead to member</h2><div class="spacer"></div><span class="chip n">all sources</span></div>
+            <div class="body p0"><table><thead><tr><th>Stage</th><th class="num">People</th><th class="num">Of prior stage</th><th>How it runs</th></tr></thead><tbody id="gpStages"></tbody></table></div>
+            <div class="body"><div class="note">The leak is between replied and toured: 61 replies turn into 38 tours. That is a booking conversation, not a lead problem, and it is the cheapest thing to fix this week.</div></div></div>
+          <div class="panel"><div class="head"><h2>Where the leads come from</h2><div class="spacer"></div><span class="chip a">needs to roughly double</span></div>
+            <div class="body p0"><table><thead><tr><th>Channel</th><th class="num">Leads/wk now</th><th class="num">Needed</th><th class="num">Cost per lead</th><th>Who runs it</th><th></th></tr></thead><tbody id="gpChannels"></tbody></table></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="head"><h2>The waitlist is a head start, not the plan</h2></div>
+            <div class="body" id="gpWl"></div></div>
+          <div class="panel"><div class="head"><h2>Does the budget hold</h2><div class="spacer"></div><span class="chip g">yes</span></div>
+            <div class="body" id="gpBudget"></div></div>
+          <div class="panel"><div class="head"><h2>ARPM is the cheapest lever</h2></div>
+            <div class="body"><div class="bars" id="gpArpm"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-sources">
+      <div class="cards" id="srcKpis"></div>
+      <div class="panel"><div class="head"><h2>Who owns what</h2><div class="spacer"></div><span class="chip g">no duplication</span></div>
+        <div class="body p0"><table><thead><tr><th>System</th><th>Owns</th><th>We read</th><th>We write</th><th>Rule</th></tr></thead><tbody id="srcBody"></tbody></table></div>
+        <div class="body"><div class="note">Steve said this first project is the GTM strategy and the dashboard that synthesizes the lead generation. This table is how we keep that promise: every fact lives in the system that already owns it, and this dashboard joins them into one screen without becoming a second CRM.</div></div></div>
+      <div class="panel"><div class="head"><h2>Rules we hold to</h2></div><div class="body" id="srcRules"></div></div>
     </section>
 
     <section class="view" id="v-skip">
@@ -659,7 +692,7 @@ function renderOverview(){
   document.getElementById('ovKpis').innerHTML=[
     kpi('Waitlist',WAITLIST.length,'+16 this week','up'),
     kpi('Members sold',members(),'pre-sale, before opening'),
-    kpi('MRR',money(mrr()),'ARPU '+money(arpu())),
+    kpi('MRR',money(mrr()),'ARPM '+money(arpu())),
     kpi('Spend this month',money(spend()),pct(spend()/BUDGET*100)+' of '+money(BUDGET)),
     kpi('Cost per signup',money(spend()/signups()),'across all channels'),
     kpi('Cage utilization',pct(util()),booked()+' of '+capacity()+' slots')
@@ -679,8 +712,8 @@ function renderOverview(){
   document.getElementById('ovGoal').innerHTML=bars([
     ['Members today',members()/250*100,'',members()+' / 250'],
     ['MRR today',mrr()/62500*100,'g',money(mrr())+' / $62,500'],
-    ['ARPU today',arpu()/250*100,'b',money(arpu())+' / $250']
-  ])+'<div class="note" style="margin-top:10px">Gap to the goal is <b>'+money(62500-mrr())+'</b> of monthly recurring revenue. ARPU is the fastest lever: moving the mix to Elite and Hitting plus Strength closes 60 percent of it without a single extra member.</div>';
+    ['ARPM today',arpu()/250*100,'b',money(arpu())+' / $250']
+  ])+'<div class="note" style="margin-top:10px">Gap to the goal is <b>'+money(62500-mrr())+'</b> of monthly recurring revenue. ARPM is the fastest lever: moving the mix to Elite and Hitting plus Strength closes 60 percent of it without a single extra member.</div>';
   document.getElementById('ovWeek').innerHTML=[
     kpi('Sessions booked',booked(),'next 7 days'),
     kpi('Peak 3 to 7pm',pct(191/336*100),'191 of 336 slots'),
@@ -799,7 +832,7 @@ function renderMembers(){
   document.getElementById('mbKpis').innerHTML=[
     kpi('Memberships sold',members(),'pre-sale before opening'),
     kpi('MRR',money(tot),'recurring, billed on the 1st'),
-    kpi('ARPU',money(arpu()),'target '+money(250)),
+    kpi('ARPM',money(arpu()),'target '+money(250)),
     kpi('Family add-ons',FAMILY_ADDONS,'at '+money(ADDON_PRICE)+' each'),
     kpi('Highest plan','Elite Hitting',money(349)+' a month'),
     kpi('To 250 members',250-members()+' left','at '+money(250)+' average')
@@ -807,7 +840,7 @@ function renderMembers(){
   document.getElementById('mbBody').innerHTML=PLANS.map((p,i)=>'<tr><td><b>'+p.n+'</b></td><td>'+p.cat+'</td><td class="num">'+money(p.price)+'</td><td class="num">'+p.sold+'</td><td class="num">'+money(p.price*p.sold)+'</td><td class="num">'+pct(p.sold/members()*100)+'</td><td><button class="btn sm" onclick="sellTo('+i+')">Sell</button></td></tr>').join('');
   document.getElementById('mbWeeks').innerHTML=bars(MB_WEEKS.map((v,i)=>['Wk '+(i+1),v/7*100,'',v+' sold']));
   document.getElementById('mbArpu').innerHTML='<div class="cards" style="margin:0">'+kpi('Today',money(arpu()),'blended')+kpi('Target',money(250),'Steve\'s number')+kpi('Gap',money(250-arpu()),'per member, per month')+'</div>';
-  document.getElementById('mbArpuNote').innerHTML='ARPU is '+money(arpu())+'. Getting to $250 is a mix problem, not a price problem: every Youth Hitting member who moves up to Hitting plus Strength adds $80 a month with no new acquisition cost.';
+  document.getElementById('mbArpuNote').innerHTML='ARPM is '+money(arpu())+'. Getting to $250 is a mix problem, not a price problem: every Youth Hitting member who moves up to Hitting plus Strength adds $80 a month with no new acquisition cost.';
 }
 function sellTo(i){openModal('Sell '+PLANS[i].n,'<div class="grid2"><div class="field"><label>Member name</label><input id="slName" placeholder="First and last"></div><div class="field"><label>Payment</label><select id="slPay"><option>Card</option><option>ESA invoice</option><option>ACH</option></select></div></div><div class="field"><label>Add a family athlete (+'+money(ADDON_PRICE)+')</label><select id="slFam"><option>No</option><option>Yes</option></select></div><div class="acts"><button class="btn blue" onclick="doSell('+i+')">Create membership</button></div>');
 }
@@ -837,7 +870,7 @@ function renderRevenue(){
     ['Break even',100,'g','Passed'],
     ['$20k to $30k band',100,'g','In band'],
     ['$60k by April',last.mrr/60000*100,'b',pct(last.mrr/60000*100)]
-  ])+'<div class="note" style="margin-top:8px">The April line is the one at risk. It needs 152 members at the current ARPU, or 96 members at the $250 ARPU Steve wants.</div>';
+  ])+'<div class="note" style="margin-top:8px">The April line is the one at risk. It needs 152 members at the current ARPM, or 96 members at the $250 ARPM Steve wants.</div>';
   document.getElementById('rvMix').innerHTML=bars(PLANS.map(p=>[p.n,p.price*p.sold/mrr()*100,'',money(p.price*p.sold)]).concat([['Family add-ons',FAMILY_ADDONS*ADDON_PRICE/mrr()*100,'a',money(FAMILY_ADDONS*ADDON_PRICE)]]));
 }
 
@@ -1028,7 +1061,7 @@ function renderTrends(){
     kpi('Ahead of top 10%',BENCH.filter(b=>b.gap==='ahead').length,'of 8 metrics','up'),
     kpi('Behind',BENCH.filter(b=>b.gap==='behind').length,'where the work is','dn'),
     kpi('Biggest gap','Utilization','32% against 65%'),
-    kpi('Fastest win','ARPU',money(182)+' to '+money(250)),
+    kpi('Fastest win','ARPM',money(182)+' to '+money(250)),
     kpi('Competitors tracked',COMP.length,'social, weekly'),
     kpi('Copy-worthy moves',4,'of 5 this week')
   ].join('');
@@ -1645,6 +1678,17 @@ function askAnswer(raw){
     return {html:'<b>'+open.length+'</b> threads are waiting on a human: '+open.map(c=>c.member_name).join(', ')+'. The AI handled the other <b>'+(CONVOS.length-open.length)+'</b> end to end.',tab:'convos'};
   }
 
+  /* gtm plan */
+  if(has(/gtm plan|priority|path to|250|goal|convert the waitlist|arpm|target|gap|pace|how do we get/)){
+    const gap=TARGET_MEMBERS-members();
+    return {html:'Priority one is <b>'+TARGET_MEMBERS+' members at '+money(TARGET_ARPM)+' ARPM</b>, which is '+money(TARGET_MEMBERS*TARGET_ARPM)+' a month. You are at <b>'+members()+'</b>, so <b>'+gap+'</b> to go, about <b>'+Math.ceil(gap/WEEKS_TO_GOAL)+' a week</b> against '+MB_WEEKS[MB_WEEKS.length-1]+' now. Two things have to be true: leads roughly double to about <b>'+LEADS_NEEDED+' a week</b>, and ARPM moves from '+money(arpu())+' to '+money(TARGET_ARPM)+', which drops the member target from 343 to 250. The waitlist alone caps out around '+Math.round(WAITLIST.length*0.4)+' members, so it is a head start, not the plan.',tab:'gtmplan'};
+  }
+
+  /* data sources */
+  if(has(/duplicate|source of truth|data source|who owns|hubspot|shopify|integration|overlap/)){
+    return {html:'Nothing here is a second CRM. <b>HubSpot</b> owns contacts and deals, <b>Shopify</b> owns money and carts, <b>Skip</b> owns the texting inbox, <b>Meta and Google</b> own delivery, the <b>Google profile</b> owns search, and the <b>GTM container</b> owns measurement. This dashboard reads all six and writes almost nothing. If a number here disagrees with its source, the source wins and we fix the dashboard.',tab:'sources'};
+  }
+
   /* geofencing */
   if(has(/geofence|geo.?fenc|radius|fence|nearby|competitor|conquest|foot traffic/)){
     const t=geoTot();
@@ -1667,7 +1711,7 @@ function askAnswer(raw){
 
   /* help */
   if(has(/what can you|help|scope|who are you|what do you do|capabilit/)){
-    return {html:'Every scope on this dashboard. Money: MRR, ARPU, revenue against goal. Growth: waitlist pace, ad spend, cost per signup by channel. Operations: cage utilization, empty hours, coach load, the no-show window. Retention: who is at risk, churn. Reputation: rating and unanswered reviews. Recovery: abandoned carts and their value. Skip: messages, reply rate, bookings, attributed revenue, and who needs a reply. Server: records, storage, uptime and security. And I can act: <b>book</b> a session, <b>text</b> a member, <b>pause</b> a sequence, change the <b>no-show window</b>.'};
+    return {html:'Every scope on this dashboard. Money: MRR, ARPM, revenue against goal, and the path to 250 members. GTM: the priority-one plan, lead volume needed, ARPM mix and whether the budget holds. Sources: which system owns which fact. Growth: waitlist pace, ad spend, cost per signup by channel. Operations: cage utilization, empty hours, coach load, the no-show window. Retention: who is at risk, churn. Reputation: rating and unanswered reviews. Recovery: abandoned carts and their value. Skip: messages, reply rate, bookings, attributed revenue, and who needs a reply. Server: records, storage, uptime and security. And I can act: <b>book</b> a session, <b>text</b> a member, <b>pause</b> a sequence, change the <b>no-show window</b>.'};
   }
 
   /* greeting */
@@ -1900,6 +1944,139 @@ NAV.geo=['Geofencing','Fences around the places that matter, and what they retur
 NAV.seo=['SEO tracking','Rankings, the local profile and the citations behind them'];
 NAV.gtm=['GTM deployment','One container, every tag, and what to fix next'];
 RENDER.geo=renderGeo; RENDER.seo=renderSeo; RENDER.gtm=renderGtm;
+
+</script>
+<script>
+/* ============================================================
+   GTM plan (Steve's priority 1) and the data-source map that
+   keeps this dashboard a synthesis layer, not a duplicate CRM
+   ============================================================ */
+
+const TARGET_MEMBERS=250, TARGET_ARPM=250, WEEKS_TO_GOAL=22;
+const L2M=0.28;                    /* 34 memberships from 120 waitlist signups */
+const LEADS_NOW=16;                /* last week, WL_WEEKS[9] */
+const LEADS_NEEDED=Math.round((TARGET_MEMBERS-members())/L2M/WEEKS_TO_GOAL);
+
+const LEAD_PLAN=[
+ {n:'Meta, Instagram and Facebook',now:5.6,need:16,cpl:19,own:'LNL runs it'},
+ {n:'Google Search',now:1.6,need:5,cpl:21,own:'LNL runs it'},
+ {n:'Flyer QR codes',now:2.5,need:4,cpl:7,own:'ONBASE prints, LNL tracks'},
+ {n:'Referral credits',now:1.1,need:3,cpl:10,own:'ONBASE runs it'},
+ {n:'Geofencing',now:0,need:4,cpl:10,own:'LNL runs it'},
+ {n:'Organic and SEO',now:0,need:3,cpl:0,own:'LNL runs it'}
+];
+const STAGES=[
+ ['Waitlist signups',120,'source: HubSpot forms and flyer QR'],
+ ['Contacted by text',112,'93%, Skip sends the first touch'],
+ ['Replied',61,'54% of contacted'],
+ ['Toured or called',38,'62% of replies'],
+ ['Offer sent',34,'89% of tours'],
+ ['Paid member',34,'100% of offers, pre-sale']
+];
+const SOURCES_MAP=[
+ ['HubSpot','Contacts, forms, deals, AEO content','Name, source, ESA flag, deal stage','Nothing','Owns the record. This dashboard reads it.'],
+ ['Shopify','Customers, orders, memberships, abandoned carts','Plan, price, start date, cart value','Nothing','Owns billing. Recovery reads the carts.'],
+ ['Skip / PlateOps','Texts, sequences, replies, bookings','Messages, reply rate, bookings, attributed revenue','Pause or resume a sequence','Owns the texting inbox. We never rebuild it.'],
+ ['Meta and Google Ads','Spend, impressions, clicks, conversions','Spend, cost per signup, geofence performance','Campaign budgets on request','Owns delivery. GTM passes the conversions.'],
+ ['Google Business Profile and Search Console','Rankings, calls, directions','Keyword position, calls, directions','Nothing','Owns search. SEO tab reads it.'],
+ ['GTM container','Every tag and conversion event','Tag health, fired counts, conversion events','Publish a container version','Owns measurement. One container, no hardcoding.'],
+ ['This dashboard','Synthesis only','All of the above, in one view','Task and follow-up notes','No system of record. If it disagrees with the source, the source wins.']
+];
+
+function renderGtmPlan(){
+  const gap=TARGET_MEMBERS-members();
+  const needPerWeek=Math.ceil(gap/WEEKS_TO_GOAL);
+  const nowPerWeek=MB_WEEKS[MB_WEEKS.length-1];
+  const wl40=Math.round(WAITLIST.length*0.40);
+  document.getElementById('gpKpis').innerHTML=[
+    kpi('Members today',members(),'of '+TARGET_MEMBERS+' by April or May'),
+    kpi('Still to add',gap,'about '+needPerWeek+' a week','a'),
+    kpi('Pace now',nowPerWeek+' a week','needs to be '+needPerWeek,'dn'),
+    kpi('ARPM today',money(arpu()),'target '+money(TARGET_ARPM),'a'),
+    kpi('Leads a week',LEADS_NOW,'needs about '+LEADS_NEEDED,'dn'),
+    kpi('MRR today',money(mrr()),'of '+money(TARGET_MEMBERS*TARGET_ARPM))
+  ].join('');
+
+  document.getElementById('gpMath').innerHTML=bars([
+    ['Members',members()/TARGET_MEMBERS*100,'',members()+' / '+TARGET_MEMBERS],
+    ['MRR',mrr()/(TARGET_MEMBERS*TARGET_ARPM)*100,'g',money(mrr())+' / '+money(TARGET_MEMBERS*TARGET_ARPM)],
+    ['ARPM',arpu()/TARGET_ARPM*100,'b',money(arpu())+' / '+money(TARGET_ARPM)],
+    ['Leads a week',LEADS_NOW/LEADS_NEEDED*100,'a',LEADS_NOW+' / '+LEADS_NEEDED]
+  ])+'<div class="note" style="margin-top:10px">Steve\'s number is <b>'+TARGET_MEMBERS+' members at '+money(TARGET_ARPM)+' ARPM</b>, which is '+money(TARGET_MEMBERS*TARGET_ARPM)+' a month. Everything on this dashboard feeds those four bars. The ARPM bar is the one nobody is watching and it is the cheapest to move.</div>';
+
+  document.getElementById('gpWl').innerHTML=
+    '<div class="grid2" style="margin-bottom:10px">'+
+      '<div class="kpi"><div class="k">On the waitlist</div><div class="v">'+WAITLIST.length+'</div><div class="dlt">the head start</div></div>'+
+      '<div class="kpi"><div class="k">At a 40% close</div><div class="v">'+wl40+'</div><div class="dlt">members from the list</div></div>'+
+    '</div>'+
+    '<div class="note" style="margin-top:0">The waitlist cannot carry this on its own. Even if every one of the '+WAITLIST.length+' converts at 100 percent it is still '+(TARGET_MEMBERS-WAITLIST.length)+' short of '+TARGET_MEMBERS+'. At a realistic 40 percent it is <b>'+(gap-wl40)+' members short</b>. So the list is a head start, and the GTM job is the '+Math.round((gap-wl40)/gap*100)+' percent that has to come from new lead generation.</div>'+
+    '<div style="margin-top:12px"><button class="btn blue" onclick="go(\'waitlist\')">Open the waitlist</button></div>';
+
+  document.getElementById('gpStages').innerHTML=STAGES.map((s,i)=>
+    '<tr><td><b>'+s[0]+'</b></td><td class="num">'+s[1]+'</td>'+
+    '<td class="num">'+(i===0?'':Math.round(s[1]/STAGES[i-1][1]*100)+'%')+'</td>'+
+    '<td class="tag">'+s[2]+'</td></tr>').join('');
+
+  document.getElementById('gpChannels').innerHTML=LEAD_PLAN.map((c,i)=>
+    '<tr><td><b>'+c.n+'</b></td><td class="num">'+c.now.toFixed(1)+'</td><td class="num"><b>'+c.need+'</b></td>'+
+    '<td class="num">'+(c.cpl?money(c.cpl):'organic')+'</td><td class="tag">'+c.own+'</td>'+
+    '<td><button class="btn sm" onclick="gpPlan('+i+')">Plan</button></td></tr>').join('');
+
+  const budget=BUDGET, leadsMo=LEADS_NEEDED*4;
+  document.getElementById('gpBudget').innerHTML=
+    '<div class="grid2">'+
+      '<div class="kpi"><div class="k">Monthly budget</div><div class="v">'+money(budget)+'</div><div class="dlt">unchanged</div></div>'+
+      '<div class="kpi"><div class="k">Leads a month needed</div><div class="v">'+leadsMo+'</div><div class="dlt">at '+LEADS_NEEDED+' a week</div></div>'+
+      '<div class="kpi"><div class="k">Cost per lead at that volume</div><div class="v">'+money(budget/leadsMo)+'</div><div class="dlt">'+money(spend()/signups())+' today</div></div>'+
+      '<div class="kpi"><div class="k">Cost per member</div><div class="v">'+money(budget/leadsMo/L2M)+'</div><div class="dlt">against '+money(TARGET_ARPM)+' a month</div></div>'+
+    '</div>'+
+    '<div class="note">The budget does not need to grow. The volume does. Two channels do most of that work for free: geofencing and organic, which is why both were built before the spend went up. A member acquired at '+money(budget/leadsMo/L2M)+' pays that back in under two months at the target ARPM.</div>';
+
+  document.getElementById('gpArpm').innerHTML=bars([
+    ['Members needed at '+money(arpu()),250/343*100,'a','343'],
+    ['Members needed at '+money(TARGET_ARPM),100,'g','250'],
+    ['Youth Hitting',149/TARGET_ARPM*100,'b',money(149)],
+    ['Hitting plus Strength',229/TARGET_ARPM*100,'b',money(229)],
+    ['Elite Hitting',349/TARGET_ARPM*100,'g',money(349)]
+  ])+'<div class="note" style="margin-top:10px">At today\'s '+money(arpu())+' ARPM the goal needs <b>343 members</b>. At '+money(TARGET_ARPM)+' it needs <b>250</b>. That is 93 fewer memberships to sell for the same revenue, which is why the mix matters more than the headcount.</div>';
+}
+function gpPlan(i){
+  const c=LEAD_PLAN[i];
+  openModal(c.n,
+    '<div class="grid2" style="margin-bottom:10px">'+
+      '<div class="kpi"><div class="k">Leads a week now</div><div class="v">'+c.now.toFixed(1)+'</div></div>'+
+      '<div class="kpi"><div class="k">Needed</div><div class="v">'+c.need+'</div></div>'+
+      '<div class="kpi"><div class="k">Cost per lead</div><div class="v">'+(c.cpl?money(c.cpl):'organic')+'</div></div>'+
+      '<div class="kpi"><div class="k">Owner</div><div class="v" style="font-size:12px">'+c.own+'</div></div>'+
+    '</div>'+
+    '<div class="note" style="margin-top:0">This is the volume change for this channel, not a new system. The tracking, the conversions and the reporting already run through GTM, so turning it up is a budget and creative decision, not a build.</div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn blue" onclick="gpCommit('+i+')">Add to the GTM plan</button>'+
+    '<button class="btn" onclick="closeModal()">Close</button></div>');
+}
+function gpCommit(i){closeModal();toast(LEAD_PLAN[i].n+' set to '+LEAD_PLAN[i].need+' leads a week in the GTM plan')}
+
+function renderSources(){
+  document.getElementById('srcKpis').innerHTML=[
+    kpi('Systems read',6,'plus this dashboard'),
+    kpi('Systems of record',5,'none of them are us'),
+    kpi('Data we write back','2','sequences and container versions'),
+    kpi('Duplicated reporting','0','by design')
+  ].join('');
+  document.getElementById('srcBody').innerHTML=SOURCES_MAP.map(r=>
+    '<tr><td><b>'+r[0]+'</b></td><td class="tag">'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td class="tag">'+r[4]+'</td></tr>').join('');
+  document.getElementById('srcRules').innerHTML=[
+    ['One system owns each fact','HubSpot owns contacts. Shopify owns money. Skip owns the conversation. Ads own delivery. We read them and never keep a second copy.'],
+    ['The source always wins','If a number here disagrees with HubSpot or Shopify, the dashboard is wrong and gets fixed, not the other way round.'],
+    ['No rebuilds','We are not rebuilding HubSpot reporting, Skip\'s inbox or Shopify analytics. Steve already pays for those. This is the one screen that joins them.'],
+    ['Tracking is shared, not duplicated','Every conversion fires once from the GTM container. No second pixel, no second event name, no double counting.'],
+    ['Access is read only unless asked','Read scopes first. Write only where Steve asks for an action, like pausing a sequence or publishing a container.'],
+    ['Nothing here needs their developers','If a change needs ONBASE to ship code, we have done it wrong.']
+  ].map(r=>'<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #EDEAE2"><div style="flex:0 0 150px;font-size:12px;font-weight:700">'+r[0]+'</div><div style="flex:1;font-size:12px;color:#5C564C">'+r[1]+'</div></div>').join('');
+}
+
+NAV.gtmplan=['GTM plan','Priority one: convert the waitlist, then 250 members at $250 ARPM by April'];
+NAV.sources=['Data sources','What each system owns, so nothing gets built twice'];
+RENDER.gtmplan=renderGtmPlan; RENDER.sources=renderSources;
 
 </script>
 </body></html>
