@@ -163,6 +163,7 @@ tbody tr.sel{background:#FBF3EA}
       <button data-v="gtmplan"><span class="ic">◎</span><span>GTM plan</span></button>
       <button data-v="skip"><span class="ic">⚡</span><span>Skip integration</span></button>
       <button data-v="server"><span class="ic">▤</span><span>Server</span></button>
+      <button data-v="tenants"><span class="ic">⛨</span><span>Tenants</span></button>
       <button data-v="geo"><span class="ic">◈</span><span>Geofencing</span></button>
       <button data-v="seo"><span class="ic">⌕</span><span>SEO tracking</span></button>
       <button data-v="gtm"><span class="ic">⚙</span><span>GTM deployment</span></button>
@@ -209,6 +210,8 @@ tbody tr.sel{background:#FBF3EA}
         </div>
       </div>
     </section>
+
+    <section class="view" id="v-tenants"></section>
 
     <section class="view" id="v-server">
       <div class="cards" id="svKpis"></div>
@@ -1221,7 +1224,7 @@ function ovWhat(){
     ['The growth layer','Waitlist to membership, ad spend and cost per signup, cage utilization, retention, recovery, reviews, geofencing, SEO and GTM, all on one screen, all reading the same numbers.'],
     ['Runs on your server','Not ours. This dashboard reads your own server for records, storage and backups, and the Server tab shows what it holds and what it deliberately does not.'],
     ['PlateOps stays the source','Texts, sequences, contacts and bookings live in PlateOps and are read live. Nothing is copied, so there is never a second inbox to disagree with theirs.'],
-    ['Yours to sell','Every record carries a tenant, so the same build runs under another gym or league name with their own login, their own data and their own billing. One foundation, many locations.']
+    ['Yours to sell','Every record carries a tenant, so the same build runs under another gym or league name with their own login, their own private server, storage and nightly backup, and their own paywall that suspends them on a failed card without touching their data. One foundation, many locations.']
   ];
   el.innerHTML='<div class="grid2" style="gap:10px">'+items.map(i=>
     '<div><div class="mk">'+i[0]+'</div><div style="font-size:12.5px;line-height:1.5;margin-top:3px">'+i[1]+'</div></div>').join('')+'</div>'+
@@ -1426,14 +1429,15 @@ function askChips(){
     'v-server':['How much storage is left?','storage'],
     'v-convos':['Who needs a reply?','reply'],
     'v-seqs':['Which sequence books the most?','seq'],
-    'v-spend':['What is our cost per signup?','cac'] }[active]||[['What is our cost per signup?','cac']];
+    'v-spend':['What is our cost per signup?','cac'],
+    'v-tenants':['How does the paywall work?','paywall'] }[active]||[['What is our cost per signup?','cac']];
   c.innerHTML=base.concat(extra).slice(0,4).map(x=>'<button onclick="askQuick(\''+x[1]+'\')">'+x[0]+'</button>').join('');
 }
 function askQuick(k){
   const q={'mrr':'What is our MRR?','book':'Book a session Thursday 5pm','skip':'How are the Skip texts doing?',
     'empty':'What is empty this week?','carts':'How much is in abandoned carts?','risk':'Who is at risk?',
     'storage':'How much storage is left?','reply':'Who needs a reply?','seq':'Which sequence books the most?',
-    'cac':'What is our cost per signup?'}[k];
+    'cac':'What is our cost per signup?','paywall':'How does the paywall work?'}[k];
   document.getElementById('askInput').value=q; askSend();
 }
 function askSend(){
@@ -1479,7 +1483,7 @@ function askAnswer(raw){
   }
 
   /* revenue */
-  if(has(/mrr|revenue|income|arr\b|recurring|money coming/)){
+  if(has(/mrr|revenue|income|arr\b|recurring|money coming/)&&!/platform|tenant/.test(q)){
     return {html:'MRR is <b>'+money(mrr())+'</b> from <b>'+members()+'</b> memberships, which is an average of <b>'+money(arpu())+'</b> per member. The goal Steve gave is $62,500, so the gap is <b>'+money(62500-mrr())+'</b>. The fastest lever is mix: moving 20 members from Youth to Hitting plus Strength adds about $1,600 a month without a single new signup.',tab:'revenue'};
   }
 
@@ -1491,7 +1495,7 @@ function askAnswer(raw){
   }
 
   /* spend and CAC */
-  if(has(/spend|budget|ad spend|cac|cost per|acquisition|roas|channel/)){
+  if(has(/\bspend\b|budget|cac|cost per|acquisition|roas|channel|ad money/)){
     const best=CHANNELS.slice().sort((a,b)=>a.spend/a.signups-(b.spend/b.signups))[0];
     const worst=CHANNELS.slice().sort((a,b)=>b.spend/b.signups-(a.spend/a.signups))[0];
     return {html:'<b>'+money(spend())+'</b> of the <b>'+money(BUDGET)+'</b> budget is spent, producing <b>'+signups()+'</b> signups at <b>'+money(spend()/signups())+'</b> each. Cheapest is <b>'+best.n+'</b> at '+money(best.spend/best.signups)+'. Most expensive is <b>'+worst.n+'</b> at '+money(worst.spend/worst.signups)+', so every dollar moved from there to flyers buys about two and a half more signups.',tab:'spend'};
@@ -1555,6 +1559,61 @@ function askAnswer(raw){
   /* skip and texts */
   if(has(/skip|text|sms|message|reply rate|opt.?out|plateops/)){
     return {html:'Skip has <b>'+SKIP_TOTALS.contacts+'</b> contacts in sync and <b>'+SKIP_TOTALS.sent.toLocaleString()+'</b> messages out in 30 days with <b>'+SKIP_TOTALS.reply+'</b> coming back, a <b>30%</b> reply rate. That produced <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>. Opt-outs are <b>2.2%</b>, below the 3 to 5% typical for this kind of list. Right now <b>2</b> threads are waiting on a human, and they are answered in PlateOps, not here.',tab:'skip'};
+  }
+
+  /* tenants, paywall, per tenant storage and backup */
+  if(has(/tenant|paywall|pay wall|past due|dunning|suspend|resume|reinstate|per gym|per location|platform|backup|restore|export|isolat|private from|private server|own server/)){
+    const who=TENANTS.map(t=>t.name).filter(n=>q.indexOf(n.toLowerCase())>=0)[0];
+    const byShort=TENANTS.filter(t=>q.indexOf(t.name.split(' ')[0].toLowerCase())>=0)[0];
+
+    /* actions first, so "suspend ignite" does the thing */
+    if(has(/\b(suspend|pause the account|turn the paywall on|paywall on)\b/)&&(who||byShort)){
+      const t=who?TENANTS.filter(x=>x.name===who)[0]:byShort;
+      const msg=tenSet(t.id,'suspended'); tenSelect(t.id);
+      return {html:msg+' Their data stays, their bucket keeps backing up, and no other gym is affected.',tab:'tenants'};
+    }
+    if(has(/\b(resume|reinstate|turn the paywall off|paywall off|unsuspend)\b/)&&(who||byShort)){
+      const t=who?TENANTS.filter(x=>x.name===who)[0]:byShort;
+      const msg=tenSet(t.id,'active'); tenSelect(t.id);
+      return {html:msg,tab:'tenants'};
+    }
+    if(has(/\b(back ?up)\b/)&&!(/how|when|does|do|is|are|what/.test(q))){
+      const t=who?TENANTS.filter(x=>x.name===who)[0]:tenFind(TEN_SEL);
+      tenBackup(t.id);
+      return {html:'Backup run on <b>'+t.name+'</b>. '+t.used.toFixed(1)+' GB written to <code>'+t.bucket+'</code>, '+t.gens+' generations now held, 30 day retention. Nightly still runs at 02:00 MST.',tab:'tenants'};
+    }
+    if(has(/\b(restore|roll back)\b/)){
+      const t=who?TENANTS.filter(x=>x.name===who)[0]:tenFind(TEN_SEL);
+      tenDoRestore(t.id);
+      return {html:'<b>'+t.name+'</b> restored from their own backup in <b>'+t.rto+'</b>. Only that tenant was touched, because only that tenant owns their bucket, their schema and their key.',tab:'tenants'};
+    }
+    if(has(/\b(export|take their data|data out)\b/)){
+      const t=who?TENANTS.filter(x=>x.name===who)[0]:tenFind(TEN_SEL);
+      tenExport(t.id);
+      return {html:'Export queued for <b>'+t.name+'</b>: every record and file they own, signed link valid one hour. A tenant can always leave with their data, which is the thing buyers ask about second.',tab:'tenants'};
+    }
+
+    if(has(/past due|dunning|failed card|not paying/)){
+      const due=TENANTS.filter(t=>t.status==='past_due');
+      return {html:(due.length
+        ? '<b>'+due.map(t=>t.name).join(', ')+'</b> is past due, '+money(tenP(due[0]).price)+' a month, and the dunning ladder is running: email day 0, text day 3, paywall day 7. Nothing is suspended yet.'
+        : 'No tenant is past due right now. Every card is current, so nothing is in dunning.')+' One suspended tenant, Ignite Gym, sits behind the paywall and keeps its data and its nightly backup while it is blocked.',tab:'tenants'};
+    }
+    if(has(/paywall|pay wall|suspend|blocked|locked out/)){
+      return {html:'The paywall is a switch on the tenant, not a delete. Day 0 the card fails and they get an email and a banner, day 3 a text and a card retry, <b>day 7 the paywall goes on</b> and logins are blocked while the database, the bucket and the nightly backup all keep running, day 14 they get an export link and stay archived. Turn it off and they are back in the same data with no restore. You can test it on any row in the Tenants tab.',tab:'tenants'};
+    }
+    if(has(/backup|restore|rpo|rto|retention|recover/)){
+      return {html:'Every tenant has their own nightly backup at 02:00 MST, 30 day retention, point in time to the minute, and their own bucket under their own key. Current state: <b>'+TENANTS.filter(t=>t.restored!=='not yet').length+' of '+TENANTS.length+'</b> tenants have a restore test on record, recovery time 11 to 14 minutes, and the last nightly wrote 13.6 GB across '+TENANTS.length+' tenants with every job green. Suspended tenants keep backing up, because losing the data is not a collections tactic.',tab:'tenants'};
+    }
+    if(has(/isolat|see (each|another)|private from|\bcross.?tenant|leak/)){
+      return {html:'Tenant two cannot see tenant one even if the application code is wrong. Every row carries a tenant id with row level security at the database, each tenant has their own schema, their own storage prefix and their own encryption key, so revoking a key kills one tenant reads and nobody else. That is the difference between a dashboard and a product you can sell.',tab:'tenants'};
+    }
+    if(has(/storage|data space/)){
+      return {html:'<b>'+tenStorage().toFixed(1)+' GB</b> used across '+TENANTS.length+' tenants against <b>'+tenQuota()+' GB</b> allocated. Each tenant is measured and billed on their own bucket, so one gym filling up never looks like another running out. The biggest is ONBASE at 4.2 of 25 GB.',tab:'tenants'};
+    }
+    if(has(/tenant|per gym|per location|platform|mrr/)){
+      return {html:'<b>'+tenLive()+' of '+TENANTS.length+'</b> tenants are live and the platform is billing <b>'+money(tenMRR())+'</b> a month, which is separate from the $6,199 of membership MRR. One is past due in dunning, one is behind the paywall, one is in trial. Each has their own login, their own database schema, their own bucket, their own key and their own nightly backup.',tab:'tenants'};
+    }
   }
 
   /* server and storage */
@@ -1621,7 +1680,7 @@ function askAnswer(raw){
   }
 
   /* white label, other locations, tenants */
-  if(has(/white.?label|other gym|another gym|other location|another location|multi.?tenant|tenant|franchis|sell (it|this)|resell|licen[cs]e it|our own brand|own brand/)){
+  if(has(/white.?label|other gym|another gym|other location|another location|multi.?tenant|franchis|sell (it|this)|resell|licen[cs]e it|our own brand|own brand/)&&!/private from|isolat|backup|storage|paywall|past due/.test(q)){
     return {html:'Yes, and it is the reason the build is worth more than one gym. Every record carries a tenant id with row level security, each location gets its own subdomain and admin login, its own storage prefix and keys, and its own billing with a paywall that suspends on non payment. Your team keeps a platform owner role above all of them with an audit trail. A gym buying it sees <b>their</b> numbers under <b>their</b> brand and never sees another gym, and at the top tier the database is separate per tenant rather than shared rows.',tab:'sources'};
   }
 
@@ -2563,6 +2622,244 @@ function seoSel(i){ SEO_SEL=i; renderSeoMap(); }
 const _geoBase=RENDER.geo, _seoBase=RENDER.seo;
 RENDER.geo=function(){ _geoBase(); renderGeoMap(); };
 RENDER.seo=function(){ _seoBase(); renderSeoMap(); };
+
+</script>
+<script>
+/* ============================================================
+   Tenants — the platform layer. Paywall, private server,
+   private storage and backup, per tenant. Every action here
+   changes the simulation so a buyer can watch it happen.
+   ============================================================ */
+
+const TEN_PLANS={
+  starter:{n:'Starter',price:199,gb:25,seats:1,note:'one location, one admin login'},
+  growth:{n:'Growth',price:399,gb:100,seats:4,note:'multi coach, per team separation'},
+  scale:{n:'Scale',price:799,gb:250,seats:12,note:'league, many teams, export API'}
+};
+
+let TENANTS=[
+ {id:'t_onbase',name:'ONBASE Athlete',loc:'Mesa, AZ',plan:'growth',status:'active',recs:161,users:6,card:'4242',
+  server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_onbase',bucket:'s3://lnl-tenants/t_onbase/',kms:'key/t_onbase/8f21',
+  used:4.2,last:'2 hours ago',gens:14,restored:'Nov 20, 2026',rto:'12 min'},
+ {id:'t_push',name:'Push Performance',loc:'Tempe, AZ',plan:'starter',status:'active',recs:94,users:2,card:'1881',
+  server:'us-west-2 · 1 vCPU · 2 GB',db:'onbase_t_push',bucket:'s3://lnl-tenants/t_push/',kms:'key/t_push/4d77',
+  used:1.8,last:'4 hours ago',gens:11,restored:'Nov 18, 2026',rto:'14 min'},
+ {id:'t_azd',name:'AZ Dingers',loc:'Chandler, AZ',plan:'growth',status:'active',recs:128,users:4,card:'9034',
+  server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_azd',bucket:'s3://lnl-tenants/t_azd/',kms:'key/t_azd/c310',
+  used:3.1,last:'5 hours ago',gens:12,restored:'Nov 21, 2026',rto:'11 min'},
+ {id:'t_eic',name:'Extra Innings Chandler',loc:'Chandler, AZ',plan:'starter',status:'past_due',recs:77,users:2,card:'5510',
+  server:'us-west-2 · 1 vCPU · 2 GB',db:'onbase_t_eic',bucket:'s3://lnl-tenants/t_eic/',kms:'key/t_eic/2b95',
+  used:2.4,last:'6 days ago',gens:9,restored:'Oct 30, 2026',rto:'14 min'},
+ {id:'t_ignite',name:'Ignite Gym',loc:'Gilbert, AZ',plan:'starter',status:'suspended',recs:63,users:1,card:'7788',
+  server:'paused',db:'onbase_t_ignite',bucket:'s3://lnl-tenants/t_ignite/',kms:'key/t_ignite/6a04',
+  used:1.2,last:'12 days ago',gens:7,restored:'Oct 12, 2026',rto:'14 min'},
+ {id:'t_dbat',name:'D-BAT Mesa',loc:'Mesa, AZ',plan:'growth',status:'trial',recs:41,users:3,card:'none',
+  server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_dbat',bucket:'s3://lnl-tenants/t_dbat/',kms:'key/t_dbat/7e18',
+  used:0.9,last:'1 hour ago',gens:4,restored:'not yet',rto:'12 min',trialDays:9}
+];
+let TEN_SEL='t_onbase';
+const tenFind=id=>TENANTS.find(t=>t.id===id)||TENANTS[0];
+const tenP=t=>TEN_PLANS[t.plan]||TEN_PLANS.starter;
+const tenMRR=()=>TENANTS.filter(t=>t.status==='active'||t.status==='past_due').reduce((s,t)=>s+tenP(t).price,0);
+const tenLive=()=>TENANTS.filter(t=>t.status==='active').length;
+const tenPastDue=()=>TENANTS.filter(t=>t.status==='past_due').length;
+const tenStorage=()=>TENANTS.reduce((s,t)=>s+t.used,0);
+const tenQuota=()=>TENANTS.reduce((s,t)=>s+tenP(t).gb,0);
+
+function tenStatusChip(s){
+  return s==='active'?'<span class="chip g">active</span>'
+    :s==='trial'?'<span class="chip b">trial</span>'
+    :s==='past_due'?'<span class="chip a">past due</span>'
+    :'<span class="chip r">paywall on</span>';
+}
+
+function renderTenants(){
+  const box=document.getElementById('v-tenants'); if(!box) return;
+  const t=tenFind(TEN_SEL), p=tenP(t);
+  const pctUsed=Math.round(t.used/p.gb*100);
+
+  box.innerHTML=
+  '<div class="cards">'+
+    kpi('Tenants live',tenLive()+' of '+TENANTS.length,TENANTS.length-tenLive()+' not paying','')+
+    kpi('Platform MRR',money(tenMRR()),'from tenants, not memberships','up')+
+    kpi('Past due',tenPastDue(),tenPastDue()?'dunning running':'all cards current',tenPastDue()?'dn':'up')+
+    kpi('Storage used',tenStorage().toFixed(1)+' GB','of '+tenQuota()+' GB allocated','')+
+    kpi('Backups',TENANTS.filter(x=>x.status!=='suspended').length+' green','per tenant, own bucket','up')+
+    kpi('Restores tested',TENANTS.filter(x=>x.restored!=='not yet').length+' of '+TENANTS.length,'last 30 days','')+
+  '</div>'+
+
+  '<div class="panel"><div class="head"><h2>Tenants</h2><div class="spacer"></div>'+
+    '<span class="chip n">every record carries a tenant id</span>'+
+    '<button class="btn blue sm" onclick="tenAdd()">Add tenant</button></div>'+
+    '<div class="body p0"><table><thead><tr><th>Tenant</th><th>Plan</th><th>Status</th><th>Server</th><th>Storage</th><th>Last backup</th><th></th></tr></thead><tbody>'+
+    TENANTS.map(x=>{const xp=tenP(x);return '<tr'+(x.id===TEN_SEL?' style="background:#FCF8F2"':'')+'>'+
+      '<td><b>'+x.name+'</b><div class="note" style="margin:2px 0 0">'+x.loc+' · '+x.recs+' records</div></td>'+
+      '<td>'+xp.n+'<div class="note" style="margin:2px 0 0">'+money(xp.price)+'/mo</div></td>'+
+      '<td>'+tenStatusChip(x.status)+(x.trialDays?'<div class="note" style="margin:2px 0 0">'+x.trialDays+' days left</div>':'')+'</td>'+
+      '<td style="font-size:11.5px">'+x.server+'</td>'+
+      '<td>'+x.used.toFixed(1)+' / '+xp.gb+' GB<div class="note" style="margin:2px 0 0">'+Math.round(x.used/xp.gb*100)+'% used</div></td>'+
+      '<td style="font-size:11.5px">'+x.last+'<div class="note" style="margin:2px 0 0">'+x.gens+' generations</div></td>'+
+      '<td><button class="btn ghost sm" onclick="tenSelect(\''+x.id+'\')">Open</button></td></tr>'}).join('')+
+    '</tbody></table></div></div>'+
+
+  '<div class="cols"><div>'+
+    '<div class="panel"><div class="head"><h2>Paywall</h2><div class="spacer"></div>'+tenStatusChip(t.status)+'</div>'+
+      '<div class="body">'+
+      '<div style="font-size:12.5px;line-height:1.55">A tenant that stops paying does not lose their data, they lose the door. The database stays, the bucket stays, the backups keep running, and the login shows a paywall until the card clears. That is the difference between a product and a project.</div>'+
+      '<div class="grid2" style="margin-top:11px">'+
+        '<div><div class="mk">Dunning ladder</div><div style="font-size:12px;line-height:1.6;margin-top:4px">'+
+          'Day 0 · card fails, email and in-app banner<br>Day 3 · text to the owner, retry the card<br>Day 7 · <b>paywall on</b>, logins blocked, data intact<br>Day 14 · export link sent, tenant stays archived</div></div>'+
+        '<div><div class="mk">What a blocked tenant sees</div>'+
+          '<div style="margin-top:5px;background:#1F1F1F;border-radius:9px;padding:13px;color:#fff;text-align:center">'+
+            '<div style="font-size:20px">🔒</div>'+
+            '<div style="font-weight:800;margin-top:5px;font-size:13px">Subscription paused</div>'+
+            '<div style="font-size:11.5px;color:#C9C4BC;margin-top:4px;line-height:1.5">Your data is safe. Update the card on file and the dashboard opens again.</div>'+
+            '<div style="margin-top:9px;background:#F56539;border-radius:7px;padding:6px;font-weight:800;font-size:11.5px">Update payment</div>'+
+          '</div></div>'+
+      '</div>'+
+      '<div class="acts" style="margin-top:11px">'+
+        (t.status==='suspended'
+          ? '<button class="btn blue sm" onclick="tenResume(\''+t.id+'\')">Turn the paywall off</button>'
+          : '<button class="btn ghost sm" onclick="tenSuspend(\''+t.id+'\')">Test the paywall on '+t.name+'</button>')+
+        '<button class="btn ghost sm" onclick="tenCard(\''+t.id+'\')">Card on file</button>'+
+      '</div>'+
+      '<div class="note" style="margin-top:9px">Each tenant has its own card, its own invoice and its own suspend switch. Suspending one never touches another.</div>'+
+      '</div></div>'+
+
+    '<div class="panel"><div class="head"><h2>Private server, storage and backup</h2><div class="spacer"></div><span class="chip n">'+t.name+'</span></div>'+
+      '<div class="body">'+
+      '<table><tbody>'+
+        '<tr><th style="width:38%">Compute</th><td>'+t.server+'<div class="note" style="margin:2px 0 0">own container, own process, no shared runtime</div></td></tr>'+
+        '<tr><th>Database</th><td><code>'+t.db+'</code><div class="note" style="margin:2px 0 0">row level security on tenant_id, own schema</div></td></tr>'+
+        '<tr><th>Storage</th><td><code>'+t.bucket+'</code><div class="note" style="margin:2px 0 0">'+t.used.toFixed(1)+' of '+p.gb+' GB · '+pctUsed+'% used</div></td></tr>'+
+        '<tr><th>Encryption key</th><td><code>'+t.kms+'</code><div class="note" style="margin:2px 0 0">per tenant key, revoking it kills their reads only</div></td></tr>'+
+        '<tr><th>Backup</th><td>nightly 02:00 MST · '+t.gens+' generations · 30 day retention<div class="note" style="margin:2px 0 0">last run '+t.last+'</div></td></tr>'+
+        '<tr><th>Restore</th><td>last tested '+t.restored+'<div class="note" style="margin:2px 0 0">recovery time '+t.rto+' · point in time to the minute</div></td></tr>'+
+      '</tbody></table>'+
+      '<div class="acts" style="margin-top:11px">'+
+        '<button class="btn ghost sm" onclick="tenBackup(\''+t.id+'\')">Run a backup now</button>'+
+        '<button class="btn ghost sm" onclick="tenRestore(\''+t.id+'\')">Restore a point in time</button>'+
+        '<button class="btn ghost sm" onclick="tenExport(\''+t.id+'\')">Export everything</button>'+
+      '</div>'+
+      '</div></div>'+
+  '</div><div>'+
+    '<div class="panel"><div class="head"><h2>Capacity per tenant</h2></div><div class="body">'+
+      bars(TENANTS.map(x=>{const xp=tenP(x);return [xp.n+' · '+x.name.split(' ')[0],Math.round(x.used/xp.gb*100),x.used/xp.gb>0.75?'red':'',x.used.toFixed(1)+' GB']}))+
+      '<div class="note">Storage is billed per tenant and shown per tenant, so one gym filling a bucket never shows up as another gym running out of space.</div>'+
+    '</div></div>'+
+    '<div class="panel"><div class="head"><h2>What separates one tenant from another</h2></div><div class="body">'+
+      '<div style="font-size:12.5px;line-height:1.6">'+
+      'Six things, and every one of them is already in the data model: <b>tenant id on every record</b> with row level security, <b>own database schema</b>, <b>own storage prefix</b>, <b>own encryption key</b>, <b>own subdomain and admin login</b>, and <b>own billing with its own paywall</b>. Tenant two cannot see tenant one even if the application code is wrong, because the database refuses the rows before the code runs.'+
+      '</div>'+
+      '<div class="note" style="margin-top:9px">At Scale a tenant can also be handed their own database instance. Same product, same screens, different floor of the building.</div>'+
+    '</div></div>'+
+    '<div class="panel"><div class="head"><h2>Platform owner</h2></div><div class="body">'+
+      '<div style="font-size:12.5px;line-height:1.6">You sit above every tenant: see every location, every invoice, every backup, and every suspend. Every action taken from this screen is written to an audit trail with the time and the user.</div>'+
+      '<div class="acts" style="margin-top:10px"><button class="btn ghost sm" onclick="tenAudit()">View the audit trail</button></div>'+
+    '</div></div>'+
+  '</div></div>';
+}
+
+function tenSelect(id){TEN_SEL=id;renderTenants();toast(tenFind(id).name+' selected')}
+
+function tenSet(id,status){
+  const t=tenFind(id);
+  if(status==='suspended'){
+    t.status='suspended'; t.server='paused'; renderTenants();
+    return 'Paywall on for '+t.name+'. Logins blocked, data intact, backups still running.';
+  }
+  t.status='active'; t.server=(t.plan==='starter'?'us-west-2 · 1 vCPU · 2 GB':'us-west-2 · 2 vCPU · 4 GB');
+  renderTenants();
+  return 'Card cleared. '+t.name+' is back in, same data, no restore needed.';
+}
+function tenSuspend(id){
+  const t=tenFind(id);
+  if(t.status==='suspended'){return tenResume(id)}
+  t.status='suspended'; t.server='paused';
+  renderTenants();
+  toast('Paywall on for '+t.name+'. Logins blocked, data intact, backups still running.');
+}
+
+function tenResume(id){
+  const t=tenFind(id);
+  t.status='active'; t.server=(t.plan==='starter'?'us-west-2 · 1 vCPU · 2 GB':'us-west-2 · 2 vCPU · 4 GB');
+  renderTenants();
+  toast('Card cleared. '+t.name+' is back in, same data, no restore needed.');
+}
+
+function tenCard(id){
+  const t=tenFind(id);
+  openModal('Card on file · '+t.name,
+    '<div class="field"><label>Tenant</label><input value="'+t.name+'" disabled></div>'+
+    '<div class="field"><label>Card</label><input value="'+(t.card==='none'?'No card yet':('Visa ending '+t.card))+'"></div>'+
+    '<div class="field"><label>Billing contact</label><input value="Owner · '+t.loc+'"></div>'+
+    '<div class="note">Each tenant is billed separately, on its own card, on its own date. A failed card suspends that tenant only. Card data never sits in this dashboard, the processor holds it and we keep the token.</div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="closeModal();toast(\'Card saved to the vault for '+t.name+'\')">Save card</button></div>');
+}
+
+function tenBackup(id){
+  const t=tenFind(id);
+  t.last='just now'; t.gens+=1;
+  renderTenants();
+  toast('Backup complete for '+t.name+': '+t.used.toFixed(1)+' GB to '+t.bucket+' ('+t.gens+' generations).');
+}
+
+function tenRestore(id){
+  const t=tenFind(id);
+  openModal('Restore · '+t.name,
+    '<div style="font-size:12.5px;line-height:1.6">Restoring rebuilds this tenant from their own backup. No other tenant is touched, because no other tenant shares their bucket, their schema or their key.</div>'+
+    '<div class="field" style="margin-top:10px"><label>Point in time</label><select><option>Today, 02:00 MST (last nightly)</option><option>Yesterday, 02:00 MST</option><option>Nov 22, 02:00 MST</option></select></div>'+
+    '<div class="note">Recovery time on record is '+t.rto+'. Restore is tested every 30 days, and the date of the last test is on the tenant row.</div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="tenDoRestore(\''+t.id+'\')">Restore now</button></div>');
+}
+function tenDoRestore(id){
+  const t=tenFind(id); closeModal();
+  t.restored='today'; renderTenants();
+  toast(t.name+' restored in '+t.rto+'. 34 minutes of data rolled back, nothing else touched.');
+}
+
+function tenExport(id){
+  const t=tenFind(id);
+  toast('Export queued for '+t.name+'. Signed link, valid one hour, contains every record and file they own.');
+}
+
+function tenAudit(){
+  openModal('Audit trail',
+    '<div style="font-size:12.5px;line-height:1.7">'+
+    '<b>00:38</b> Kelsey T · paywall tested on Ignite Gym<br>'+
+    '<b>00:31</b> Kelsey T · backup run on ONBASE Athlete<br>'+
+    '<b>Nov 25 22:10</b> system · card failed for Extra Innings Chandler, dunning day 0<br>'+
+    '<b>Nov 25 02:00</b> system · nightly backup, 6 tenants, 13.6 GB, all green<br>'+
+    '<b>Nov 20 14:02</b> Kelsey T · restore test on ONBASE Athlete, recovery 12 min<br>'+
+    '<b>Nov 18 09:44</b> system · tenant Push Performance provisioned</div>'+
+    '<div class="note" style="margin-top:9px">Every platform action is written with a time and a user. That is what a buyer asks for when their data is in someone else system.</div>');
+}
+
+function tenAdd(){
+  openModal('Add a tenant',
+    '<div class="field"><label>Gym or organisation</label><input id="ntName" placeholder="e.g. D-BAT Gilbert"></div>'+
+    '<div class="field"><label>Location</label><input id="ntLoc" placeholder="Gilbert, AZ"></div>'+
+    '<div class="field"><label>Plan</label><select id="ntPlan">'+
+      Object.keys(TEN_PLANS).map(k=>'<option value="'+k+'">'+TEN_PLANS[k].n+' · '+money(TEN_PLANS[k].price)+'/mo · '+TEN_PLANS[k].gb+' GB</option>').join('')+
+    '</select></div>'+
+    '<div class="note">Adding a tenant provisions their own database schema, their own storage prefix, their own encryption key, their own admin login and their own nightly backup. They cannot see any other gym, and no other gym can see them.</div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="tenDoAdd()">Provision tenant</button></div>');
+}
+function tenDoAdd(){
+  const n=(document.getElementById('ntName')||{}).value||'New tenant';
+  const l=(document.getElementById('ntLoc')||{}).value||'Mesa, AZ';
+  const p=(document.getElementById('ntPlan')||{}).value||'starter';
+  const id='t_'+Math.random().toString(36).slice(2,7);
+  TENANTS.push({id:id,name:n,loc:l,plan:p,status:'trial',recs:0,users:1,card:'none',
+    server:(p==='starter'?'us-west-2 · 1 vCPU · 2 GB':'us-west-2 · 2 vCPU · 4 GB'),
+    db:'onbase_'+id,bucket:'s3://lnl-tenants/'+id+'/',kms:'key/'+id+'/'+Math.random().toString(16).slice(2,6),
+    used:0,last:'just now',gens:1,restored:'not yet',rto:'12 min',trialDays:14});
+  TEN_SEL=id; closeModal(); renderTenants();
+  toast(n+' provisioned. Own schema, own bucket, own key, own backup. Trial 14 days.');
+}
+
+RENDER.tenants=renderTenants;
+NAV.tenants=['Tenants','Paywall, private server, storage and backup for every gym on the platform'];
 
 </script>
 </body></html>
