@@ -1411,7 +1411,7 @@ function renderServer(){
     kpi('Records held',total.toLocaleString(),d.tables.length+' tables, one location','up'),
     kpi('Storage used',d.storage.used_mb+' MB','of '+(d.storage.quota_mb/1024).toFixed(0)+' GB provisioned'),
     kpi('Space available',((d.storage.available_mb)/1024).toFixed(1)+' GB','nothing to buy for years'),
-    kpi('Skip messages',d.skip.messages,'across '+d.skip.conversations+' conversations','up'),
+    kpi('PlateOps threads',d.skip.conversations,'read live, 0 copied here','up'),
     kpi('Uptime, 30 days',d.server.uptime,'measured at the function'),
     kpi('Attributed revenue',money(d.skip.revenue_attributed),d.skip.booked+' texted bookings','up')
   ].join('');
