@@ -89,11 +89,29 @@ tr:last-child td{border-bottom:0}
 .slot.on{background:var(--orange)}
 .slot.half{background:#F2C3AE}
 .tag{font-size:10.5px;color:var(--muted)}
+
+.inbox{display:grid;grid-template-columns:296px 1fr}
+@media(max-width:900px){.inbox{grid-template-columns:1fr}.inbox #cvList{border-right:0!important;border-bottom:1px solid var(--line);max-height:240px}}
+.thread{display:flex;flex-direction:column;height:556px}
+.thread .msgs{flex:1;overflow:auto;padding:14px 16px;background:var(--cream2);display:flex;flex-direction:column;gap:9px}
+.bub{max-width:76%;padding:9px 12px;border-radius:14px;font-size:12.5px;line-height:1.45;background:#fff;border:1px solid var(--line)}
+.bub.me{align-self:flex-end;background:var(--ink);color:#fff;border-color:var(--ink)}
+.bub.ai{align-self:flex-start;background:#E7EEF9;border-color:#CBD9EE}
+.bub .who{font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;opacity:.6;margin-bottom:3px}
+.trow{padding:10px 12px;border-bottom:1px solid #EDEAE2;cursor:pointer}
+.trow:hover{background:var(--cream2)}
+.trow.on{background:var(--cream)}
+.trow .nm{font-size:12.5px;font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.trow .sn{font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.composer{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:7px;align-items:center;background:#fff}
+.composer input{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 12px;font:inherit;font-size:12.5px}
+.live{display:inline-flex;align-items:center;gap:6px;background:#E4F1E9;color:var(--green);font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:20px}
+.live i{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
 </style></head><body>
 <div class="gate" id="gate"><div class="box">
   <div class="mark" style="margin-bottom:10px">O</div>
   <h2>ONBASE Athlete · growth dashboard</h2>
-  <p>Built from Steve's intake. Waitlist, spend and cost per signup, memberships, revenue and MRR, cage and session utilization, coach load, retention, reviews, plus Jacobo's checkout and lead recovery.</p>
+  <p>Built from Steve's intake. Waitlist, spend and cost per signup, memberships, revenue and MRR, cage and session utilization, coach load, retention, reviews, plus Jacobo's checkout and lead recovery. The Skip tab shows the PlateOps texting layer: every message, reply and booking it drives, written back into this dashboard.</p>
   <div class="field"><label>Access code</label><input id="gateCode" placeholder="Enter code" onkeydown="if(event.key==='Enter')unlock()"></div>
   <button class="btn blue" style="width:100%;justify-content:center" onclick="unlock()">Open dashboard</button>
 </div></div>
@@ -103,6 +121,9 @@ tr:last-child td{border-bottom:0}
     <div class="logo"><div class="mark">O</div><div><b>ONBASE</b><span>growth system</span></div></div>
     <nav class="navi" id="nav">
       <button data-v="overview" class="on"><span class="ic">▦</span><span>Overview</span></button>
+      <button data-v="skip"><span class="ic">⚡</span><span>Skip integration</span></button>
+      <button data-v="convos"><span class="ic">✉</span><span>Conversations</span></button>
+      <button data-v="seqs"><span class="ic">↺</span><span>AI sequences</span></button>
       <button data-v="waitlist"><span class="ic">◎</span><span>Waitlist</span></button>
       <button data-v="spend"><span class="ic">◈</span><span>Spend and CAC</span></button>
       <button data-v="members"><span class="ic">◉</span><span>Memberships</span></button>
@@ -120,6 +141,7 @@ tr:last-child td{border-bottom:0}
     <div class="top">
       <h1 id="ttl">Overview</h1><span class="sub" id="sub">Waitlist, revenue and the opening countdown</span>
       <div class="spacer"></div>
+      <span class="live"><i></i>Skip connected</span>
       <button class="btn sm ghost" onclick="toast('HubSpot sync started, 120 waitlist contacts queued')">Sync HubSpot</button>
       <button class="btn sm ghost" onclick="toast('Shopify sync started, 34 memberships pulled')">Sync Shopify</button>
       <div class="avatar" title="Steve Lundin">SL</div>
@@ -141,6 +163,53 @@ tr:last-child td{border-bottom:0}
             <div class="body"><div class="cards" style="margin:0" id="ovWeek"></div></div></div>
         </div>
       </div>
+    </section>
+
+    <section class="view" id="v-skip">
+      <div class="cards" id="skKpis"></div>
+      <div class="cols">
+        <div>
+          <div class="panel"><div class="head"><h2>Skip by PlateOps</h2><div class="spacer"></div><span class="chip g">connected</span><span class="chip b">two way</span></div>
+            <div class="body" id="skConn"></div></div>
+          <div class="panel"><div class="head"><h2>Texts to bookings to revenue</h2><div class="spacer"></div><span class="chip n">last 30 days</span></div>
+            <div class="body"><div class="bars" id="skFunnel"></div><div class="note">Every booking is attributed to the message that caused it, not to the channel that first found the lead. That is the difference between a texting tool and a revenue system.</div></div></div>
+          <div class="panel"><div class="head"><h2>Sync log</h2><div class="spacer"></div><button class="btn sm blue" onclick="skipSync()">Run sync now</button></div>
+            <div class="body p0"><table><thead><tr><th>When</th><th>Direction</th><th class="num">Records</th><th>Result</th></tr></thead><tbody id="skLog"></tbody></table></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="head"><h2>What we read, what we write</h2></div>
+            <div class="body p0"><table><thead><tr><th>Skip field</th><th>ONBASE field</th><th>Direction</th></tr></thead><tbody id="skMap"></tbody></table></div>
+            <div class="body"><div class="note">Read on the left, write back on the right. The only things ONBASE writes into Skip are tags and outcomes it owns itself.</div></div></div>
+          <div class="panel"><div class="head"><h2>Texting compliance</h2><div class="spacer"></div><span class="chip g">10DLC approved</span></div>
+            <div class="body" id="skComp"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-convos">
+      <div class="cards" id="cvKpis"></div>
+      <div class="panel"><div class="head"><h2>Skip inbox</h2><div class="spacer"></div>
+        <div class="filters" id="cvFilters">
+          <button class="on" onclick="convoFilter('all',this)">All</button>
+          <button onclick="convoFilter('reply',this)">Needs reply</button>
+          <button onclick="convoFilter('booked',this)">Booked</button>
+          <button onclick="convoFilter('paused',this)">Paused</button>
+        </div>
+        <input id="cvSearch" class="search" placeholder="Search name or message" oninput="renderConvoList()">
+      </div>
+        <div class="body p0 inbox">
+          <div id="cvList" style="border-right:1px solid var(--line);max-height:556px;overflow:auto"></div>
+          <div id="cvThread"></div>
+        </div>
+        <div class="body"><div class="note">Skip writes the first message and every follow up. When a member replies with something the AI will not handle, the thread is flagged and Jacobo takes it. Anything you type here sends through Skip from the ONBASE number, so the whole conversation stays in one place.</div></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-seqs">
+      <div class="cards" id="sqKpis"></div>
+      <div class="panel"><div class="head"><h2>AI follow-up sequences, running in Skip</h2><div class="spacer"></div><span class="chip n">six sequences</span></div>
+        <div class="body p0"><table><thead><tr><th>Sequence</th><th>Trigger</th><th class="num">Enrolled</th><th class="num">Replied</th><th class="num">Booked</th><th class="num">Revenue</th><th>Status</th><th></th></tr></thead><tbody id="sqBody"></tbody></table></div>
+        <div class="body"><div class="note">Every message in these sequences is written and sent by Skip. Pausing one here pauses it in Skip, which is why the switch lives on this screen and not buried in the other app. Replied counts conversations, not messages.</div></div></div>
     </section>
 
     <section class="view" id="v-waitlist">
@@ -291,6 +360,7 @@ tr:last-child td{border-bottom:0}
 
 <div class="modal" id="modal"><div class="sheet"><div class="head"><h2 id="mTitle">Title</h2><div class="spacer"></div><button class="btn ghost sm" onclick="closeModal()">Close</button></div><div class="body" id="mBody"></div></div></div>
 <div class="toast" id="toast"></div>
+
 <script>
 const CODE='onbase2026';
 const money=n=>'$'+Math.round(n).toLocaleString('en-US');
@@ -515,6 +585,9 @@ function quickAction(i){
   eval(map[i]);
   toast(['Cancel window lives under Cages and sessions','ESA paperwork lives under Retention','Empty hours are on the utilization chart','Recovery is Jacobo\'s list'][i]);
 }
+
+</script>
+<script>
 /* ---------- waitlist ---------- */
 let WL_FILTER='all';
 function wlFilter(f,el){WL_FILTER=f;document.querySelectorAll('#wlFilters button').forEach(b=>b.classList.toggle('on',b===el));renderWaitlist();toast('Showing '+(f==='all'?'all contacts':f))}
@@ -674,6 +747,9 @@ function exportRevenue(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='onbase-revenue.csv';a.click();
   toast('Revenue model exported');
 }
+
+</script>
+<script>
 /* ---------- schedule ---------- */
 function renderSchedule(){
   document.getElementById('scKpis').innerHTML=[
@@ -865,4 +941,286 @@ function unlock(){
   else toast('That code is not right');
 }
 document.getElementById('gateCode').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
-</script></body></html>
+
+</script>
+<script>
+/* ============================================================
+   Skip by PlateOps — simulated two-way integration
+   Everything below is demo data shaped exactly like the live
+   payloads, so the screen behaves the way the connected version will.
+   ============================================================ */
+
+const SKIP_ACCOUNT={
+  product:'Skip by PlateOps', env:'Production', zone:'textskip.com',
+  number:'(480) 555-0142', brand:'ONBASE ATHLETE LLC', campaign:'ONBASE appointment follow-up',
+  key:'sk_live_••••••••••••4f21', webhook:'https://onbaseathlete.com/api/skip/hook',
+  lastSync:'2 minutes ago', uptime:'99.98%', latency:'184 ms'
+};
+
+const SKIP_KPIS=[
+  ['Contacts in sync','187','120 waitlist, 34 members, 33 leads'],
+  ['Messages, 30 days','1,284','386 came back in'],
+  ['Reply rate','30%','per message sent','up'],
+  ['Bookings from texts','67','attributed to the message'],
+  ['Revenue attributed','$5,901','from 67 texted bookings','up'],
+  ['Opt-out rate','2.2%','9 of 412, industry is 3 to 5%']
+];
+
+const SKIP_FUNNEL=[
+  ['Texts sent',100,'',1284],
+  ['Replies',30,'b',386],
+  ['Booked',5.2,'g',67],
+  ['Revenue',100,'a','$5,901']
+];
+
+const SKIP_LOG=[
+  ['2 min ago','Inbound','18 messages','Imported, 6 new conversations'],
+  ['2 min ago','Outbound','6 tags','Written to Skip, booked and not interested'],
+  ['14 min ago','Inbound','4 bookings','Matched to member records'],
+  ['1 hr ago','Inbound','187 contacts','Full sync, no changes'],
+  ['3 hr ago','Outbound','12 outcomes','Written to Skip sequence audience']
+];
+
+const SKIP_MAP=[
+  ['contact.phone','Member mobile','Read'],
+  ['contact.tags','ONBASE segment','Read and write'],
+  ['conversation.messages','Conversation log','Read'],
+  ['booking.completed_at','Session attended','Read'],
+  ['sequence.status','Follow-up state','Read'],
+  ['outcome (booked, not interested)','Skip tag','Write'],
+  ['member stage','Skip audience','Write']
+];
+
+const SKIP_COMPLIANCE=[
+  ['Brand registration','ONBASE ATHLETE LLC, EIN verified','Approved'],
+  ['Campaign','ONBASE appointment follow-up, mixed use case','Approved'],
+  ['Throughput','15 messages a second','Live'],
+  ['Quiet hours','9pm to 8am, enforced in Skip','On'],
+  ['Opt-outs','STOP honored in under a second','9 of 412'],
+  ['Consent source','Signup form and waitlist form','All 187 on file']
+];
+
+/* ---------- conversations ---------- */
+let CONVOS=[
+ {id:'c1',name:'Jordan Alvarez',role:'Parent of Mason, 13u',seq:'Missed visit win-back',status:'booked',when:'9:42am',
+  msgs:[['ai','Hey Jordan, it is Skip from ONBASE. Mason has not been in for 11 days. Want me to hold Thursday 5pm with Coach Reyes?'],
+        ['them','Yeah that works'],
+        ['ai','Booked. Thursday 5:00pm, cage 3, Coach Reyes. Reply C to cancel.'],
+        ['them','Perfect thanks']]},
+ {id:'c2',name:'Mia Patel',role:'Athlete, 16u',seq:'Open slot offer',status:'reply',when:'9:31am',
+  msgs:[['ai','Hi Mia, Coach Diaz has an open spot in the 6am strength group. Want it?'],
+        ['them','what time does it end']]},
+ {id:'c3',name:'Chase Bennett',role:'Parent of Jaxon, 12u',seq:'Abandoned checkout',status:'booked',when:'9:12am',
+  msgs:[['ai','Chase, the Hitting plus Strength membership is still in your cart at $229. Want the link again?'],
+        ['them','does that include cage time'],
+        ['ai','It does. Four hours of cage time a month plus two strength sessions a week. Here is the link: onbaseathlete.com/cart/229'],
+        ['them','ok paying now'],
+        ['ai','Got it. You will get the receipt by email in a minute.']]},
+ {id:'c4',name:'Emma Flores',role:'Parent of Liam, 10u',seq:'No-show recovery',status:'booked',when:'8:58am',
+  msgs:[['ai','Emma, we missed Liam at 4pm today. There is no charge. Want Friday 4pm instead?'],
+        ['them','yes please'],
+        ['ai','Moved to Friday 4:00pm with the same coach.']]},
+ {id:'c5',name:'Diego Morales',role:'Athlete, 14u',seq:'Lapsed reactivation',status:'paused',when:'8:40am',
+  msgs:[['them','STOP'],
+        ['ai','You are unsubscribed and will not get texts from ONBASE. Reply START to turn them back on.']]},
+ {id:'c6',name:'Olivia Reyes',role:'Parent of Sofia, 11u',seq:'ESA paperwork reminder',status:'reply',when:'8:22am',
+  msgs:[['ai','Olivia, Sofia ESA paperwork is still missing the diagnosis date. Once it is in we can invoice the state directly.'],
+        ['them','sending it tonight']]},
+ {id:'c7',name:'Hunter Keller',role:'Parent of Jaxon, 9u',seq:'Trial to membership',status:'booked',when:'8:05am',
+  msgs:[['ai','Hunter, Jaxon third session is Thursday. Members get cage time included. Want me to switch him to the $149 plan?'],
+        ['them','what is the difference'],
+        ['ai','Trial is sessions only. The $149 plan adds four hours of cage time a month and priority booking on 3 to 7pm.'],
+        ['them','let us do it'],
+        ['ai','Done. You are on Youth Hitting, first billing Thursday.']]},
+ {id:'c8',name:'Nora Castillo',role:'Parent of Grace, 12u',seq:'Open slot offer',status:'booked',when:'Yesterday',
+  msgs:[['ai','Nora, Grace has an open evaluation slot Saturday 10am.'],
+        ['them','booked']]},
+ {id:'c9',name:'Eli Whitaker',role:'Athlete, 15u',seq:'None',status:'reply',when:'Yesterday',
+  msgs:[['them','can I switch to the strength only plan']]},
+ {id:'c10',name:'Ava Jensen',role:'Parent of Ella, 10u',seq:'Session reminder',status:'booked',when:'Yesterday',
+  msgs:[['ai','Ava, reminder that Ella session is tomorrow at 5pm.'],
+        ['them','thanks!']]},
+ {id:'c11',name:'Landon Ortiz',role:'Parent of Nolan, 13u',seq:'Clinic offer',status:'reply',when:'Yesterday',
+  msgs:[['ai','Landon, three spots left in the winter hitting clinic.'],
+        ['them','how much']]},
+ {id:'c12',name:'Isla Sandoval',role:'Athlete, 17u',seq:'Open gym offer',status:'booked',when:'2 days ago',
+  msgs:[['them','is there open gym tonight'],
+        ['ai','Yes, 7 to 9pm, $15 drop in. Want me to save you a spot?'],
+        ['them','yes']]},
+ {id:'c13',name:'Mason Baker',role:'Parent of Quinn, 11u',seq:'Lapsed reactivation',status:'reply',when:'2 days ago',
+  msgs:[['ai','Mason, we have not seen Quinn in three weeks.'],
+        ['them','we moved to Chandler, but keep me on the list']]},
+ {id:'c14',name:'Tessa Uribe',role:'Parent of Mateo, 12u',seq:'ESA paperwork reminder',status:'booked',when:'2 days ago',
+  msgs:[['ai','Tessa, the ESA invoice is ready and the state pays directly. Want it emailed?'],
+        ['them','yes please']]}
+];
+
+const SEQS=[
+ {id:'s1',n:'Missed visit win-back',trig:'No booking in 14 days',enr:84,rep:39,bk:22,rev:1738,on:true,
+  steps:[['Day 14','Short check in, offer two specific times',84,41,22],
+         ['Day 17','Coach name drop, one open slot',52,26,14],
+         ['Day 21','Last call before we pause the plan',31,12,6]]},
+ {id:'s2',n:'No-show recovery',trig:'No-show logged at the front desk',enr:41,rep:24,bk:19,rev:1254,on:true,
+  steps:[['Same day','No charge, offer a swap time',41,28,19],
+         ['Day 2','Confirm the new time',19,11,8]]},
+ {id:'s3',n:'Abandoned checkout',trig:'Cart abandoned in Shopify for 1 hour',enr:33,rep:14,bk:9,rev:1431,on:true,
+  steps:[['1 hour','Name the plan and the price, resend the link',33,16,9],
+         ['Day 1','Answer the objection we hear most',18,9,5],
+         ['Day 3','One time $20 off first month',11,4,2]]},
+ {id:'s4',n:'Trial to membership',trig:'7 days after the first session',enr:26,rep:18,bk:12,rev:1320,on:true,
+  steps:[['Day 7','Show what membership adds beyond sessions',26,18,12],
+         ['Day 10','Ask for the switch directly',14,8,6]]},
+ {id:'s5',n:'ESA paperwork reminder',trig:'ESA family with documents outstanding',enr:12,rep:8,bk:3,rev:0,on:true,
+  steps:[['Day 1','Name the missing document',12,8,3],
+         ['Day 4','Offer to fill it in with them',7,4,2]]},
+ {id:'s6',n:'Lapsed member reactivation',trig:'30 days with no session',enr:19,rep:6,bk:2,rev:158,on:false,
+  steps:[['Day 30','We have not seen you, here is what changed',19,6,2],
+         ['Day 37','One free session to come back',12,3,1]]}
+];
+
+const SKIP_TOTALS={booked:67,rev:5901,sent:1284,reply:386,contacts:187};
+const C_STATUS={reply:['needs reply','a'],booked:['booked','g'],paused:['paused','']};
+
+/* ---------- skip tab ---------- */
+function renderSkip(){
+  document.getElementById('skKpis').innerHTML=SKIP_KPIS.map(k=>kpi(k[0],k[1],k[2],k[3])).join('');
+  document.getElementById('skConn').innerHTML='<div class="grid2">'+
+    [['Product',SKIP_ACCOUNT.product],['Environment',SKIP_ACCOUNT.env],['Sending number',SKIP_ACCOUNT.number],
+     ['Brand and campaign',SKIP_ACCOUNT.brand],['API key',SKIP_ACCOUNT.key],['Webhook',SKIP_ACCOUNT.webhook],
+     ['Last sync',SKIP_ACCOUNT.lastSync],['Uptime, 30 days',SKIP_ACCOUNT.uptime],['Median latency',SKIP_ACCOUNT.latency]]
+    .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700;word-break:break-word">'+r[1]+'</div></div>').join('')+
+    '</div><div class="note">Two way. We read contacts, conversations, bookings and sequence state, and we write back only the tags and outcomes we own. Nothing in Skip is overwritten.</div>';
+  document.getElementById('skFunnel').innerHTML=bars(SKIP_FUNNEL);
+  document.getElementById('skLog').innerHTML=SKIP_LOG.map(r=>'<tr><td>'+r[0]+'</td><td><span class="chip '+(r[1]==='Inbound'?'b':'g')+'">'+r[1]+'</span></td><td class="num">'+r[2]+'</td><td class="tag">'+r[3]+'</td></tr>').join('');
+  document.getElementById('skMap').innerHTML=SKIP_MAP.map(r=>'<tr><td class="mono">'+r[0]+'</td><td>'+r[1]+'</td><td><span class="chip '+(r[2].indexOf('Write')===0?'g':'')+'">'+r[2]+'</span></td></tr>').join('');
+  document.getElementById('skComp').innerHTML=SKIP_COMPLIANCE.map(r=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #EDEAE2"><div style="flex:1"><b style="font-size:12px">'+r[0]+'</b><div class="tag">'+r[1]+'</div></div><div><span class="chip '+(r[2]==='9 of 412'?'':'g')+'">'+r[2]+'</span></div></div>').join('')+
+    '<div class="note">Skip handles registration, quiet hours and STOP for every number it sends from, which is the part gyms get wrong on their own.</div>';
+}
+function skipSync(){
+  const b=document.getElementById('skLog');
+  b.insertAdjacentHTML('afterbegin','<tr><td>just now</td><td><span class="chip b">Inbound</span></td><td class="num">7 messages</td><td class="tag">Imported, 2 new conversations</td></tr>');
+  toast('Skip synced. 7 new messages, 2 conversations added to the inbox');
+}
+
+/* ---------- conversations ---------- */
+let CV_FILTER='all', CV_OPEN='c1';
+function convoFilter(f,btn){CV_FILTER=f;document.querySelectorAll('#cvFilters button').forEach(b=>b.classList.toggle('on',b===btn));renderConvoList()}
+function cvMatches(c){
+  if(CV_FILTER==='reply'&&c.status!=='reply')return false;
+  if(CV_FILTER==='booked'&&c.status!=='booked')return false;
+  if(CV_FILTER==='paused'&&c.status!=='paused')return false;
+  const q=(document.getElementById('cvSearch')||{}).value||'';
+  if(!q)return true;
+  const hay=(c.name+' '+c.role+' '+c.msgs.map(m=>m[1]).join(' ')).toLowerCase();
+  return hay.indexOf(q.toLowerCase())>=0;
+}
+function renderConvoList(){
+  const kb=document.getElementById('cvKpis');
+  if(kb){
+    const need=CONVOS.filter(c=>c.status==='reply').length;
+    kb.innerHTML=[
+      kpi('Threads',CONVOS.length,'every Skip conversation'),
+      kpi('Needs a reply',need,'AI handed these back','dn'),
+      kpi('Booked',CONVOS.filter(c=>c.status==='booked').length,'from a text','up'),
+      kpi('Handled by AI',Math.round((1-need/CONVOS.length)*100)+'%','no human touched it','up')
+    ].join('');
+  }
+  const rows=CONVOS.filter(cvMatches);
+  document.getElementById('cvList').innerHTML=rows.length?rows.map(c=>{
+    const st=C_STATUS[c.status]||['',''];
+    return '<div class="trow '+(c.id===CV_OPEN?'on':'')+'" onclick="openConvo(\''+c.id+'\')">'+
+      '<div class="nm">'+c.name+' <span class="chip '+st[1]+'">'+st[0]+'</span></div>'+
+      '<div class="sn">'+c.msgs[c.msgs.length-1][1].slice(0,58)+'</div>'+
+      '<div class="sn" style="opacity:.7">'+c.seq+' · '+c.when+'</div></div>';
+  }).join(''):'<div style="padding:18px;color:var(--muted);font-size:12px">Nothing in this filter.</div>';
+  renderThread();
+}
+function renderThread(){
+  const c=CONVOS.find(x=>x.id===CV_OPEN)||CONVOS[0];
+  const st=C_STATUS[c.status]||['',''];
+  document.getElementById('cvThread').innerHTML=
+   '<div class="thread"><div style="padding:11px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+     '<div><b style="font-size:13px">'+c.name+'</b><div class="tag">'+c.role+' · '+c.seq+'</div></div><div class="spacer"></div>'+
+     '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
+     '<button class="btn sm" onclick="convoAction(\'booked\')">Mark booked</button>'+
+     '<button class="btn sm" onclick="convoAction(\'assign\')">Assign Jacobo</button>'+
+     '<button class="btn sm" onclick="convoAction(\'pause\')">Pause sequence</button>'+
+   '</div>'+
+   '<div class="msgs" id="cvMsgs">'+c.msgs.map(m=>
+     '<div class="bub '+(m[0]==='them'?'':(m[0]==='ai'?'ai':'me'))+'">'+
+     '<div class="who">'+(m[0]==='them'?'Member':(m[0]==='ai'?'Skip, AI':'Steve'))+'</div>'+
+     m[1]+'</div>').join('')+'</div>'+
+   '<div class="composer"><input id="cvInput" placeholder="Reply as Steve" onkeydown="if(event.key===\'Enter\')convoSend()">'+
+     '<button class="btn blue sm" onclick="convoSend()">Send</button></div></div>';
+  const box=document.getElementById('cvMsgs'); if(box)box.scrollTop=box.scrollHeight;
+}
+function openConvo(id){CV_OPEN=id;renderConvoList()}
+function convoSend(){
+  const el=document.getElementById('cvInput'); const t=(el.value||'').trim();
+  if(!t){toast('Type a message first');return}
+  const c=CONVOS.find(x=>x.id===CV_OPEN); c.msgs.push(['me',t]); el.value='';
+  renderThread(); toast('Sent through Skip to '+c.name);
+}
+function convoAction(a){
+  const c=CONVOS.find(x=>x.id===CV_OPEN);
+  if(a==='booked'){c.status='booked';c.msgs.push(['me','Booked for Thursday 5pm, cage 3.']);toast('Marked booked and written back to Skip')}
+  if(a==='assign'){toast('Assigned to Jacobo, he gets a Skip notification')}
+  if(a==='pause'){c.status='paused';toast('Sequence paused for '+c.name)}
+  renderConvoList();
+}
+
+/* ---------- sequences ---------- */
+function renderSeqs(){
+  const on=SEQS.filter(s=>s.on);
+  document.getElementById('sqKpis').innerHTML=[
+    kpi('Sequences running',on.length+' of '+SEQS.length,'AI writes and sends every message','up'),
+    kpi('Enrolled, 30 days',SEQS.reduce((a,s)=>a+s.enr,0),'across all sequences'),
+    kpi('Booked',SEQS.reduce((a,s)=>a+s.bk,0),'conversations that turned into a booking','up'),
+    kpi('Revenue attributed',money(SEQS.reduce((a,s)=>a+s.rev,0)),'from texted bookings','up')
+  ].join('');
+  document.getElementById('sqBody').innerHTML=SEQS.map(s=>
+    '<tr><td><b>'+s.n+'</b></td><td class="tag">'+s.trig+'</td><td class="num">'+s.enr+'</td><td class="num">'+s.rep+'</td>'+
+    '<td class="num">'+s.bk+'</td><td class="num">'+(s.rev?money(s.rev):'state funds')+'</td>'+
+    '<td><span class="chip '+(s.on?'g':'')+'">'+(s.on?'running':'paused')+'</span></td>'+
+    '<td style="white-space:nowrap"><button class="btn sm" onclick="openSeq(\''+s.id+'\')">Steps</button> '+
+    '<button class="btn sm" onclick="seqToggle(\''+s.id+'\')">'+(s.on?'Pause':'Resume')+'</button></td></tr>').join('');
+}
+function seqToggle(id){
+  const s=SEQS.find(x=>x.id===id); s.on=!s.on;
+  renderSeqs(); toast(s.n+' '+(s.on?'resumed':'paused')+' in Skip');
+}
+function openSeq(id){
+  const s=SEQS.find(x=>x.id===id);
+  openModal(s.n,
+    '<div class="grid2" style="margin-bottom:12px">'+
+      '<div class="kpi"><div class="k">Trigger</div><div class="v" style="font-size:12px">'+s.trig+'</div></div>'+
+      '<div class="kpi"><div class="k">Status</div><div class="v" style="font-size:12px">'+(s.on?'Running in Skip':'Paused in Skip')+'</div></div>'+
+    '</div>'+
+    '<table><thead><tr><th>Step</th><th>What Skip sends</th><th class="num">Sent</th><th class="num">Replied</th><th class="num">Booked</th></tr></thead><tbody>'+
+    s.steps.map(st=>'<tr><td><b>'+st[0]+'</b></td><td>'+st[1]+'</td><td class="num">'+st[2]+'</td><td class="num">'+st[3]+'</td><td class="num">'+st[4]+'</td></tr>').join('')+
+    '</tbody></table>'+
+    '<div class="note">Each step waits for the previous one to go quiet before it sends, and any reply stops the ladder. That is why the booked number is real and not a message count.</div>'+
+    '<div style="margin-top:12px"><button class="btn blue" onclick="seqToggle(\''+s.id+'\');closeModal()">'+(s.on?'Pause this sequence':'Resume this sequence')+'</button></div>');
+}
+
+/* ---------- wire into the dashboard ---------- */
+NAV.skip=['Skip integration','PlateOps is sending the texts. This is what comes back'];
+NAV.convos=['Conversations','Every Skip thread, with the AI reply and the handoff'];
+NAV.seqs=['AI sequences','The follow-ups running on their own, and what they return'];
+RENDER.skip=renderSkip; RENDER.convos=renderConvoList; RENDER.seqs=renderSeqs;
+
+const _ovBase=RENDER.overview;
+RENDER.overview=function(){
+  _ovBase();
+  const box=document.getElementById('ovKpis');
+  if(box&&box.querySelectorAll('.card').length<7){
+    box.insertAdjacentHTML('beforeend',kpi('Skip attributed',money(SKIP_TOTALS.rev),SKIP_TOTALS.booked+' texted bookings','up'));
+  }
+  const pace=document.getElementById('ovPaceNote');
+  if(pace&&pace.innerHTML.indexOf('Skip')<0){
+    pace.innerHTML+=' <b>'+SKIP_TOTALS.booked+' of those signups came from a Skip text</b>, worth '+money(SKIP_TOTALS.rev)+' in booked revenue.';
+  }
+};
+
+</script>
+</body></html>
