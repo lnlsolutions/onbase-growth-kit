@@ -163,8 +163,6 @@ tbody tr.sel{background:#FBF3EA}
       <button data-v="gtmplan"><span class="ic">◎</span><span>GTM plan</span></button>
       <button data-v="skip"><span class="ic">⚡</span><span>Skip integration</span></button>
       <button data-v="server"><span class="ic">▤</span><span>Server</span></button>
-      <button data-v="convos"><span class="ic">✉</span><span>Conversations</span></button>
-      <button data-v="seqs"><span class="ic">↺</span><span>AI sequences</span></button>
       <button data-v="geo"><span class="ic">◈</span><span>Geofencing</span></button>
       <button data-v="seo"><span class="ic">⌕</span><span>SEO tracking</span></button>
       <button data-v="gtm"><span class="ic">⚙</span><span>GTM deployment</span></button>
@@ -269,6 +267,9 @@ tbody tr.sel{background:#FBF3EA}
             <div class="body" id="skConn"></div></div>
           <div class="panel"><div class="head"><h2>Texts to bookings to revenue</h2><div class="spacer"></div><span class="chip n">last 30 days</span></div>
             <div class="body"><div class="bars" id="skFunnel"></div><div class="note">Every booking is attributed to the message that caused it, not to the channel that first found the lead. That is the difference between a texting tool and a revenue system.</div></div></div>
+          <div class="panel"><div class="head"><h2>What comes back from the inbox</h2><div class="spacer"></div><span class="chip n">read live</span>
+            <button class="btn sm blue" onclick="skipOpen()">Open PlateOps</button></div>
+            <div class="body" id="skBack"></div></div>
           <div class="panel"><div class="head"><h2>Sync log</h2><div class="spacer"></div><button class="btn sm blue" onclick="skipSync()">Run sync now</button></div>
             <div class="body p0"><table><thead><tr><th>When</th><th>Direction</th><th class="num">Records</th><th>Result</th></tr></thead><tbody id="skLog"></tbody></table></div></div>
         </div>
@@ -280,32 +281,6 @@ tbody tr.sel{background:#FBF3EA}
             <div class="body" id="skComp"></div></div>
         </div>
       </div>
-    </section>
-
-    <section class="view" id="v-convos">
-      <div class="cards" id="cvKpis"></div>
-      <div class="panel"><div class="head"><h2>Skip inbox</h2><div class="spacer"></div>
-        <div class="filters" id="cvFilters">
-          <button class="on" onclick="convoFilter('all',this)">All</button>
-          <button onclick="convoFilter('reply',this)">Needs reply</button>
-          <button onclick="convoFilter('booked',this)">Booked</button>
-          <button onclick="convoFilter('paused',this)">Paused</button>
-        </div>
-        <input id="cvSearch" class="search" placeholder="Search name or message" oninput="renderConvoList()">
-      </div>
-        <div class="body p0 inbox">
-          <div id="cvList" style="border-right:1px solid var(--line);max-height:556px;overflow:auto"></div>
-          <div id="cvThread"></div>
-        </div>
-        <div class="body"><div class="note">Read live from PlateOps, which owns the threads, the replies, the opt-outs and the bookings. This screen shows the state of every conversation and the one line that decides the next move. Nothing is copied here, so nothing can drift.</div></div>
-      </div>
-    </section>
-
-    <section class="view" id="v-seqs">
-      <div class="cards" id="sqKpis"></div>
-      <div class="panel"><div class="head"><h2>AI follow-up sequences, running in Skip</h2><div class="spacer"></div><span class="chip n">six sequences</span></div>
-        <div class="body p0"><table><thead><tr><th>Sequence</th><th>Trigger</th><th class="num">Enrolled</th><th class="num">Replied</th><th class="num">Booked</th><th class="num">Revenue</th><th>Status</th><th></th></tr></thead><tbody id="sqBody"></tbody></table></div>
-        <div class="body"><div class="note">The steps, the wording and the send timing live in PlateOps, which is also what stops a sequence when someone replies. What comes back here is the return on each one: enrolled, replied, booked and revenue. Replied counts conversations, not messages.</div></div></div>
     </section>
 
     <section class="view" id="v-geo">
@@ -1195,129 +1170,6 @@ const SKIP_COMPLIANCE=[
 
 /* Live payload from PlateOps. Nothing in this array is a second database:
    it is the response we render, refreshed on load. */
-let CONVOS=[
- {id:'c1',name:'Jordan Alvarez',role:'Parent of Mason, 13u',seq:'Missed visit win-back',status:'booked',when:'9:42am',ref:'PO-10482',dir:'them',last:'Perfect thanks'},
- {id:'c2',name:'Mia Patel',role:'Athlete, 16u',seq:'Open slot offer',status:'reply',when:'9:31am',ref:'PO-10479',dir:'them',last:'what time does it end'},
- {id:'c3',name:'Chase Bennett',role:'Parent of Jaxon, 12u',seq:'Abandoned checkout',status:'booked',when:'9:12am',ref:'PO-10471',dir:'ai',last:'Got it. You will get the receipt by email in a minute.'},
- {id:'c4',name:'Emma Flores',role:'Parent of Liam, 10u',seq:'No-show recovery',status:'booked',when:'8:58am',ref:'PO-10466',dir:'ai',last:'Moved to Friday 4:00pm with the same coach.'},
- {id:'c5',name:'Diego Morales',role:'Athlete, 14u',seq:'Lapsed reactivation',status:'paused',when:'8:40am',ref:'PO-10461',dir:'ai',last:'You are unsubscribed and will not get texts from ONBASE. Reply START to turn them back on.'},
- {id:'c6',name:'Olivia Reyes',role:'Parent of Sofia, 11u',seq:'ESA paperwork reminder',status:'reply',when:'8:22am',ref:'PO-10455',dir:'them',last:'sending it tonight'},
- {id:'c7',name:'Hunter Keller',role:'Parent of Jaxon, 9u',seq:'Trial to membership',status:'booked',when:'8:05am',ref:'PO-10450',dir:'ai',last:'Done. You are on Youth Hitting, first billing Thursday.'},
- {id:'c8',name:'Nora Castillo',role:'Parent of Grace, 12u',seq:'Open slot offer',status:'booked',when:'Yesterday',ref:'PO-10444',dir:'them',last:'booked'},
- {id:'c9',name:'Eli Whitaker',role:'Athlete, 15u',seq:'None',status:'reply',when:'Yesterday',ref:'PO-10439',dir:'them',last:'can I switch to the strength only plan'},
- {id:'c10',name:'Ava Jensen',role:'Parent of Ella, 10u',seq:'Session reminder',status:'booked',when:'Yesterday',ref:'PO-10431',dir:'them',last:'thanks!'},
- {id:'c11',name:'Landon Ortiz',role:'Parent of Nolan, 13u',seq:'Clinic offer',status:'reply',when:'Yesterday',ref:'PO-10428',dir:'them',last:'how much'},
- {id:'c12',name:'Isla Sandoval',role:'Athlete, 17u',seq:'Open gym offer',status:'booked',when:'2 days ago',ref:'PO-10422',dir:'them',last:'yes'},
- {id:'c13',name:'Mason Baker',role:'Parent of Quinn, 11u',seq:'Lapsed reactivation',status:'reply',when:'2 days ago',ref:'PO-10417',dir:'them',last:'we moved to Chandler, but keep me on the list'},
- {id:'c14',name:'Tessa Uribe',role:'Parent of Mateo, 12u',seq:'ESA paperwork reminder',status:'booked',when:'2 days ago',ref:'PO-10409',dir:'them',last:'yes please'}
-];
-
-const C_STATUS={reply:['needs reply','a'],booked:['booked','g'],paused:['paused','']};
-const SEQS=[
- {id:'s1',n:'Missed visit win-back',trig:'No booking in 14 days',enr:84,rep:39,bk:22,rev:1738,on:true},
- {id:'s2',n:'No-show recovery',trig:'No-show logged at the front desk',enr:41,rep:24,bk:19,rev:1254,on:true},
- {id:'s3',n:'Abandoned checkout',trig:'Cart abandoned in Shopify for 1 hour',enr:33,rep:14,bk:9,rev:1431,on:true},
- {id:'s4',n:'Trial to membership',trig:'7 days after the first session',enr:26,rep:18,bk:12,rev:1320,on:true},
- {id:'s5',n:'ESA paperwork reminder',trig:'ESA family with documents outstanding',enr:12,rep:8,bk:3,rev:0,on:true},
- {id:'s6',n:'Lapsed member reactivation',trig:'30 days with no session',enr:19,rep:6,bk:2,rev:158,on:false}
-];
-
-/* ---------- conversations ----------
-   PlateOps owns the inbox: threads, message bodies, replies, opt-outs and
-   bookings. Nothing here is stored twice. This tab reads the live payload
-   and shows the one line a decision needs, with the thread itself left in
-   PlateOps where it belongs. */
-let CV_FILTER='all', CV_OPEN='c1';
-function convoFilter(f,btn){CV_FILTER=f;document.querySelectorAll('#cvFilters button').forEach(b=>b.classList.toggle('on',b===btn));renderConvoList()}
-function cvMatches(c){
-  if(CV_FILTER==='reply'&&c.status!=='reply')return false;
-  if(CV_FILTER==='booked'&&c.status!=='booked')return false;
-  if(CV_FILTER==='paused'&&c.status!=='paused')return false;
-  const q=(document.getElementById('cvSearch')||{}).value||'';
-  if(!q)return true;
-  return (c.name+' '+c.role+' '+c.seq+' '+c.last).toLowerCase().indexOf(q.toLowerCase())>=0;
-}
-function renderConvoList(){
-  const kb=document.getElementById('cvKpis');
-  if(kb){
-    const need=CONVOS.filter(c=>c.status==='reply').length;
-    kb.innerHTML=[
-      kpi('Threads in PlateOps',CONVOS.length,'read live, nothing stored here'),
-      kpi('Needs a reply',need,'AI handed these back','dn'),
-      kpi('Booked',CONVOS.filter(c=>c.status==='booked').length,'from a text','up'),
-      kpi('Handled by AI',Math.round((1-need/CONVOS.length)*100)+'%','no human touched it','up')
-    ].join('');
-  }
-  const rows=CONVOS.filter(cvMatches);
-  document.getElementById('cvList').innerHTML=rows.length?rows.map(c=>{
-    const st=C_STATUS[c.status]||['',''];
-    return '<div class="trow '+(c.id===CV_OPEN?'on':'')+'" onclick="openConvo(\''+c.id+'\')">'+
-      '<div class="nm">'+c.name+' <span class="chip '+st[1]+'">'+st[0]+'</span></div>'+
-      '<div class="sn">'+c.last.slice(0,58)+'</div>'+
-      '<div class="sn" style="opacity:.7">'+c.seq+' · '+c.when+'</div></div>';
-  }).join(''):'<div style="padding:18px;color:var(--muted);font-size:12px">Nothing in this filter.</div>';
-  renderThread();
-}
-function renderThread(){
-  const c=CONVOS.find(x=>x.id===CV_OPEN)||CONVOS[0];
-  const st=C_STATUS[c.status]||['',''];
-  document.getElementById('cvThread').innerHTML=
-   '<div class="thread"><div style="padding:11px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-     '<div><b style="font-size:13px">'+c.name+'</b><div class="tag">'+c.role+' · '+c.seq+' · '+c.ref+'</div></div><div class="spacer"></div>'+
-     '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
-   '</div>'+
-   '<div style="padding:16px 14px">'+
-     '<div class="mk">Last message, live from PlateOps</div>'+
-     '<div class="bub '+(c.dir==='them'?'':'ai')+'" style="max-width:100%;margin-top:8px">'+
-       '<div class="who">'+(c.dir==='them'?'Member':'Skip, AI')+'</div>'+c.last+'</div>'+
-     '<div class="mrow"><div class="mk">Reference</div><div class="mv">'+c.ref+'</div></div>'+
-     '<div class="mrow"><div class="mk">Owner of the record</div><div class="mv">PlateOps</div></div>'+
-     '<div class="mrow"><div class="mk">Last activity</div><div class="mv">'+c.when+'</div></div>'+
-     '<div class="mrow"><div class="mk">Reply handled by</div><div class="mv">'+(c.status==='reply'?'Jacobo, in PlateOps':'Skip, no handoff')+'</div></div>'+
-     '<div class="note" style="margin-top:10px">The transcript, the reply box, the opt-out state and the booking all live in PlateOps. Reading them here would be a second copy that goes stale the moment someone replies.</div>'+
-     '<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">'+
-       '<button class="btn blue sm" onclick="openInSkip()">Open this thread in PlateOps</button>'+
-       '<button class="btn sm" onclick="toast(\''+c.ref+' copied\')">Copy reference</button></div>'+
-   '</div></div>';
-}
-function openConvo(id){CV_OPEN=id;renderConvoList()}
-function openInSkip(){toast('Opening PlateOps at the live thread')}
-
-/* ---------- sequences ----------
-   Steps, wording and send state belong to PlateOps. This is the return:
-   what each sequence produced, read only. */
-function renderSeqs(){
-  const on=SEQS.filter(s=>s.on);
-  document.getElementById('sqKpis').innerHTML=[
-    kpi('Sequences running',on.length+' of '+SEQS.length,'AI writes and sends every message','up'),
-    kpi('Enrolled, 30 days',SEQS.reduce((a,s)=>a+s.enr,0),'across all sequences'),
-    kpi('Booked',SEQS.reduce((a,s)=>a+s.bk,0),'conversations that turned into a booking','up'),
-    kpi('Revenue attributed',money(SEQS.reduce((a,s)=>a+s.rev,0)),'from texted bookings','up')
-  ].join('');
-  document.getElementById('sqBody').innerHTML=SEQS.map(s=>
-    '<tr><td><b>'+s.n+'</b></td><td class="tag">'+s.trig+'</td><td class="num">'+s.enr+'</td><td class="num">'+s.rep+'</td>'+
-    '<td class="num">'+s.bk+'</td><td class="num">'+(s.rev?money(s.rev):'state funds')+'</td>'+
-    '<td><span class="chip '+(s.on?'g':'')+'">'+(s.on?'running':'paused')+'</span></td>'+
-    '<td><button class="btn sm" onclick="openSeq(\''+s.id+'\')">Read</button></td></tr>').join('');
-}
-function openSeq(id){
-  const s=SEQS.find(x=>x.id===id);
-  const rr=s.enr?Math.round(s.rep/s.enr*100):0, br=s.enr?Math.round(s.bk/s.enr*100):0;
-  openModal(s.n,
-    '<div class="grid2" style="margin-bottom:12px">'+
-      '<div class="kpi"><div class="k">Trigger</div><div class="v" style="font-size:12px">'+s.trig+'</div></div>'+
-      '<div class="kpi"><div class="k">Status</div><div class="v" style="font-size:12px">'+(s.on?'Running in PlateOps':'Paused in PlateOps')+'</div></div>'+
-      '<div class="kpi"><div class="k">Reply rate</div><div class="v">'+rr+'%</div></div>'+
-      '<div class="kpi"><div class="k">Enrolled to booked</div><div class="v">'+br+'%</div></div>'+
-    '</div>'+
-    '<div class="bars">'+bars([
-      ['Enrolled',100,'b',s.enr],['Replied',s.enr?Math.round(s.rep/s.enr*100):0,'a',s.rep],
-      ['Booked',Math.max(2,br),'g',s.bk]
-    ])+'</div>'+
-    '<div class="note">The steps, the wording and the send timing are set in PlateOps, which is also what stops a sequence on a reply. Duplicating them here would mean two places to edit and one of them silently wrong.</div>'+
-    '<div style="margin-top:12px"><button class="btn blue" onclick="openInSkip()">Open the sequence in PlateOps</button></div>');
-}
-
 const SKIP_TOTALS={booked:67,rev:5901,sent:1284,reply:386,contacts:187};
 
 /* ---------- skip tab ---------- */
@@ -1335,6 +1187,20 @@ function renderSkip(){
   document.getElementById('skComp').innerHTML=SKIP_COMPLIANCE.map(r=>'<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #EDEAE2"><div style="flex:1"><b style="font-size:12px">'+r[0]+'</b><div class="tag">'+r[1]+'</div></div><div><span class="chip '+(r[2]==='9 of 412'?'':'g')+'">'+r[2]+'</span></div></div>').join('')+
     '<div class="note">Skip handles registration, quiet hours and STOP for every number it sends from, which is the part gyms get wrong on their own.</div>';
 }
+function skipOpen(){toast('Opening PlateOps, where the threads and sequences live')}
+function skipBack(){
+  const el=document.getElementById('skBack'); if(!el) return;
+  const rows=[
+    ['Threads in the inbox','14','all of them stay in PlateOps, none copied here'],
+    ['Waiting on a human','2','PlateOps flags them, Jacobo replies there'],
+    ['Sequences running','5 of 6','the switch lives in PlateOps, one place to change it'],
+    ['Bookings from texts','67','attributed to the message that caused it'],
+    ['Revenue attributed',money(5901),'from those bookings'],
+    ['Reply rate','30%','386 replies from 1,284 messages']
+  ];
+  el.innerHTML=rows.map(r=>'<div class="mrow"><div><div class="mk">'+r[0]+'</div><div class="tag">'+r[2]+'</div></div><div class="mv">'+r[1]+'</div></div>').join('')+
+    '<div class="note" style="margin-top:8px">Nothing in this list is stored on our server. It is read from PlateOps when the tab opens, which is why there is no second inbox to keep in sync.</div>';
+}
 function skipSync(){
   const b=document.getElementById('skLog');
   b.insertAdjacentHTML('afterbegin','<tr><td>just now</td><td><span class="chip b">Inbound</span></td><td class="num">7 messages</td><td class="tag">Imported, 2 new conversations</td></tr>');
@@ -1344,9 +1210,7 @@ function skipSync(){
 
 /* ---------- wire into the dashboard ---------- */
 NAV.skip=['Skip integration','PlateOps is sending the texts. This is what comes back'];
-NAV.convos=['Conversations','Every Skip thread, with the AI reply and the handoff'];
-NAV.seqs=['AI sequences','The follow-ups running on their own, and what they return'];
-RENDER.skip=renderSkip; RENDER.convos=renderConvoList; RENDER.seqs=renderSeqs;
+RENDER.skip=function(){renderSkip();skipBack()};
 
 const _ovBase=RENDER.overview;
 RENDER.overview=function(){
@@ -1579,7 +1443,7 @@ function askAnswer(raw){
     if(tm){let h=parseInt(tm[1],10);const ap=tm[3]||(h<=8?'pm':null);time=h+(tm[2]?':'+tm[2]:':00')+(ap?' '+ap:'');}
     if(!day&&/today/.test(q))day='Wed';
     if(!day&&/tomorrow/.test(q))day='Thu';
-    const who=(WAITLIST.map(w=>w.name).concat(CONVOS.map(c=>c.name))).filter(Boolean).find(n=>q.indexOf(String(n).toLowerCase())>=0);
+    const who=(WAITLIST.map(w=>w.name)).filter(Boolean).find(n=>q.indexOf(String(n).toLowerCase())>=0);
     if(!day||!time){
       return {html:'I can book that, I just need a day and a time. Try <b>book Jordan Thursday 5pm</b>, or tell me the day and I will offer the open slots.'};
     }
@@ -1654,15 +1518,14 @@ function askAnswer(raw){
     return {html:'<b>'+CARTS.length+'</b> abandoned carts holding <b>'+money(v)+'</b>. The two biggest are '+CARTS.slice().sort((a,b)=>b.val-a.val).slice(0,2).map(c=>c.n+' at '+money(c.val)).join(' and ')+'. Sending the recovery text to all of them is one click on the Recovery tab.',tab:'recovery'};
   }
 
-  /* sequences */
+  /* sequences: definitions and switches stay in PlateOps */
   if(has(/sequence|automation|follow.?up|drip/)){
-    const best=SEQS.slice().sort((a,b)=>b.booked-a.booked)[0];
-    return {html:'<b>'+SEQS.filter(s=>s.on).length+' of '+SEQS.length+'</b> sequences are running. The best performer is <b>'+best.n+'</b>: '+best.enr+' enrolled, '+best.rep+' replied, '+best.booked+' booked, <b>'+money(best.rev)+'</b> attributed. Say <b>pause missed visit win-back</b> and I will stop it in Skip.',tab:'seqs'};
+    return {html:'Five of six sequences are running in <b>PlateOps</b>, and the definitions, steps and pause switches stay there so there is one place a sequence can change. What comes back to this dashboard is the result: <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>, a <b>30%</b> reply rate and <b>2.2%</b> opt-outs. The integration tab lists every figure we read.',tab:'skip'};
   }
 
   /* skip and texts */
   if(has(/skip|text|sms|message|reply rate|opt.?out|plateops/)){
-    return {html:'Skip has <b>'+SKIP_TOTALS.contacts+'</b> contacts in sync and <b>'+SKIP_TOTALS.sent.toLocaleString()+'</b> messages out in 30 days with <b>'+SKIP_TOTALS.reply+'</b> coming back, a <b>30%</b> reply rate. That produced <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>. Opt-outs are <b>2.2%</b>, below the 3 to 5% typical for this kind of list. Right now <b>'+CONVOS.filter(c=>c.status==='reply').length+'</b> threads are waiting on a human.',tab:'skip'};
+    return {html:'Skip has <b>'+SKIP_TOTALS.contacts+'</b> contacts in sync and <b>'+SKIP_TOTALS.sent.toLocaleString()+'</b> messages out in 30 days with <b>'+SKIP_TOTALS.reply+'</b> coming back, a <b>30%</b> reply rate. That produced <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>. Opt-outs are <b>2.2%</b>, below the 3 to 5% typical for this kind of list. Right now <b>2</b> threads are waiting on a human, and they are answered in PlateOps, not here.',tab:'skip'};
   }
 
   /* server and storage */
@@ -1672,17 +1535,14 @@ function askAnswer(raw){
     return {html:'The one-location server is live with <b>'+recs+'</b> records across '+d.tables.length+' tables, using <b>'+d.storage.used_mb+' MB</b> of the <b>'+(d.storage.quota_mb/1024).toFixed(0)+' GB</b> provisioned, so <b>'+((d.storage.available_mb)/1024).toFixed(1)+' GB</b> is still free. Uptime is '+d.server.uptime+'. Security is in place except two items I will not claim: the restore test is scheduled for week three, and the production token moves into the vault when the server moves into ONBASE own Cloudflare account.',tab:'server'};
   }
 
-  /* sequence questions: the sequence itself is managed in PlateOps */
-  const seqHit=SEQS.find(s=>q.indexOf(s.n.toLowerCase())>=0);
-  if(seqHit&&has(/pause|stop|turn off|resume|start|turn on/)){
-    const wantOn=has(/resume|start|turn on/);
-    return {html:'<b>'+seqHit.n+'</b> is <b>'+(seqHit.on?'running':'paused')+'</b> in PlateOps, and that switch stays in PlateOps so there is only one place a sequence can be turned on or off. What comes back here is the result: <b>'+seqHit.enr+'</b> enrolled, <b>'+seqHit.rep+'</b> replied, <b>'+seqHit.bk+'</b> booked, '+(seqHit.rev?money(seqHit.rev):'state funded')+'.',tab:'seqs'};
+  /* sequence switches live in PlateOps */
+  if(has(/pause|stop|turn off|resume|start|turn on/)&&has(/sequence|drip|follow.?up/)){
+    return {html:'That switch is in <b>PlateOps</b>, on purpose: sequences have exactly one home so a follow-up cannot be running in two places or paused in one and live in the other. Open PlateOps, change it there, and the numbers on the integration tab update on the next read.',tab:'skip'};
   }
 
   /* who needs a reply */
   if(has(/needs a reply|waiting|handoff|inbox|conversation/)){
-    const open=CONVOS.filter(c=>c.status==='reply');
-    return {html:'<b>'+open.length+'</b> threads are waiting on a human: '+open.map(c=>c.name).join(', ')+'. The AI handled the other <b>'+(CONVOS.length-open.length)+'</b> end to end.',tab:'convos'};
+    return {html:'<b>2</b> of the <b>14</b> live threads are waiting on a human, and both are flagged inside <b>PlateOps</b> where Jacobo answers them. This dashboard does not hold a copy of the inbox, by design: it reads the counts and the outcomes so nothing has to be kept in sync twice.',tab:'skip'};
   }
 
   /* gtm plan */
@@ -1727,7 +1587,7 @@ function askAnswer(raw){
   }
 
   /* fallback */
-  const open=CONVOS.filter(c=>c.status==='reply').length;
+  const open=2;
   return {html:'I do not have that one tied to a number yet. What I can answer right now: revenue and MRR ('+money(mrr())+'), members ('+members()+'), waitlist ('+WAITLIST.length+'), cost per signup ('+money(spend()/signups())+'), utilization ('+pct(util())+'), at risk ('+RISK.length+'), texts ('+SKIP_TOTALS.sent.toLocaleString()+' out, '+open+' waiting), storage ('+(SRV_LAST||SRV_FALLBACK).storage.used_mb+' MB used). Try one of those, or say <b>help</b> for the full scope.'};
 }
 
