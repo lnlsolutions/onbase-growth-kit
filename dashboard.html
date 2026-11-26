@@ -1449,7 +1449,9 @@ function askSend(){
   const el=document.getElementById('askInput'); const q=(el.value||'').trim();
   if(!q){return}
   askPush('me',q); el.value='';
-  const r=askAnswer(q);
+  let r;
+  try{ r=askAnswer(q); }
+  catch(e){ r={html:'Something in that answer broke. Try <b>help</b> for the full scope, or ask me for revenue, members, texts or storage.'}; }
   setTimeout(()=>{askPush('ai',r.html); if(r.tab)setTimeout(()=>{},0); askChips();},140);
 }
 
@@ -1467,7 +1469,7 @@ function askAnswer(raw){
     if(tm){let h=parseInt(tm[1],10);const ap=tm[3]||(h<=8?'pm':null);time=h+(tm[2]?':'+tm[2]:':00')+(ap?' '+ap:'');}
     if(!day&&/today/.test(q))day='Wed';
     if(!day&&/tomorrow/.test(q))day='Thu';
-    const who=(WAITLIST.map(w=>w.name).concat(CONVOS.map(c=>c.member_name))).find(n=>q.indexOf(n.toLowerCase())>=0);
+    const who=(WAITLIST.map(w=>w.name).concat(CONVOS.map(c=>c.name))).filter(Boolean).find(n=>q.indexOf(String(n).toLowerCase())>=0);
     if(!day||!time){
       return {html:'I can book that, I just need a day and a time. Try <b>book Jordan Thursday 5pm</b>, or tell me the day and I will offer the open slots.'};
     }
