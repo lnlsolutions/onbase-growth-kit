@@ -2142,14 +2142,11 @@ function baseMap(){
   const H=[33.445,33.395,33.345,33.295,33.250];
   let s='';
   s+='<rect x="0" y="0" width="'+MW+'" height="'+MH+'" fill="#F6F3EC"/>';
-  /* blocks, very faint, to give the map some texture */
-  for(let gx=0;gx<26;gx++){
-    for(let gy=0;gy<22;gy++){
-      const x=gx*38+6, y=gy*37+6;
-      const t=(gx*7+gy*11)%9;
-      s+='<rect x="'+x+'" y="'+y+'" width="30" height="28" fill="'+(t===0?'#EDE8DC':'#F1EDE3')+'" opacity="'+(t===0?0.9:0.55)+'"/>';
-    }
-  }
+  /* blocks, very faint, to give the map some texture: one pattern, not 500 rects */
+  s+='<defs><pattern id="blk" width="38" height="37" patternUnits="userSpaceOnUse">'+
+     '<rect x="6" y="6" width="30" height="28" fill="#F1EDE3" opacity="0.75"/>'+
+     '<rect x="6" y="6" width="14" height="12" fill="#EDE8DC" opacity="0.8"/></pattern></defs>'+
+     '<rect x="0" y="0" width="'+MW+'" height="'+MH+'" fill="url(#blk)"/>';
   /* the Salt River, north edge */
   s+='<path d="M -20 '+my(33.437)+' C '+mx(-111.88)+' '+my(33.452)+', '+mx(-111.78)+' '+my(33.428)+', '+mx(-111.70)+' '+my(33.448)+' S '+mx(-111.60)+' '+my(33.436)+', '+MW+20+' '+my(33.452)+'" fill="none" stroke="#CFE0E4" stroke-width="10" stroke-linecap="round" opacity="0.9"/>';
   /* arterials */
@@ -2190,33 +2187,48 @@ function mapFrame(inner,label){
 let GEO_SEL=0;
 function renderGeoMap(){
   let s=baseMap();
+  const labels=[];
   GEO_FENCES.forEach((f,i)=>{
     const [lat,lng]=geoPos(f,i), x=mx(lng), y=my(lat);
-    const r=Math.min(f.r*MILE_PX, MH*0.9);
+    const r=Math.min(f.r*MILE_PX, MH*0.95);
     const sel=i===GEO_SEL;
     if(f.on){
-      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="rgba(217,83,30,'+(sel?0.16:0.08)+')" stroke="#D9531E" stroke-width="'+(sel?2.4:1.4)+'" '+(sel?'':'stroke-dasharray="0"')+'/>';
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="rgba(217,83,30,'+(sel?0.18:0.08)+')" stroke="#D9531E" stroke-width="'+(sel?2.6:1.5)+'"'+(sel?'':' opacity="0.95"')+'/>';
     }else{
-      s+='<circle cx="'+x+'" cy="'+y+'" r="'+(r)+'" fill="none" stroke="#8C8578" stroke-width="1.2" stroke-dasharray="5 6" opacity="0.5"/>';
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+Math.min(r,MH*0.75)+'" fill="none" stroke="#8C8578" stroke-width="1.2" stroke-dasharray="6 8" opacity="0.35"/>';
     }
-    s+='<g style="cursor:pointer" onclick="geoSel('+i+')">'+
-       '<circle cx="'+x+'" cy="'+y+'" r="'+(sel?8:6)+'" fill="'+(f.on?'#D9531E':'#8C8578')+'" stroke="#FFFFFF" stroke-width="2"/>'+
-       '<text x="'+(x+11)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="'+(sel?'#2B2A26':'#6B655A')+'">'+f.n.replace(/,.*/,'')+'</text>'+
-       '</g>';
+    if(i>0){
+      s+='<g style="cursor:pointer" onclick="geoSel('+i+')">'+
+         '<circle cx="'+x+'" cy="'+y+'" r="'+(sel?8:6.5)+'" fill="'+(f.on?'#D9531E':'#8C8578')+'" stroke="#FFFFFF" stroke-width="2"/>'+
+         '</g>';
+    }
+    labels.push({x:x,y:y,t:f.n.replace(/,.*/,''),sel:sel,i:i});
   });
-  /* the facility itself */
+  /* facility pin sits on the HQ fence, so it is the HQ marker */
   const [hlat,hlng]=GEO_POS['ONBASE Athlete HQ'];
-  s+='<g transform="translate('+mx(hlng)+','+my(hlat)+')">'+
-     '<circle r="15" fill="rgba(27,58,107,0.12)"/>'+
-     '<path d="M0 -13 C7 -13 12 -8 12 -1 C12 8 0 17 0 17 C0 17 -12 8 -12 -1 C-12 -8 -7 -13 0 -13 Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
-     '<circle cy="-2" r="4.6" fill="#FFFFFF"/></g>'+
-     '<text x="'+mx(hlng)+'" y="'+(my(hlat)+30)+'" font-size="11" font-weight="700" fill="#1B3A6B" text-anchor="middle">8150 E GERMANN</text>';
+  const hx=mx(hlng), hy=my(hlat);
+  s+='<g style="cursor:pointer" onclick="geoSel(0)">'+
+     '<circle cx="'+hx+'" cy="'+hy+'" r="16" fill="rgba(27,58,107,0.14)"/>'+
+     '<path d="M'+hx+' '+(hy-14)+' C'+(hx+7)+' '+(hy-14)+' '+(hx+13)+' '+(hy-8)+' '+(hx+13)+' '+hy+' C'+(hx+13)+' '+(hy+10)+' '+hx+' '+(hy+19)+' '+hx+' '+(hy+19)+' C'+hx+' '+(hy+19)+' '+(hx-13)+' '+(hy+10)+' '+(hx-13)+' '+hy+' C'+(hx-13)+' '+(hy-8)+' '+(hx-7)+' '+(hy-14)+' '+hx+' '+(hy-14)+' Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
+     '<circle cx="'+hx+'" cy="'+(hy-2)+'" r="4.6" fill="#FFFFFF"/></g>';
+  /* labels, nudged so none collide */
+  labels.sort((a,b)=>a.x-b.x);
+  let lastX=-999,lastY=-999;
+  labels.forEach(l=>{
+    let ly=l.y+4;
+    if(Math.abs(l.x-lastX)<170 && Math.abs(ly-lastY)<17) ly=lastY+18;
+    lastX=l.x; lastY=ly;
+    const anchor=l.i===0?'start':'start';
+    s+='<text x="'+(l.x+14)+'" y="'+ly+'" font-size="13" font-weight="700" fill="'+(l.sel?'#2B2A26':'#6B655A')+'" '+
+       'style="paint-order:stroke" stroke="#F6F3EC" stroke-width="4" stroke-linejoin="round" text-anchor="'+anchor+'">'+l.t+'</text>';
+  });
   document.getElementById('geMap').innerHTML=mapFrame(s,'Geofences around Mesa and the east valley');
   const t=geoTot();
   const f=GEO_FENCES[GEO_SEL]||GEO_FENCES[0];
   document.getElementById('geMapChip').textContent=GEO_FENCES.filter(x=>x.on).length+' active';
   document.getElementById('geMapDetail').innerHTML=
-    '<div class="mrow"><div class="mk">'+f.n+'</div><div class="mv">'+(f.on?'running':'paused')+' · '+f.t+' · '+f.r+' mile radius</div></div>'+
+    '<div class="mrow"><div class="mk">'+f.n+'</div><div class="mv">'+(f.on?'running':'paused')+' · '+f.t+'</div></div>'+
+    '<div class="mrow"><div class="mk">Radius</div><div class="mv">'+f.r+' miles</div></div>'+
     '<div class="mrow"><div class="mk">Devices</div><div class="mv">'+f.dev.toLocaleString()+'</div></div>'+
     '<div class="mrow"><div class="mk">Impressions</div><div class="mv">'+f.imp.toLocaleString()+'</div></div>'+
     '<div class="mrow"><div class="mk">Visits</div><div class="mv">'+f.vis+'</div></div>'+
