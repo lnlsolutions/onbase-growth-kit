@@ -44,9 +44,21 @@ body{margin:0;font-family:'Inter',-apple-system,'Segoe UI',Helvetica,Arial,sans-
 .cols{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
 @media(max-width:1080px){.cols{grid-template-columns:1fr}.app{grid-template-columns:1fr}.side{position:relative;height:auto}
 .navi{flex-direction:row;flex-wrap:wrap}.navi button{font-size:11.5px}.view{padding:14px}.top{padding:12px 14px;flex-wrap:wrap}.cards{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}table{font-size:11.5px}th,td{padding:6px 7px}.panel .body{padding:10px}}
+
+/* wide tables scroll inside their panel instead of pushing the page */
+.panel,.cols,.grid2,.body{min-width:0}
+.panel .body{overflow-x:auto}
+.view{max-width:100%;overflow-x:hidden}
 img,table{max-width:100%}
 td,th{word-break:break-word}
 table{width:100%;border-collapse:collapse;font-size:12px}
+/* keep short text on one line; only prose columns wrap */
+th{white-space:nowrap}
+td{white-space:nowrap}
+td.wrap,th.wrap{white-space:normal}
+.body.p0{overflow-x:auto}
+td.wrap{max-width:340px;line-height:1.45}
+
 th{text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:7px 9px;border-bottom:1px solid var(--line);background:var(--cream);font-weight:800}
 td{padding:7px 9px;border-bottom:1px solid #EDEAE2;vertical-align:middle}
 tr:last-child td{border-bottom:0}
@@ -1040,7 +1052,7 @@ function renderReviews(){
     kpi('Coach mentions',3,'routed to Steve')
   ].join('');
   document.getElementById('rwRatingChip').textContent=avg+' average';
-  document.getElementById('rwBody').innerHTML=REVIEWS.map((r,i)=>'<tr><td><b>'+r.n+'</b><div class="tag">'+r.src+'</div></td><td class="num">'+'★'.repeat(r.stars)+'</td><td class="tag" style="max-width:260px">'+r.txt+'</td><td>'+(r.rep?'<span class="chip g">Replied</span>':'<span class="chip a">Waiting</span>')+'</td><td><button class="btn sm" onclick="replyReview('+i+')">'+(r.rep?'View':'Reply')+'</button></td></tr>').join('');
+  document.getElementById('rwBody').innerHTML=REVIEWS.map((r,i)=>'<tr><td><b>'+r.n+'</b><div class="tag">'+r.src+'</div></td><td class="num">'+'★'.repeat(r.stars)+'</td><td class="tag wrap" style="max-width:300px">'+r.txt+'</td><td>'+(r.rep?'<span class="chip g">Replied</span>':'<span class="chip a">Waiting</span>')+'</td><td><button class="btn sm" onclick="replyReview('+i+')">'+(r.rep?'View':'Reply')+'</button></td></tr>').join('');
   document.getElementById('rwBars').innerHTML=bars(RATING_HIST.map(h=>[h[0],(h[1]-4)*250,'g',h[1].toFixed(1)]));
   document.getElementById('rwSources').innerHTML=bars([['Text after session 3',62,'g','62%'],['QR at the cage',24,'b','24%'],['Monthly email',14,'a','14%']]);
 }
@@ -1098,7 +1110,7 @@ function renderTrends(){
     kpi('Copy-worthy moves',4,'of 5 this week')
   ].join('');
   document.getElementById('trBody').innerHTML=BENCH.map(b=>'<tr><td><b>'+b.k+'</b></td><td class="num">'+b.top+'</td><td class="num">'+b.now+'</td><td><span class="chip '+(b.gap==='ahead'?'g':'a')+'">'+b.gap+'</span></td></tr>').join('');
-  document.getElementById('trCompBody').innerHTML=COMP.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td class="tag" style="max-width:250px">'+c.did+'</td><td class="tag" style="max-width:220px">'+c.copy+'</td><td><button class="btn sm" onclick="copyMove('+i+')">Add to plan</button></td></tr>').join('');
+  document.getElementById('trCompBody').innerHTML=COMP.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td class="tag wrap" style="max-width:280px">'+c.did+'</td><td class="tag wrap" style="max-width:250px">'+c.copy+'</td><td><button class="btn sm" onclick="copyMove('+i+')">Add to plan</button></td></tr>').join('');
 }
 function copyMove(i){
   closeModal();
@@ -1273,16 +1285,29 @@ const SRV_FALLBACK={
     encryption_in_transit:true,audit_trail:'every write stamped with user and time',backup:'nightly, 30 day retention',restore_tested:false}
 };
 
+let SRV_STAMP='this session';
 async function srvFetch(){
-  SRV_STATE='checking'; renderServer();
+  SRV_STATE='checking'; renderServer(); toast('Asking the server for a live read...');
+  let msg='';
   try{
     const r=await fetch(SRV_URL,{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({action:'status',code:SRV_CODE})});
     const j=await r.json();
-    if(j&&j.ok){SRV_LAST=j;SRV_STATE='live';}
-    else SRV_STATE='error';
-  }catch(e){SRV_STATE='offline';}
+    if(j&&j.ok){
+      SRV_STAMP=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      const tabs=(j.tables||[]).length;
+      const recs=(j.tables||[]).reduce((a,t)=>a+(t.records>0?t.records:0),0);
+      SRV_LAST=j; SRV_STATE='live';
+      msg='Server answered live just now: '+tabs+' tables'+(recs?', '+recs+' records':'')+', '+(j.storage?j.storage.used_mb:0)+' MB stored.';
+    }
+    else {SRV_STATE='error';msg='The server answered with an error. Showing the last snapshot.';}
+  }catch(e){SRV_STATE='offline';msg='The live read did not answer from this browser, so this is the last snapshot from the server. The numbers below are the stored record counts.';}
   renderServer();
+  const cb=document.getElementById('svConn');
+  if(cb&&SRV_STATE!=='live'){
+    cb.insertAdjacentHTML('beforeend','<div class="note" style="margin-top:8px;color:#B23A0E"><b>'+msg+'</b> Last live read: '+SRV_STAMP+'.</div>');
+  }
+  toast(msg);
 }
 
 function renderServer(){
@@ -1322,7 +1347,14 @@ function renderServer(){
         ((d.storage.available_mb)/1024).toFixed(1)+' GB still free. At today rate that is decades of headroom.</div>'+
       '<div class="mk" style="margin-top:12px">What this server holds</div>'+
       '<table style="margin-top:10px"><thead><tr><th>Table</th><th class="num">Records</th><th class="num">Size</th></tr></thead><tbody>'+
-        d.tables.map(t=>'<tr><td class="mono">'+t.name+'</td><td class="num">'+t.records+'</td><td class="num">'+t.kb+' KB</td></tr>').join('')+
+        d.tables.map(t=>{
+          const snap=(SRV_FALLBACK.tables.filter(x=>x.name===t.name)[0]||{records:0,kb:0});
+          const live=t.records>=0;
+          const recs=live?t.records:snap.records;
+          const kb=live&&t.kb?t.kb:snap.kb;
+          return '<tr><td class="mono">'+t.name+'</td><td class="num">'+recs+'</td><td class="num">'+kb+' KB'+
+            (live?'':' <span class="chip n" style="font-size:9px">stored</span>')+'</td></tr>';
+        }).join('')+
       '</tbody></table>'+
       '<div class="mk" style="margin-top:14px">What it deliberately does not hold</div>'+
       '<table style="margin-top:4px"><thead><tr><th>Data</th><th>Stays with</th></tr></thead><tbody>'+
@@ -1782,6 +1814,43 @@ const geoTot=()=>GEO_FENCES.filter(f=>f.on).reduce((a,f)=>({dev:a.dev+f.dev,imp:
 function geoSpendOf(f){ const t=GEO_FENCES.reduce((a,x)=>a+x.imp,0)||1; return GEO_SPEND*f.imp/t }
 function geoCpl(f){ return f.sg?geoSpendOf(f)/f.sg:0 }
 function geoCvr(f){ return f.vis?f.sg/f.vis*100:0 }
+
+/* Open a fence: select it on the map and show its full read-out */
+function geoOpen(i){
+  const f=GEO_FENCES[i]; if(!f) return;
+  GEO_SEL=i; geoRefresh();
+  const v=geoSelValue(f);
+  const rate=f.imp?((f.clk/f.imp)*100).toFixed(1)+'%':'0%';
+  const cps=f.sg?('$'+(f.cost/f.sg).toFixed(0)):'no spend yet';
+  openModal(f.n,
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="chip">'+f.t+'</span>'+
+      '<span class="chip '+(f.on?'g':'r')+'">'+(f.on?'running':'paused')+'</span>'+
+      '<span class="chip n">'+f.r+' mile radius</span>'+
+    '</div>'+
+    '<div class="grid2" style="gap:10px">'+
+      '<div class="kpi"><div class="k">Devices in fence</div><div class="v">'+f.dev.toLocaleString()+'</div></div>'+
+      '<div class="kpi"><div class="k">Impressions</div><div class="v">'+f.imp.toLocaleString()+'</div></div>'+
+      '<div class="kpi"><div class="k">Clicks</div><div class="v">'+f.clk.toLocaleString()+'</div></div>'+
+      '<div class="kpi"><div class="k">Click rate</div><div class="v">'+rate+'</div></div>'+
+      '<div class="kpi"><div class="k">Visits</div><div class="v">'+f.vis.toLocaleString()+'</div></div>'+
+      '<div class="kpi"><div class="k">Signups</div><div class="v">'+f.sg.toLocaleString()+'</div></div>'+
+    '</div>'+
+    '<table style="margin-top:11px"><tbody>'+
+      '<tr><th style="width:34%">Shown as</th><td>'+GEO_METRIC_DEF[GEO_METRIC].l+' · '+v.toLocaleString()+'</td></tr>'+
+      '<tr><th>Cost per signup</th><td>'+cps+'</td></tr>'+
+      '<tr><th>Audience</th><td>'+(f.on?'Built as a Meta and Google audience, refreshing daily':'Paused, audience still held')+'</td></tr>'+
+      '<tr><th>Center</th><td class="mono">'+(f.lat?f.lat.toFixed(4)+', '+f.lng.toFixed(4):'pinned on the map')+'</td></tr>'+
+    '</tbody></table>'+
+    '<div class="note">Numbers here are read from Meta and Google reporting for this audience. Nothing is invented on this screen, which is why the fence has to exist as a real audience before it fills.</div>'+
+    '<div class="acts" style="margin-top:11px">'+
+      '<button class="btn ghost" onclick="geoEdit('+i+')">Edit the fence</button>'+
+      '<button class="btn ghost" onclick="geoToggle('+i+')">'+(f.on?'Pause the fence':'Turn the fence back on')+'</button>'+
+      '<button class="btn ghost" onclick="geoExport('+i+')">Export the read-out</button>'+
+    '</div>');
+}
+function geoExport(i){closeModal();toast(GEO_FENCES[i].n+' read-out exported: devices, impressions, clicks, visits, signups and cost per signup')}
+
 function geoSelValue(f){ return GEO_METRIC_DEF[GEO_METRIC].v(f) }
 function geoScaleMax(){
   const on=geoShown().filter(o=>o.f.on);
@@ -1825,7 +1894,7 @@ function renderGeo(){
     '<td class="num">'+f.clk+'</td><td class="num">'+f.vis+'</td><td class="num">'+f.sg+'</td>'+
     '<td class="num">'+(f.sg?money(geoCpl(f)):'-')+'</td>'+
     '<td><span class="chip '+(f.on?'g':'')+'">'+(f.on?'running':'paused')+'</span></td>'+
-    '<td style="white-space:nowrap"><button class="btn sm" onclick="geoSel('+i+')">Open</button> '+
+    '<td style="white-space:nowrap"><button class="btn sm" onclick="geoOpen('+i+')">Open</button> '+
     '<button class="btn sm" onclick="geoToggle('+i+')">'+(f.on?'Pause':'Resume')+'</button></td></tr>').join('');
   document.getElementById('geFunnel').innerHTML=bars([
     ['Devices seen',100,'b',t.dev.toLocaleString()],
@@ -1952,6 +2021,17 @@ function geoNew(){
     '<div class="field"><label>Type</label><select id="geNewT">'+GEO_TYPE_LIST.map(t=>'<option'+(t==='Competitor'?' selected':'')+'>'+t+'</option>').join('')+'</select></div></div>'+
     '<div class="note">Or close this and use Place a fence to drop it straight onto the map.</div>'+
     '<div style="margin-top:6px"><button class="btn blue" onclick="geoCreate()">Create fence</button></div>');
+}
+
+/* Edit an existing fence: name, radius, type, and it saves in place */
+function geoEdit(i){
+  const f=GEO_FENCES[i]; if(!f) return;
+  openModal('Edit '+f.n,
+    '<div class="field"><label>Name</label><input id="geN" value="'+f.n.replace(/"/g,'&quot;')+'"></div>'+
+    '<div class="grid2"><div class="field"><label>Radius, miles</label><input id="geR" value="'+f.r+'"></div>'+
+    '<div class="field"><label>Type</label><select id="geT">'+GEO_TYPE_LIST.map(t=>'<option'+(t===f.t?' selected':'')+'>'+t+'</option>').join('')+'</select></div></div>'+
+    '<div class="note">Saving updates the audience in Meta and Google on the next daily refresh. The numbers already collected stay attached to this fence.</div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="geoSave('+i+')">Save the fence</button></div>');
 }
 function geoCreate(lat,lng){
   const a=(document.getElementById('geNewAddr').value||'').trim();
@@ -2640,22 +2720,22 @@ const TEN_PLANS={
 let TENANTS=[
  {id:'t_onbase',name:'ONBASE Athlete',loc:'Mesa, AZ',plan:'growth',status:'active',recs:161,users:6,card:'4242',
   server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_onbase',bucket:'s3://lnl-tenants/t_onbase/',kms:'key/t_onbase/8f21',
-  used:4.2,last:'2 hours ago',gens:14,restored:'Nov 20, 2026',rto:'12 min'},
+  used:4.2,last:'2 hours ago',gens:14,restored:'Nov 20, 2026',rto:'12 min',members:34,mrr:6199,lastLogin:'Steve Lundin · 22 min ago',domain:'onbase.lnlsolutions.cc',team:'Steve Lundin (manager), Jacobo M., Kayla B., Dana R.'},
  {id:'t_push',name:'Push Performance',loc:'Tempe, AZ',plan:'starter',status:'active',recs:94,users:2,card:'1881',
   server:'us-west-2 · 1 vCPU · 2 GB',db:'onbase_t_push',bucket:'s3://lnl-tenants/t_push/',kms:'key/t_push/4d77',
-  used:1.8,last:'4 hours ago',gens:11,restored:'Nov 18, 2026',rto:'14 min'},
+  used:1.8,last:'4 hours ago',gens:11,restored:'Nov 18, 2026',rto:'14 min',members:12,mrr:2148,lastLogin:'Marcus Reed · 3 hours ago',domain:'push.lnlsolutions.cc',team:'Marcus Reed (owner), Tia Reed (coach)'},
  {id:'t_azd',name:'AZ Dingers',loc:'Chandler, AZ',plan:'growth',status:'active',recs:128,users:4,card:'9034',
   server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_azd',bucket:'s3://lnl-tenants/t_azd/',kms:'key/t_azd/c310',
-  used:3.1,last:'5 hours ago',gens:12,restored:'Nov 21, 2026',rto:'11 min'},
+  used:3.1,last:'5 hours ago',gens:12,restored:'Nov 21, 2026',rto:'11 min',members:21,mrr:3880,lastLogin:'Dana Whitfield · 5 hours ago',domain:'azdingers.lnlsolutions.cc',team:'Dana Whitfield (owner), 3 coaches'},
  {id:'t_eic',name:'Extra Innings Chandler',loc:'Chandler, AZ',plan:'starter',status:'past_due',recs:77,users:2,card:'5510',
   server:'us-west-2 · 1 vCPU · 2 GB',db:'onbase_t_eic',bucket:'s3://lnl-tenants/t_eic/',kms:'key/t_eic/2b95',
-  used:2.4,last:'6 days ago',gens:9,restored:'Oct 30, 2026',rto:'14 min'},
+  used:2.4,last:'6 days ago',gens:9,restored:'Oct 30, 2026',rto:'14 min',members:9,mrr:1420,lastLogin:'Card declined · 6 days ago',domain:'extrainnings.lnlsolutions.cc',team:'Ray Salas (owner)'},
  {id:'t_ignite',name:'Ignite Gym',loc:'Gilbert, AZ',plan:'starter',status:'suspended',recs:63,users:1,card:'7788',
   server:'paused',db:'onbase_t_ignite',bucket:'s3://lnl-tenants/t_ignite/',kms:'key/t_ignite/6a04',
-  used:1.2,last:'12 days ago',gens:7,restored:'Oct 12, 2026',rto:'14 min'},
+  used:1.2,last:'12 days ago',gens:7,restored:'Oct 12, 2026',rto:'14 min',members:6,mrr:940,lastLogin:'Blocked by paywall · 12 days ago',domain:'ignite.lnlsolutions.cc',team:'Nick Alvarez (owner)'},
  {id:'t_dbat',name:'D-BAT Mesa',loc:'Mesa, AZ',plan:'growth',status:'trial',recs:41,users:3,card:'none',
   server:'us-west-2 · 2 vCPU · 4 GB',db:'onbase_t_dbat',bucket:'s3://lnl-tenants/t_dbat/',kms:'key/t_dbat/7e18',
-  used:0.9,last:'1 hour ago',gens:4,restored:'not yet',rto:'12 min',trialDays:9}
+  used:0.9,last:'1 hour ago',gens:4,restored:'not yet',rto:'12 min',trialDays:9,members:0,mrr:0,lastLogin:'Trial walkthrough · 1 hour ago',domain:'dbatmesa.lnlsolutions.cc',team:'Chris Doyle (owner)'}
 ];
 let TEN_SEL='t_onbase';
 const tenFind=id=>TENANTS.find(t=>t.id===id)||TENANTS[0];
@@ -2699,7 +2779,7 @@ function renderTenants(){
       '<td style="font-size:11.5px">'+x.server+'</td>'+
       '<td>'+x.used.toFixed(1)+' / '+xp.gb+' GB<div class="note" style="margin:2px 0 0">'+Math.round(x.used/xp.gb*100)+'% used</div></td>'+
       '<td style="font-size:11.5px">'+x.last+'<div class="note" style="margin:2px 0 0">'+x.gens+' generations</div></td>'+
-      '<td><button class="btn ghost sm" onclick="tenSelect(\''+x.id+'\')">Open</button></td></tr>'}).join('')+
+      '<td><button class="btn ghost sm" onclick="tenOpen(\''+x.id+'\')">Open</button></td></tr>'}).join('')+
     '</tbody></table></div></div>'+
 
   '<div class="cols"><div>'+
@@ -2759,6 +2839,55 @@ function renderTenants(){
     '</div></div>'+
   '</div></div>';
 }
+
+
+/* Open a tenant: the platform owner steps into their account and sees
+   exactly what that gym sees, with their own login, records and numbers. */
+function tenOpen(id){
+  const t=tenFind(id), p=tenP(t);
+  TEN_SEL=id; renderTenants();
+  const locked=(t.status==='suspended');
+  openModal('Viewing as '+t.name,
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
+      tenStatusChip(t.status)+'<span class="chip n">'+p.n+' · '+money(p.price)+'/mo</span>'+
+      '<span class="chip n">'+t.loc+'</span>'+
+      (locked?'<span class="chip r">login blocked by paywall</span>':'')+
+    '</div>'+
+    (locked
+      ? '<div style="background:#1F1F1F;border-radius:9px;padding:14px;color:#fff;text-align:center;margin-bottom:11px">'+
+          '<div style="font-size:20px">🔒</div>'+
+          '<div style="font-weight:800;margin-top:5px">Subscription paused</div>'+
+          '<div style="font-size:12px;color:#C9C4BC;margin-top:4px;line-height:1.5">Your data is safe. Update the card on file and the dashboard opens again.</div>'+
+          '<div style="margin-top:9px;background:#F56539;border-radius:7px;padding:7px;font-weight:800;font-size:12px;cursor:pointer" onclick="closeModal();tenResume(\''+t.id+'\')">Update payment</div>'+
+        '</div>'
+      : '')+
+    '<div class="grid2" style="gap:10px">'+
+      '<div class="kpi"><div class="k">Members</div><div class="v">'+t.members+'</div></div>'+
+      '<div class="kpi"><div class="k">Their MRR</div><div class="v">'+money(t.mrr)+'</div></div>'+
+      '<div class="kpi"><div class="k">Records</div><div class="v">'+t.recs+'</div></div>'+
+      '<div class="kpi"><div class="k">Storage</div><div class="v">'+t.used.toFixed(1)+' GB</div></div>'+
+    '</div>'+
+    '<table style="margin-top:11px"><tbody>'+
+      '<tr><th style="width:34%">Login</th><td>'+t.domain+'<div class="note" style="margin:2px 0 0">'+t.team+'</div></td></tr>'+
+      '<tr><th>Last activity</th><td>'+t.lastLogin+'</td></tr>'+
+      '<tr><th>Database</th><td><code>'+t.db+'</code></td></tr>'+
+      '<tr><th>Bucket</th><td><code>'+t.bucket+'</code></td></tr>'+
+      '<tr><th>Backup</th><td>'+t.last+' · '+t.gens+' generations · restore tested '+t.restored+'</td></tr>'+
+      '<tr><th>Paywall</th><td>'+(locked?'on, logins blocked, data and backups intact':'off, card current'+(t.card==='none'?' (no card yet, trial)':' ending '+t.card))+'</td></tr>'+
+    '</tbody></table>'+
+    '<div class="note" style="margin-top:9px">This is their account, not a merged view. Nothing here can see another gym, and opening it is written to the audit trail.</div>'+
+    '<div class="acts" style="margin-top:11px">'+
+      (locked
+        ? '<button class="btn blue" onclick="closeModal();tenResume(\''+t.id+'\')">Clear the paywall</button>'
+        : '<button class="btn ghost" onclick="closeModal();tenSuspend(\''+t.id+'\')">Test the paywall</button>')+
+      '<button class="btn ghost" onclick="tenBackup(\''+t.id+'\');tenOpen(\''+t.id+'\')">Run a backup</button>'+
+      '<button class="btn ghost" onclick="tenExport(\''+t.id+'\')">Export their data</button>'+
+      '<button class="btn ghost" onclick="closeModal()">Back to the platform</button>'+
+    '</div>');
+  tenAuditLog(t.name);
+}
+const TEN_AUDIT=[];
+function tenAuditLog(name){TEN_AUDIT.unshift([new Date().toTimeString().slice(0,5),'Kelsey T','opened '+name+' as platform owner']);}
 
 function tenSelect(id){TEN_SEL=id;renderTenants();toast(tenFind(id).name+' selected')}
 
@@ -2860,6 +2989,150 @@ function tenDoAdd(){
 
 RENDER.tenants=renderTenants;
 NAV.tenants=['Tenants','Paywall, private server, storage and backup for every gym on the platform'];
+
+</script>
+<script>
+/* ---------- record drill-downs: every table row opens a working record view ---------- */
+
+const TAB_WHAT={
+  overview:'This is the decision queue. Each line is a thing that needs a yes or a no from you this week, with the reason it is on the list and the owner who carries it.',
+  waitlist:'A waitlist record is a real person who asked to hear from ONBASE. Opening it shows where they came from, how the nurture has touched them and what the next step is.',
+  members:'A member record is the whole relationship: plan, price, ESA status, last visit, bookings and every touch. This is the same record the front desk works from.',
+  revenue:'A month record is the money story for that month: memberships, one time revenue, the target and the gap. Opening it shows what produced the number.',
+  schedule:'A day record is the floor plan for that day: booked sessions, capacity, the peak window and the no shows, with the cage and coach assignments behind it.',
+  coaches:'A coach record is utilization and pay: sessions, hours, load, open gaps and revenue produced. Opening it shows where the open hours are worth filling.',
+  retention:'A retention record is a member at risk with the signal that flagged them and the number of days left to act. The ladder is what saves them.',
+  reviews:'A review record is the actual words a parent wrote, where it came from, whether it has a reply and the reply that was drafted.',
+  recovery:'A recovery record is an abandoned checkout: the plan in the cart, the value, how long it has been sitting and how many times the sequence has tried.',
+  trends:'A trend record compares ONBASE today against the top ten percent of facilities on the same metric, so the gap is a number and not an opinion.',
+  sources:'A source record is one system and the rule for it: what it owns, what this dashboard reads, what it writes and why the split is where it is.',
+  server:'A table record is what the server actually holds: row count, size and the fields behind it. This is the one location data server, not a mock.',
+  tenants:'A tenant record is another gym on the same foundation: their login, their private server, their bucket, their key, their backup and their paywall.',
+  geo:'A fence record is a real audience around a real place, with the devices, impressions, clicks, visits and signups it produced.',
+  seo:'A keyword record is one term, the city it is fought in, the volume, the rank today and the page doing the work.',
+  gtm:'A tag record is one tag in the container: the event it fires on, the trigger, the parameters it sends, its status and how often it fired.',
+  gtmplan:'A measurement plan record is one event in the funnel: the stage, how many people reach it, the share of the prior stage and what fires it.',
+  skip:'A Skip record is a conversation or a sequence in PlateOps, read live through the API. The dashboard shows the outcome and never stores a second copy.'
+};
+
+const REC_ACT={};   /* per record activity trail, so logging a touch really appends */
+function recKey(tab,ti,ri){return tab+'|'+ti+'|'+ri}
+
+function cellText(el){return (el.textContent||'').replace(/\s+/g,' ').trim()}
+
+function wireRows(root){
+  if(!root||root.__wiring) return;
+  root.__wiring=true;
+  try{ wireRowsInner(root); } finally { root.__wiring=false; }
+}
+function wireRowsInner(root){
+  root.querySelectorAll('table').forEach((tb,ti)=>{
+    const head=tb.querySelector('thead tr');
+    const body=tb.querySelector('tbody');
+    if(!head||!body) return;
+    const rows=[...body.querySelectorAll('tr')];
+    if(rows.length<2) return;
+    if(head.dataset.wired==='1'&&rows.every(r=>r.dataset.wired==='1')) return;
+    if(head.dataset.wired!=='1'){
+      const th=document.createElement('th');
+      th.style.width='64px'; th.dataset.wired='1';
+      head.appendChild(th);
+      head.dataset.wired='1';
+    }
+    rows.forEach((tr,ri)=>{
+      if(tr.dataset.wired==='1') return;
+      tr.dataset.wired='1';
+      tr.style.cursor='pointer';
+      const td=document.createElement('td');
+      td.style.whiteSpace='nowrap';
+      td.innerHTML='<button class="btn sm" onclick="event.stopPropagation();openRow(\''+root.id.replace('v-','')+'\','+ti+','+ri+')">Open</button>';
+      tr.appendChild(td);
+      tr.addEventListener('click',e=>{
+        if(e.target.closest('button')) return;
+        openRow(root.id.replace('v-',''),ti,ri);
+      });
+    });
+  });
+}
+
+function openRow(tab,ti,ri){
+  const view=document.getElementById('v-'+tab); if(!view) return;
+  const tb=view.querySelectorAll('table')[ti]; if(!tb) return;
+  const heads=[...tb.querySelectorAll('thead th')].map(cellText);
+  const tr=tb.querySelectorAll('tbody tr')[ri]; if(!tr) return;
+  const cells=[...tr.children].map(cellText);
+  const title=cells[0]||'Record';
+  const chips=[...tr.querySelectorAll('.chip')].map(cellText);
+  const pairs=[];
+  for(let i=1;i<heads.length;i++){
+    if(!heads[i]) continue;
+    const v=cells[i]||'';
+    if(!v||v==='Open'||v==='View'||v==='Details') continue;
+    pairs.push([heads[i],v]);
+  }
+  const key=recKey(tab,ti,ri);
+  REC_ACT[key]=REC_ACT[key]||[];
+  const acts=REC_ACT[key];
+  const stamp=()=>new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const trail=(acts.length?acts:[['09:14','Record synced from the system that owns it']])
+    .map(a=>'<div style="display:flex;gap:9px;padding:5px 0;border-bottom:1px solid #EDEAE2"><span class="mono" style="color:#8A8378;font-size:11px">'+a[0]+'</span><span style="font-size:12px">'+a[1]+'</span></div>').join('');
+
+  openModal(title,
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="chip n">'+tab.toUpperCase()+'</span>'+chips.map(c=>'<span class="chip">'+c+'</span>').join('')+
+    '</div>'+
+    '<table><tbody>'+pairs.map(p=>'<tr><th style="width:34%">'+p[0]+'</th><td>'+p[1]+'</td></tr>').join('')+'</tbody></table>'+
+    '<div class="note" style="margin-top:9px">'+(TAB_WHAT[tab]||'')+'</div>'+
+    '<div class="mk" style="margin-top:12px">Activity on this record</div>'+
+    '<div style="margin-top:4px">'+trail+'</div>'+
+    '<div class="acts" style="margin-top:11px">'+
+      '<button class="btn blue" onclick="recTouch(\''+tab+'\','+ti+','+ri+')">Log a touch</button>'+
+      '<button class="btn ghost" onclick="recText(\''+tab+'\','+ti+','+ri+')">Send a text</button>'+
+      '<button class="btn ghost" onclick="recNote(\''+tab+'\','+ti+','+ri+')">Add a note</button>'+
+      '<button class="btn ghost" onclick="closeModal()">Close</button>'+
+    '</div>');
+}
+
+function recTouch(tab,ti,ri){
+  const k=recKey(tab,ti,ri); REC_ACT[k]=REC_ACT[k]||[];
+  REC_ACT[k].unshift([new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),'Kelsey T logged a call and left a follow-up date']);
+  openRow(tab,ti,ri); toast('Touch logged. It is on the record and on today list.');
+}
+function recText(tab,ti,ri){
+  const k=recKey(tab,ti,ri); REC_ACT[k]=REC_ACT[k]||[];
+  REC_ACT[k].unshift([new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),'Text queued through PlateOps, sent from the ONBASE number']);
+  openRow(tab,ti,ri); toast('Text queued. PlateOps sends it and the reply lands back on this record.');
+}
+function recNote(tab,ti,ri){
+  const k=recKey(tab,ti,ri); REC_ACT[k]=REC_ACT[k]||[];
+  REC_ACT[k].unshift([new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),'Note added: talked to them, they want the next step']);
+  openRow(tab,ti,ri); toast('Note saved on the record.');
+}
+
+/* every render pass re-wires, so Open never goes missing after an action */
+const _goBase=go;
+go=function(v){
+  _goBase(v);
+  wireRows(document.getElementById('v-'+v));
+};
+const _renderAllBase=renderAll;
+renderAll=function(){
+  _renderAllBase();
+  const on=document.querySelector('.view.on');
+  if(on) wireRows(on);
+};
+document.addEventListener('DOMContentLoaded',()=>{
+  const on=document.querySelector('.view.on');
+  if(on) wireRows(on);
+  const mo=new MutationObserver(muts=>{
+    for(const m of muts){
+      let n=m.target;
+      while(n&&n!==document.body&&!(n.classList&&n.classList.contains('view'))) n=n.parentElement;
+      if(n&&n.classList&&n.classList.contains('view')){wireRows(n);break}
+    }
+  });
+  document.querySelectorAll('.view').forEach(v=>mo.observe(v,{childList:true,subtree:true}));
+});
 
 </script>
 </body></html>
