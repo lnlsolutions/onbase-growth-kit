@@ -182,6 +182,7 @@ tbody tr.sel{background:#FBF3EA}
       <button data-v="waitlist"><span class="ic">◎</span><span>Waitlist</span></button>
       <button data-v="spend"><span class="ic">◈</span><span>Spend and CAC</span></button>
       <button data-v="members"><span class="ic">◉</span><span>Memberships</span></button>
+      <button data-v="roster"><span class="ic">◍</span><span>Member records</span></button>
       <button data-v="revenue"><span class="ic">▤</span><span>Revenue and MRR</span></button>
       <button data-v="schedule"><span class="ic">▣</span><span>Cages and sessions</span></button>
       <button data-v="coaches"><span class="ic">⚑</span><span>Coaches</span></button>
@@ -449,8 +450,35 @@ tbody tr.sel{background:#FBF3EA}
       </div>
     </section>
 
+
+    <section class="view" id="v-roster">
+      <div class="cards" id="mrKpis"></div>
+      <div class="panel"><div class="head"><h2>Every member, one record each</h2><div class="spacer"></div>
+        <input class="btn sm ghost" style="width:190px;text-align:left" placeholder="Search name, plan, email" oninput="memSearch(this.value)">
+        <button class="btn blue sm" onclick="newMemberModal()">New membership</button></div>
+        <div class="body" style="padding-bottom:0"><div class="acts" id="mrFilters" style="flex-wrap:wrap"></div></div>
+        <div class="body p0"><table><thead><tr><th>Member</th><th>Plan</th><th class="num">Per month</th><th>Status</th><th>ESA</th><th>Last visit</th><th class="num">Balance</th><th></th></tr></thead><tbody id="mrBody"></tbody></table></div>
+        <div class="body"><div class="note" id="mrNote"></div></div></div>
+      <div class="cols">
+        <div class="panel"><div class="head"><h2>What a record carries</h2></div><div class="body">
+          <div class="note">A member record is the join point for everything else on this dashboard. Shopify bills it, HubSpot holds the contact, PlateOps owns the messages, the cage calendar owns the sessions. Open a record and you get its own tabs: Overview, Payments, Sessions, Messages and Touches, each with the action that belongs to it.</div>
+          <div class="acts" style="margin-top:10px">
+            <button class="btn ghost" onclick="pickMember('Take a payment',function(id){payModal(id)})">Take a payment</button>
+            <button class="btn ghost" onclick="pickMember('Log a touch',function(id){touchModal(id)})">Log a touch</button>
+            <button class="btn ghost" onclick="pickMember('Send a text',function(id){textModal(id)})">Send a text</button>
+            <button class="btn ghost" onclick="pickMember('Book a session',function(id){bookModal(id)})">Book a session</button>
+          </div></div></div>
+        <div class="panel"><div class="head"><h2>Where the records come from</h2></div><div class="body" id="mrFeed"></div></div>
+      </div>
+    </section>
     <section class="view" id="v-revenue">
       <div class="cards" id="rvKpis"></div>
+      <div class="acts" style="margin:2px 0 14px;flex-wrap:wrap">
+        <button class="btn blue" onclick="pickMember('Take a payment',function(id){payModal(id)})">Take a payment</button>
+        <button class="btn ghost" onclick="pickMember('Log a touch',function(id){touchModal(id)})">Log a touch</button>
+        <button class="btn ghost" onclick="pickMember('Send a text',function(id){textModal(id)})">Reach out</button>
+        <button class="btn ghost" onclick="pickMember('Book a session',function(id){bookModal(id)})">Book a session</button>
+      </div>
       <div class="cols">
         <div class="panel"><div class="head"><h2>Revenue by month</h2><div class="spacer"></div><span class="chip n">MRR and one time</span></div>
           <div class="body p0"><table><thead><tr><th>Month</th><th class="num">Members</th><th class="num">MRR</th><th class="num">One time</th><th class="num">Total</th><th class="num">vs target</th></tr></thead><tbody id="rvBody"></tbody></table></div>
@@ -464,6 +492,11 @@ tbody tr.sel{background:#FBF3EA}
 
     <section class="view" id="v-schedule">
       <div class="cards" id="scKpis"></div>
+      <div class="acts" style="margin:2px 0 14px;flex-wrap:wrap">
+        <button class="btn blue" onclick="pickMember('Book a member in',function(id){bookModal(id)})">Book a member in</button>
+        <button class="btn ghost" onclick="pickMember('Log a touch',function(id){touchModal(id)})">Log a touch</button>
+        <button class="btn ghost" onclick="pickMember('Send a text',function(id){textModal(id)})">Reach out</button>
+      </div>
       <div class="panel"><div class="head"><h2>Utilization by hour, this week</h2><div class="spacer"></div><span class="chip n">6 cages · 10 hours · 840 slots</span></div>
         <div class="body"><div id="scHours"></div><div class="note">Peak is 3pm to 7pm. The 10am to 2pm block is where the coach and open gym inventory sits unsold.</div></div></div>
       <div class="cols">
@@ -482,6 +515,11 @@ tbody tr.sel{background:#FBF3EA}
 
     <section class="view" id="v-coaches">
       <div class="cards" id="coKpis"></div>
+      <div class="acts" style="margin:2px 0 14px;flex-wrap:wrap">
+        <button class="btn blue" onclick="gapBook(0)">Book into a gap</button>
+        <button class="btn ghost" onclick="pickMember('Log a touch',function(id){touchModal(id)})">Log a touch</button>
+        <button class="btn ghost" onclick="pickMember('Send a text',function(id){textModal(id)})">Reach out</button>
+      </div>
       <div class="panel"><div class="head"><h2>Coach load and gaps</h2><div class="spacer"></div><span class="chip n">this week</span><button class="btn blue sm" onclick="addSessionModal()">Add a session</button></div>
         <div class="body p0"><table><thead><tr><th>Coach</th><th>Specialty</th><th class="num">Sessions</th><th class="num">Hours</th><th>Load</th><th class="num">Open gaps</th><th class="num">Revenue</th><th></th></tr></thead><tbody id="coBody"></tbody></table></div>
         <div class="body"><div class="note" id="coNote"></div></div></div>
@@ -493,6 +531,12 @@ tbody tr.sel{background:#FBF3EA}
 
     <section class="view" id="v-retention">
       <div class="cards" id="rtKpis"></div>
+      <div class="acts" style="margin:2px 0 14px;flex-wrap:wrap">
+        <button class="btn blue" onclick="pickMember('Reach out',function(id){textModal(id)})">Reach out</button>
+        <button class="btn ghost" onclick="pickMember('Log a touch',function(id){touchModal(id)})">Log a touch</button>
+        <button class="btn ghost" onclick="pickMember('Take a payment',function(id){payModal(id)})">Make a payment</button>
+        <button class="btn ghost" onclick="pickMember('Open a record',function(id){memberOpen(id)})">Open a record</button>
+      </div>
       <div class="cols">
         <div class="panel"><div class="head"><h2>At risk this month</h2><div class="spacer"></div><span class="chip a" id="rtRiskChip"></span></div>
           <div class="body p0"><table><thead><tr><th>Member</th><th>Plan</th><th>Signal</th><th class="num">Days left</th><th></th></tr></thead><tbody id="rtBody"></tbody></table></div>
@@ -700,6 +744,7 @@ const NAV={overview:['Overview','Priority one: convert the waitlist, then 250 me
  waitlist:['Waitlist','120 contacts in HubSpot, and where they came from'],
  spend:['Spend and cost per signup','$2,000 a month, and what each channel returns'],
  members:['Memberships','What has sold, at what price, and the average'],
+ roster:['Member records','Every member, one record each, with payments, sessions and messages'],
  revenue:['Revenue and MRR','Against break even, the $30k line and $60k by April'],
  schedule:['Cages and sessions','840 bookable slots a week, and which ones are empty'],
  coaches:['Coaches','Load, gaps and revenue per coach'],
@@ -802,7 +847,7 @@ function renderWaitlist(){
 }
 function convertLead(id){
   const w=WAITLIST.find(x=>x.id===id);
-  if(w.status==='Converted'){openModal(w.name,'<div class="grid2"><div class="kpi"><div class="k">Role</div><div class="v">'+w.role+'</div></div><div class="kpi"><div class="k">Source</div><div class="v">'+w.source+'</div></div><div class="kpi"><div class="k">ZIP</div><div class="v">'+w.zip+'</div></div><div class="kpi"><div class="k">ESA</div><div class="v">'+(w.esa?'Yes':'No')+'</div></div></div><div class="note">Already a paying member. Plan and payment history live under Memberships.</div>');return}
+  if(w.status==='Converted'){openModal(w.name,'<div class="grid2"><div class="kpi"><div class="k">Role</div><div class="v">'+w.role+'</div></div><div class="kpi"><div class="k">Source</div><div class="v">'+w.source+'</div></div><div class="kpi"><div class="k">ZIP</div><div class="v">'+w.zip+'</div></div><div class="kpi"><div class="k">ESA</div><div class="v">'+(w.esa?'Yes':'No')+'</div></div></div><div class="note">Already a paying member. Plan and payment history live on the member record.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="memberOpen(memFor(\''+w.name+'\').id)">Open the member record</button><button class="btn ghost" onclick="textModal(memFor(\''+w.name+'\').id)">Send a text</button><button class="btn ghost" onclick="payModal(memFor(\''+w.name+'\').id)">Make a payment</button></div>');return}
   openModal('Convert '+w.name,
    '<div class="field"><label>Plan</label><select id="cvPlan">'+PLANS.map((p,i)=>'<option value="'+i+'">'+p.n+' · '+money(p.price)+'</option>').join('')+'</select></div>'+
    '<div class="field"><label>Payment method</label><select id="cvPay"><option>Card on file</option><option>ESA invoice</option><option>ACH</option></select></div>'+
@@ -812,9 +857,13 @@ function convertLead(id){
 function doConvert(id){
   const w=WAITLIST.find(x=>x.id===id);
   const pi=+document.getElementById('cvPlan').value;
+  const how=document.getElementById('cvPay').value;
   PLANS[pi].sold++;
   w.status='Converted';
-  closeModal();renderWaitlist();toast(w.name+' is now on '+PLANS[pi].n);
+  const m=createMembership({name:w.name,plan:PLANS[pi].n,how:how,esa:w.esa||how==='ESA invoice',paid:true,from:'the waitlist'});
+  closeModal();renderWaitlist();
+  if(RENDER.roster)RENDER.roster();
+  toast(w.name+' converted to '+PLANS[pi].n+'. Member record created.');
 }
 function addWaitlistModal(){
   openModal('Add a waitlist contact',
@@ -890,10 +939,15 @@ function sellTo(i){openModal('Sell '+PLANS[i].n,'<div class="grid2"><div class="
 }
 function doSell(i){
   const n=document.getElementById('slName').value.trim()||'New member';
+  const how=document.getElementById('slPay').value;
+  const fam=document.getElementById('slFam').value==='Yes'?1:0;
   PLANS[i].sold++;
-  if(document.getElementById('slFam').value==='Yes')FAMILY_ADDONS++;
+  if(fam)FAMILY_ADDONS+=fam;
   MB_WEEKS[MB_WEEKS.length-1]++;
-  closeModal();renderMembers();toast(n+' on '+PLANS[i].n+', '+money(PLANS[i].price)+' a month');
+  const m=createMembership({name:n,plan:PLANS[i].n,how:how,esa:how==='ESA invoice',family:fam,paid:true});
+  closeModal();renderMembers();
+  if(RENDER.roster)RENDER.roster();
+  toast(m.name+' on '+PLANS[i].n+', '+money(PLANS[i].price)+' a month. Record created.');
 }
 function sellModal(){sellTo(1)}
 
@@ -1001,7 +1055,7 @@ function renderCoaches(){
 }
 function coachModal(i){
   const c=COACHES[i];
-  openModal(c.n,'<div class="grid2"><div class="kpi"><div class="k">Sessions</div><div class="v">'+c.sessions+'</div></div><div class="kpi"><div class="k">Hours</div><div class="v">'+c.hours+'</div></div><div class="kpi"><div class="k">Load</div><div class="v">'+c.load+'%</div></div><div class="kpi"><div class="k">Revenue</div><div class="v">'+money(c.rev)+'</div></div></div><div class="note">'+c.spec+'. On the floor '+c.on+'. '+c.gaps+' open hours this week.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="addSessionTo('+i+')">Add a session</button><button class="btn" onclick="toast(\'Availability shared with Jacobo for outreach\')">Share availability</button></div>');
+  openModal(c.n,'<div class="grid2"><div class="kpi"><div class="k">Sessions</div><div class="v">'+c.sessions+'</div></div><div class="kpi"><div class="k">Hours</div><div class="v">'+c.hours+'</div></div><div class="kpi"><div class="k">Load</div><div class="v">'+c.load+'%</div></div><div class="kpi"><div class="k">Revenue</div><div class="v">'+money(c.rev)+'</div></div></div><div class="note">'+c.spec+'. On the floor '+c.on+'. '+c.gaps+' open hours this week.</div><div class="acts" style="margin-top:10px"><button class="btn blue" onclick="addSessionTo('+i+')">Add a session</button><button class="btn" onclick="gapBook('+i+')">Book a member into a gap</button></div>');
 }
 function addSessionTo(i){
   COACHES[i].sessions++;COACHES[i].hours+=1;COACHES[i].rev+=160;COACHES[i].load=Math.min(100,COACHES[i].load+3);COACHES[i].gaps=Math.max(0,COACHES[i].gaps-1);
@@ -1021,7 +1075,7 @@ function renderRetention(){
     kpi('Average tenure','7 months','across 34 members')
   ].join('');
   document.getElementById('rtRiskChip').textContent=RISK.length+' open';
-  document.getElementById('rtBody').innerHTML=RISK.map((r,i)=>'<tr><td><b>'+r.n+'</b></td><td>'+r.plan+'</td><td class="tag">'+r.sig+'</td><td class="num">'+(r.days||'—')+'</td><td><button class="btn sm" onclick="riskTouch('+i+')">Touch</button></td></tr>').join('');
+  document.getElementById('rtBody').innerHTML=RISK.map((r,i)=>'<tr><td><b>'+r.n+'</b></td><td>'+r.plan+'</td><td class="tag">'+r.sig+'</td><td class="num">'+(r.days||'—')+'</td><td style="white-space:nowrap"><button class="btn sm" onclick="riskReach('+i+')">Reach out</button> <button class="btn sm ghost" onclick="riskPay('+i+')">Pay</button></td></tr>').join('');
   document.getElementById('rtBars').innerHTML=bars([
     ['Retention',96.8,'g','96.8%'],
     ['Churn',3.2,'a','3.2%'],
@@ -1076,7 +1130,7 @@ function renderRecovery(){
     kpi('Avg days quiet',Math.round(LEADS.reduce((s,l)=>s+l.days,0)/LEADS.length),'across the list'),
     kpi('Value at risk',money(cartVal+LEADS.length*180),'if none of them convert','dn')
   ].join('');
-  document.getElementById('rcCartBody').innerHTML=CARTS.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td>'+c.plan+'</td><td class="num">'+money(c.val)+'</td><td class="tag">'+c.at+'</td><td class="num">'+c.tries+'</td><td><button class="btn sm" onclick="recoverCart('+i+')">'+(c.tries?'Follow up':'Text now')+'</button></td></tr>').join('');
+  document.getElementById('rcCartBody').innerHTML=CARTS.map((c,i)=>'<tr><td><b>'+c.n+'</b></td><td>'+c.plan+'</td><td class="num">'+money(c.val)+'</td><td class="tag">'+c.at+'</td><td class="num">'+c.tries+'</td><td style="white-space:nowrap"><button class="btn sm" onclick="cartReach('+i+')">'+(c.tries?'Follow up':'Text now')+'</button></td></tr>').join('');
   document.getElementById('rcLeadChip').textContent=LEADS.length+' leads';
   document.getElementById('rcLeadBody').innerHTML=LEADS.map((l,i)=>'<tr><td><b>'+l.n+'</b></td><td class="tag">'+l.src+'</td><td class="tag">'+l.stage+'</td><td class="num">'+l.days+'</td><td><button class="btn sm" onclick="recoverLead('+i+')">Reach out</button></td></tr>').join('');
 }
@@ -3133,6 +3187,577 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   document.querySelectorAll('.view').forEach(v=>mo.observe(v,{childList:true,subtree:true}));
 });
+
+</script>
+<script>
+/* ---------- member records: the thing every other tab feeds into ---------- */
+
+let MEMBERS=[];
+let MEM_SEQ=1;
+const MEM_STATUS={active:'g',paused:'a',pastdue:'r',trial:'b',cancelled:'n'};
+const MEM_TAB={};
+
+function memNew(o){
+  const m=Object.assign({
+    id:'m'+(MEM_SEQ++), name:'', plan:'', price:0, status:'active', joined:'Nov 2026',
+    next:'Dec 1', esa:false, last:'', phone:'', email:'', balance:0, family:0,
+    payments:[], sessions:[], msgs:[], touches:[]
+  },o);
+  MEMBERS.push(m); return m;
+}
+function memFind(id){ return MEMBERS.filter(m=>m.id===id)[0] }
+function memPlanByName(n){ return PLANS.filter(p=>p.n===n)[0]||PLANS[1] }
+
+/* seed the roster from what the plans say has sold */
+(function seedMembers(){
+  const first=['Jordan','Mia','Caleb','Riley','Noah','Emma','Tyler','Samantha','Luis','Bethany','Marcus','Renee','Owen','Kayla','Diego','Nora','Hudson','Aiden','Sofia','Grant','Paige','Brody','Elena','Trevor','Nina','Cole','Ava','Miles','Ruby','Jesse','Dana','Mason','Lucy','Eli','Chloe','Wes','Ivy','Silas','Maya','Dean','Reese','Cruz','Tessa','Nico','Sadie','Rhett','Wren','Blake'];
+  const last=['Alvarez','Sandoval','Foster','Quintero','Ibarra','Vargas','Brooks','Ortiz','Navarro','Cole','Ellis','Diaz','Patel','Jensen','Reyes','Keller','Yates','Castillo','Whitaker','Uribe','Flores','Espinoza','Mercer','Hale','Okafor','Bennett','Cruz','Doyle','Fischer','Grant','Holt','Ingram','Jarvis','Kane','Lowe','Moss','Nash','Ortega','Pruitt','Quinn','Ramos','Sawyer','Tate','Underwood','Vega','Walsh','Young','Zane'];
+  let n=0;
+  PLANS.forEach((p,pi)=>{
+    const take=Math.min(p.sold, 9);
+    for(let k=0;k<take;k++){
+      const nm=first[n%first.length]+' '+last[(n*7+pi)%last.length];
+      const st=n%11===3?'paused':n%13===5?'pastdue':n%17===9?'trial':'active';
+      memNew({name:nm,plan:p.n,price:p.price,status:st,
+        joined:['Sep 2026','Oct 2026','Nov 2026'][n%3],
+        next:st==='pastdue'?'Overdue':'Dec 1',
+        esa:n%5===0, last:['Today','Yesterday','2 days ago','Last week','14 days ago'][n%5],
+        phone:'(480) 5'+String(20+n%70)+'-'+String(1000+n*37).slice(0,4),
+        email:nm.toLowerCase().replace(/[^a-z]+/g,'.')+'@email.com',
+        balance:st==='pastdue'?p.price:0,
+        family:n%6===0?1:0,
+        payments:[{d:'Nov 1',amt:p.price,how:'Card',ok:true}],
+        sessions:[{d:'Nov 22',what:p.cat+' session with Marcus'}],
+        msgs:[]});
+      n++;
+    }
+  });
+})();
+
+function memMrr(){ return MEMBERS.filter(m=>m.status==='active'||m.status==='pastdue').reduce((s,m)=>s+m.price+m.family*ADDON_PRICE,0) }
+function memActive(){ return MEMBERS.filter(m=>m.status==='active').length }
+function memPastDue(){ return MEMBERS.filter(m=>m.status==='pastdue').length }
+function memPaused(){ return MEMBERS.filter(m=>m.status==='paused').length }
+function memEsa(){ return MEMBERS.filter(m=>m.esa).length }
+function memBalances(){ return MEMBERS.reduce((s,m)=>s+m.balance,0) }
+
+let MEM_FILTER='all', MEM_Q='';
+function renderMembers2(){
+  const k=document.getElementById('mrKpis'); if(!k) return;
+  k.innerHTML=[
+    kpi('Member records',MEMBERS.length,memActive()+' active'),
+    kpi('MRR on the books',money(memMrr()),'from the records, not the plan list'),
+    kpi('Past due',memPastDue(),memPastDue()?'dunning is running':'all clear',memPastDue()?'dn':'up'),
+    kpi('Paused',memPaused(),'access held, still billed next cycle'),
+    kpi('ESA families',memEsa(),'invoiced, not carded'),
+    kpi('Open balance',money(memBalances()),'money sitting on the table')
+  ].join('');
+  const q=MEM_Q.toLowerCase();
+  let rows=MEMBERS.filter(m=>!q||(m.name+' '+m.plan+' '+m.email).toLowerCase().indexOf(q)>=0);
+  if(MEM_FILTER!=='all') rows=rows.filter(m=>m.status===MEM_FILTER);
+  const f=['all','active','pastdue','paused','trial','cancelled'];
+  document.getElementById('mrFilters').innerHTML=f.map(x=>
+    '<button class="btn sm '+(MEM_FILTER===x?'blue':'ghost')+'" onclick="memFilter(\''+x+'\')">'+(x==='pastdue'?'Past due':x.charAt(0).toUpperCase()+x.slice(1))+' <span class="tag">'+(x==='all'?MEMBERS.length:MEMBERS.filter(m=>m.status===x).length)+'</span></button>').join('');
+  document.getElementById('mrBody').innerHTML=rows.slice(0,60).map(m=>
+    '<tr><td><b>'+m.name+'</b><div class="tag">'+m.email+'</div></td>'+
+    '<td>'+m.plan+'</td><td class="num">'+money(m.price+(m.family*ADDON_PRICE))+'</td>'+
+    '<td><span class="chip '+MEM_STATUS[m.status]+'">'+(m.status==='pastdue'?'Past due':m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span></td>'+
+    '<td>'+(m.esa?'<span class="chip a">ESA</span>':'—')+'</td>'+
+    '<td class="tag">'+m.last+'</td>'+
+    '<td class="num '+(m.balance?'dn':'')+'">'+(m.balance?money(m.balance):'—')+'</td>'+
+    '<td style="white-space:nowrap"><button class="btn sm" onclick="memberOpen(\''+m.id+'\')">Open</button> '+
+      '<button class="btn sm ghost" onclick="touchModal(\''+m.id+'\')">Touch</button> '+
+      '<button class="btn sm ghost" onclick="textModal(\''+m.id+'\')">Text</button> '+
+      '<button class="btn sm ghost" onclick="payModal(\''+m.id+'\')">Pay</button></td></tr>').join('')||
+    '<tr><td colspan="7" class="tag">Nothing matches that filter.</td></tr>';
+  document.getElementById('mrNote').innerHTML='<b>'+rows.length+'</b> records shown of '+MEMBERS.length+'. Every row here is a person with a plan, a payment history, sessions and a message trail. Sell, convert and recover all land in this list, and the numbers above are computed from it.';
+}
+function memFilter(f){ MEM_FILTER=f; renderMembers2() }
+function memSearch(v){ MEM_Q=v; renderMembers2() }
+
+/* the record view, with its own tabs */
+function memberOpen(id,tab){
+  const m=memFind(id); if(!m) return;
+  const t=tab||'over';
+  MEM_TAB[id]=t;
+  const tabs=[['over','Overview'],['pay','Payments'],['ses','Sessions'],['msg','Messages'],['touch','Touches']];
+  const nav='<div class="acts" style="margin-bottom:11px">'+tabs.map(x=>
+    '<button class="btn sm '+(t===x[0]?'blue':'ghost')+'" onclick="memberOpen(\''+id+'\',\''+x[0]+'\')">'+x[1]+
+    (x[0]==='pay'?' <span class="tag">'+m.payments.length+'</span>':x[0]==='ses'?' <span class="tag">'+m.sessions.length+'</span>':x[0]==='msg'?' <span class="tag">'+m.msgs.length+'</span>':x[0]==='touch'?' <span class="tag">'+m.touches.length+'</span>':'')+
+    '</button>').join('')+'</div>';
+  let body='';
+  if(t==='over'){
+    body='<table><tbody>'+
+      '<tr><th style="width:32%">Plan</th><td>'+m.plan+' · '+money(m.price)+' a month'+(m.family?' plus '+m.family+' family athlete at '+money(ADDON_PRICE):'')+'</td></tr>'+
+      '<tr><th>Status</th><td><span class="chip '+MEM_STATUS[m.status]+'">'+(m.status==='pastdue'?'Past due':m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span></td></tr>'+
+      '<tr><th>Member since</th><td>'+m.joined+'</td></tr>'+
+      '<tr><th>Next bill</th><td>'+m.next+' · '+money(m.price+m.family*ADDON_PRICE)+'</td></tr>'+
+      '<tr><th>Open balance</th><td>'+(m.balance?'<b class="dn">'+money(m.balance)+'</b>':'$0')+'</td></tr>'+
+      '<tr><th>Last visit</th><td>'+m.last+'</td></tr>'+
+      '<tr><th>Payment method</th><td>'+(m.esa?'ESA invoice, third party payer':'Card on file')+'</td></tr>'+
+      '<tr><th>Contact</th><td>'+m.phone+' · '+m.email+'</td></tr>'+
+      '</tbody></table>'+
+      '<div class="note" style="margin-top:9px">This is the record Shopify bills from and HubSpot holds the contact for. PlateOps owns every message, so the Messages tab here shows what came back, not a second copy of the thread.</div>';
+  }
+  if(t==='pay'){
+    body=(m.payments.length?'<table><thead><tr><th>Date</th><th class="num">Amount</th><th>Method</th><th>Result</th></tr></thead><tbody>'+
+      m.payments.map(p=>'<tr><td>'+p.d+'</td><td class="num">'+money(p.amt)+'</td><td>'+p.how+'</td><td>'+(p.ok?'<span class="chip g">Paid</span>':'<span class="chip r">Declined</span>')+'</td></tr>').join('')+'</tbody></table>'
+      :'<div class="tag">No payments yet.</div>')+
+      '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="payModal(\''+id+'\')">Take a payment</button>'+
+      (m.balance?'<button class="btn ghost" onclick="retryCard(\''+id+'\')">Retry the card</button>':'')+
+      '<button class="btn ghost" onclick="invoiceModal(\''+id+'\')">Send an invoice</button></div>'+
+      '<div class="note" style="margin-top:9px">A payment written here posts to Shopify against this member and clears the balance. Nothing is stored twice.</div>';
+  }
+  if(t==='ses'){
+    body=(m.sessions.length?'<table><thead><tr><th>Date</th><th>Session</th><th>Cage</th></tr></thead><tbody>'+
+      m.sessions.map(s=>'<tr><td>'+s.d+'</td><td>'+s.what+'</td><td class="tag">Cage '+(1+(s.d.length%6))+'</td></tr>').join('')+'</tbody></table>'
+      :'<div class="tag">No sessions booked yet.</div>')+
+      '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="bookModal(\''+id+'\')">Book a session</button></div>'+
+      '<div class="note" style="margin-top:9px">Bookings land on the Cages and sessions tab and count against the 840 weekly slots.</div>';
+  }
+  if(t==='msg'){
+    body=(m.msgs.length?'<div>'+m.msgs.map(x=>'<div style="padding:7px 0;border-bottom:1px solid #EDEAE2"><div class="tag">'+x.d+' · '+x.dir+'</div><div style="font-size:12.5px">'+x.text+'</div></div>').join('')+'</div>'
+      :'<div class="tag">No messages yet.</div>')+
+      '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="textModal(\''+id+'\')">Send a text</button>'+
+      '<button class="btn ghost" onclick="emailModal(\''+id+'\')">Send an email</button>'+
+      '<button class="btn ghost" onclick="callModal(\''+id+'\')">Log a call</button></div>'+
+      '<div class="note" style="margin-top:9px">Texts send from the ONBASE number through PlateOps and the reply lands back on this record. The dashboard keeps the outcome, not a copy of the thread.</div>';
+  }
+  if(t==='touch'){
+    body=(m.touches.length?'<div>'+m.touches.map(x=>'<div style="display:flex;gap:9px;padding:6px 0;border-bottom:1px solid #EDEAE2"><span class="mono tag">'+x.d+'</span><span style="font-size:12.5px">'+x.text+'</span></div>').join('')+'</div>'
+      :'<div class="tag">No touches logged yet.</div>')+
+      '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="touchModal(\''+id+'\')">Log a touch</button></div>'+
+      '<div class="note" style="margin-top:9px">A touch is a call, a text, an email or a face to face conversation with a note and a next follow-up date. It is what makes retention measurable.</div>';
+  }
+  openModal(m.name+' · '+m.plan,
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="chip '+MEM_STATUS[m.status]+'">'+(m.status==='pastdue'?'Past due':m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span>'+
+      '<span class="chip n">'+money(m.price+m.family*ADDON_PRICE)+' a month</span>'+
+      (m.esa?'<span class="chip a">ESA</span>':'')+(m.balance?'<span class="chip r">'+money(m.balance)+' owed</span>':'')+
+    '</div>'+nav+body+
+    '<div class="acts" style="margin-top:12px;border-top:1px solid #EDEAE2;padding-top:11px">'+
+      '<button class="btn blue" onclick="touchModal(\''+id+'\')">Log a touch</button>'+
+      '<button class="btn ghost" onclick="textModal(\''+id+'\')">Send a text</button>'+
+      '<button class="btn ghost" onclick="payModal(\''+id+'\')">Make a payment</button>'+
+      '<button class="btn ghost" onclick="planModal(\''+id+'\')">Change plan</button>'+
+      (m.status==='paused'?'<button class="btn ghost" onclick="memResume(\''+id+'\')">Resume</button>':'<button class="btn ghost" onclick="memPause(\''+id+'\')">Pause</button>')+
+      '<button class="btn ghost" onclick="memCancel(\''+id+'\')">Cancel</button>'+
+    '</div>');
+}
+
+/* ---- composers: each one writes to the record and moves the numbers ---- */
+function payModal(id){
+  const m=memFind(id); if(!m) return;
+  const due=m.balance||m.price+m.family*ADDON_PRICE;
+  openModal('Take a payment · '+m.name,
+    '<div class="grid2"><div class="field"><label>Amount</label><input id="pyAmt" value="'+due+'"></div>'+
+    '<div class="field"><label>Method</label><select id="pyHow"><option>Card on file</option><option>ACH</option><option>ESA invoice</option><option>Cash at the desk</option></select></div></div>'+
+    '<div class="field"><label>Note</label><input id="pyNote" placeholder="e.g. catching up the November balance"></div>'+
+    '<div class="note">Posts to Shopify against this member, clears the balance and shows up on Revenue as collected money.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doPay(\''+id+'\')">Charge '+money(due)+'</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'pay\')">Back</button></div>');
+}
+function doPay(id){
+  const m=memFind(id); const amt=parseFloat(document.getElementById('pyAmt').value)||0;
+  const how=document.getElementById('pyHow').value;
+  const note=(document.getElementById('pyNote').value||'').trim();
+  if(!amt){toast('Add an amount');return}
+  m.payments.unshift({d:'Today',amt:amt,how:how,ok:true});
+  m.balance=Math.max(0,m.balance-amt);
+  if(m.status==='pastdue'&&m.balance===0)m.status='active';
+  m.touches.unshift({d:'Today',text:'Payment of '+money(amt)+' collected by '+how+(note?' · '+note:'')});
+  closeModal(); renderMembers2(); toast(money(amt)+' collected from '+m.name+'. Balance is '+money(m.balance)+'.');
+}
+function retryCard(id){
+  const m=memFind(id);
+  m.touches.unshift({d:'Today',text:'Card retried, declined again, dunning moves to the next step'});
+  closeModal(); renderMembers2(); toast('Card retried for '+m.name+'. Still declining, dunning continues.');
+}
+function invoiceModal(id){
+  const m=memFind(id);
+  openModal('Send an invoice · '+m.name,
+    '<div class="grid2"><div class="field"><label>Amount</label><input id="ivAmt" value="'+(m.price+m.family*ADDON_PRICE)+'"></div>'+
+    '<div class="field"><label>Send to</label><input id="ivTo" value="'+m.email+'"></div></div>'+
+    '<div class="field"><label>What it is for</label><input id="ivFor" value="'+(m.esa?'ESA invoice, third party payer':'Monthly membership')+'"></div>'+
+    '<div class="acts"><button class="btn blue" onclick="doInvoice(\''+id+'\')">Send the invoice</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'pay\')">Back</button></div>');
+}
+function doInvoice(id){
+  const m=memFind(id); const amt=parseFloat(document.getElementById('ivAmt').value)||0;
+  m.touches.unshift({d:'Today',text:'Invoice for '+money(amt)+' sent to '+document.getElementById('ivTo').value});
+  closeModal(); renderMembers2(); toast('Invoice sent to '+m.name+'. It is on the record and on the money list.');
+}
+function touchModal(id){
+  const m=memFind(id); if(!m) return;
+  openModal('Log a touch · '+m.name,
+    '<div class="grid2"><div class="field"><label>Type</label><select id="tcType"><option>Call</option><option>Text</option><option>Email</option><option>Face to face</option><option>Front desk</option></select></div>'+
+    '<div class="field"><label>Next follow up</label><select id="tcNext"><option>Tomorrow</option><option>In 3 days</option><option>In one week</option><option>In two weeks</option><option>No follow up needed</option></select></div></div>'+
+    '<div class="field"><label>What happened</label><input id="tcNote" placeholder="e.g. called about the missed week, wants to move to Tuesdays"></div>'+
+    '<div class="note">The touch is timestamped on the record, sets the next follow up date and counts toward the retention ladder.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doTouch(\''+id+'\')">Save the touch</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'touch\')">Back</button></div>');
+}
+function doTouch(id){
+  const m=memFind(id);
+  const type=document.getElementById('tcType').value;
+  const next=document.getElementById('tcNext').value;
+  const note=(document.getElementById('tcNote').value||'').trim()||'No note added';
+  m.touches.unshift({d:'Today',text:type+' · '+note+' · next: '+next});
+  if(m.status==='pastdue')m.last=m.last;
+  closeModal(); renderMembers2(); toast('Touch saved on '+m.name+'. Next follow up: '+next.toLowerCase()+'.');
+}
+function textModal(id){
+  const m=memFind(id); if(!m) return;
+  const tpl=[
+    ['Check in','Hey '+m.name.split(' ')[0]+', it is Kelsey at ONBASE. How is the training going? Anything you want to change about the plan?'],
+    ['Missed week','Hey '+m.name.split(' ')[0]+', we missed you this week. Want me to hold a cage for you tomorrow?'],
+    ['Payment','Hey '+m.name.split(' ')[0]+', your '+money(m.price)+' membership came back as not paid. Want me to send a fresh link?'],
+    ['Upgrade','Hey '+m.name.split(' ')[0]+', you are getting a lot out of '+m.plan+'. Adding strength is $80 more a month and it is the fastest jump you can make.']
+  ];
+  openModal('Send a text · '+m.name,
+    '<div class="field"><label>Template</label><select id="txTpl" onchange="txFill(\''+id+'\')">'+tpl.map((x,i)=>'<option value="'+i+'">'+x[0]+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Message</label><textarea id="txBody" rows="4">'+tpl[0][1]+'</textarea></div>'+
+    '<div class="note">Sends from the ONBASE number through PlateOps. Replies come back to this record and the thread stays in PlateOps.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doText(\''+id+'\')">Send the text</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'msg\')">Back</button></div>');
+  MEM_TAB[id+'_tpl']=tpl;
+}
+function txFill(id){
+  const m=memFind(id); const tpl=MEM_TAB[id+'_tpl']||[];
+  const i=+document.getElementById('txTpl').value;
+  if(tpl[i])document.getElementById('txBody').value=tpl[i][1];
+}
+function doText(id){
+  const m=memFind(id);
+  const body=(document.getElementById('txBody').value||'').trim();
+  if(!body){toast('Write the message first');return}
+  m.msgs.unshift({d:'Today',dir:'outbound · PlateOps',text:body});
+  m.touches.unshift({d:'Today',text:'Text sent through PlateOps'});
+  closeModal(); renderMembers2(); toast('Text sent to '+m.name+'. The reply will land on this record.');
+}
+function emailModal(id){
+  const m=memFind(id);
+  openModal('Send an email · '+m.name,
+    '<div class="field"><label>Subject</label><input id="emSub" value="Your ONBASE plan and next steps"></div>'+
+    '<div class="field"><label>Body</label><textarea id="emBody" rows="5">Hi '+m.name.split(' ')[0]+', thanks for training with us. Your '+m.plan+' is '+money(m.price)+' a month and your next bill is '+m.next+'. Reply here if you want to change anything.</textarea></div>'+
+    '<div class="acts"><button class="btn blue" onclick="doEmail(\''+id+'\')">Send the email</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'msg\')">Back</button></div>');
+}
+function doEmail(id){
+  const m=memFind(id);
+  m.msgs.unshift({d:'Today',dir:'outbound · email',text:document.getElementById('emSub').value});
+  m.touches.unshift({d:'Today',text:'Email sent: '+document.getElementById('emSub').value});
+  closeModal(); renderMembers2(); toast('Email sent to '+m.name+'.');
+}
+function callModal(id){
+  const m=memFind(id);
+  openModal('Log a call · '+m.name,
+    '<div class="grid2"><div class="field"><label>Result</label><select id="clRes"><option>Connected, happy</option><option>Connected, needs a change</option><option>Connected, wants to pause</option><option>No answer, left a voicemail</option><option>Wrong number</option></select></div>'+
+    '<div class="field"><label>Talk time</label><input id="clTime" value="4 min"></div></div>'+
+    '<div class="field"><label>Note</label><input id="clNote" placeholder="what was said"></div>'+
+    '<div class="acts"><button class="btn blue" onclick="doCall(\''+id+'\')">Save the call</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'msg\')">Back</button></div>');
+}
+function doCall(id){
+  const m=memFind(id);
+  const res=document.getElementById('clRes').value;
+  m.touches.unshift({d:'Today',text:'Call '+document.getElementById('clTime').value+' · '+res+(document.getElementById('clNote').value?' · '+document.getElementById('clNote').value:'')});
+  m.msgs.unshift({d:'Today',dir:'call',text:res});
+  closeModal(); renderMembers2(); toast('Call logged on '+m.name+'.');
+}
+function bookModal(id){
+  const m=memFind(id); if(!m) return;
+  openModal('Book a session · '+m.name,
+    '<div class="grid2"><div class="field"><label>Day</label><select id="bkDay">'+DAYS.map(d=>'<option>'+d.d+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Time</label><select id="bkTime">'+['3:00p','4:00p','5:00p','6:00p','7:00p'].map(t=>'<option>'+t+'</option>').join('')+'</select></div></div>'+
+    '<div class="field"><label>Focus</label><select id="bkWhat"><option>Hitting</option><option>Strength</option><option>Pitching</option><option>Speed and agility</option></select></div>'+
+    '<div class="note">Books against the cage calendar and counts in utilization on the Cages and sessions tab.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doBook(\''+id+'\')">Book it</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\',\'ses\')">Back</button></div>');
+}
+function doBook(id){
+  const m=memFind(id);
+  const day=document.getElementById('bkDay').value, time=document.getElementById('bkTime').value, what=document.getElementById('bkWhat').value;
+  m.sessions.unshift({d:day+' '+time,what:what+' with Marcus'});
+  m.last='Booked '+day;
+  const d=DAYS.filter(x=>x.d===day)[0]; if(d&&d.booked<d.cap)d.booked++;
+  closeModal(); renderMembers2(); toast(what+' session booked for '+m.name+' on '+day+' at '+time+'.');
+}
+function planModal(id){
+  const m=memFind(id);
+  openModal('Change plan · '+m.name,
+    '<div class="field"><label>Move to</label><select id="plTo">'+PLANS.map((p,i)=>'<option value="'+i+'"'+(p.n===m.plan?' selected':'')+'>'+p.n+' · '+money(p.price)+'</option>').join('')+'</select></div>'+
+    '<div class="note">Shopify prorates the change on the next bill. The record keeps its history either way.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doPlan(\''+id+'\')">Save the change</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\')">Back</button></div>');
+}
+function doPlan(id){
+  const m=memFind(id); const pi=+document.getElementById('plTo').value; const p=PLANS[pi];
+  const old=m.plan;
+  m.plan=p.n; m.price=p.price;
+  m.touches.unshift({d:'Today',text:'Plan changed from '+old+' to '+p.n+' at '+money(p.price)});
+  closeModal(); renderMembers2(); toast(m.name+' moved to '+p.n+'. MRR is now '+money(memMrr())+'.');
+}
+function memPause(id){
+  const m=memFind(id); m.status='paused'; m.next='Held';
+  m.touches.unshift({d:'Today',text:'Membership paused, access held, billing resumes on request'});
+  closeModal(); renderMembers2(); toast(m.name+' paused. Access is held and the record stays.');
+}
+function memResume(id){
+  const m=memFind(id); m.status='active'; m.next='Dec 1';
+  m.touches.unshift({d:'Today',text:'Membership resumed'});
+  closeModal(); renderMembers2(); toast(m.name+' is active again.');
+}
+function memCancel(id){
+  const m=memFind(id);
+  openModal('Cancel · '+m.name,
+    '<div class="field"><label>Reason</label><select id="ccWhy"><option>Moved away</option><option>Too expensive</option><option>Schedule does not fit</option><option>Not seeing progress</option><option>Other</option></select></div>'+
+    '<div class="field"><label>Save offer to try first</label><select id="ccSave"><option>Two weeks free</option><option>Move to a cheaper plan</option><option>Pause for a month</option><option>No offer, let them go</option></select></div>'+
+    '<div class="acts"><button class="btn blue" onclick="doCancel(\''+id+'\')">Confirm the cancel</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+id+'\')">Back</button></div>');
+}
+function doCancel(id){
+  const m=memFind(id);
+  const why=document.getElementById('ccWhy').value, save=document.getElementById('ccSave').value;
+  m.status='cancelled'; m.next='—';
+  m.touches.unshift({d:'Today',text:'Cancelled · '+why+' · offer made: '+save});
+  closeModal(); renderMembers2(); toast(m.name+' cancelled. Reason logged as '+why.toLowerCase()+'.');
+}
+
+/* ---- one shared create path for Sell and for Convert ---- */
+function createMembership(o){
+  const p=memPlanByName(o.plan);
+  const m=memNew({name:o.name,plan:p.n,price:p.price,status:o.status||'active',
+    joined:'Nov 2026',next:o.next||'Dec 1',esa:!!o.esa,
+    phone:o.phone||'',email:o.email||'',family:o.family||0,
+    last:'Signed up today',balance:o.balance||0,
+    payments:o.paid?[{d:'Today',amt:p.price,how:o.how||'Card',ok:true}]:[],
+    sessions:[],msgs:[],touches:[{d:'Today',text:'Membership created on '+p.n+' at '+money(p.price)+(o.from?' from '+o.from:'')}]});
+  return m;
+}
+function newMemberModal(){
+  openModal('Create a membership',
+    '<div class="grid2"><div class="field"><label>Member name</label><input id="nmName" placeholder="First and last"></div>'+
+    '<div class="field"><label>Plan</label><select id="nmPlan">'+PLANS.map((p,i)=>'<option value="'+i+'">'+p.n+' · '+money(p.price)+'</option>').join('')+'</select></div></div>'+
+    '<div class="grid2"><div class="field"><label>Phone</label><input id="nmPhone" placeholder="(480) 000-0000"></div>'+
+    '<div class="field"><label>Email</label><input id="nmEmail" placeholder="name@email.com"></div></div>'+
+    '<div class="grid2"><div class="field"><label>Payment</label><select id="nmHow"><option>Card</option><option>ACH</option><option>ESA invoice</option><option>Cash at the desk</option></select></div>'+
+    '<div class="field"><label>Charge today</label><select id="nmCharge"><option>Yes, first month</option><option>No, bill on the 1st</option></select></div></div>'+
+    '<div class="field"><label>Family athletes at '+money(ADDON_PRICE)+' each</label><select id="nmFam"><option value="0">None</option><option value="1">1</option><option value="2">2</option></select></div>'+
+    '<div class="note">Creates the Shopify membership, the HubSpot contact and the record here in one step. ESA families get an invoice instead of a card.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doNewMember()">Create the membership</button></div>');
+}
+function doNewMember(){
+  const name=(document.getElementById('nmName').value||'').trim();
+  if(!name){toast('Add a name first');return}
+  const pi=+document.getElementById('nmPlan').value;
+  const how=document.getElementById('nmHow').value;
+  const charge=document.getElementById('nmCharge').value.indexOf('Yes')===0;
+  const fam=+document.getElementById('nmFam').value;
+  const m=createMembership({name:name,plan:PLANS[pi].n,phone:document.getElementById('nmPhone').value,
+    email:document.getElementById('nmEmail').value,esa:how==='ESA invoice',family:fam,how:how,paid:charge});
+  PLANS[pi].sold++; if(fam)FAMILY_ADDONS+=fam;
+  MB_WEEKS[MB_WEEKS.length-1]++;
+  closeModal(); renderMembers2(); if(RENDER.members)RENDER.members();
+  toast(m.name+' is on '+m.plan+'. MRR is now '+money(memMrr())+'.');
+}
+
+</script>
+<script>
+/* ---------- shared pickers and the wiring from other tabs into member records ---------- */
+
+function memFor(name,plan){
+  let m=MEMBERS.filter(x=>x.name===name)[0];
+  if(!m){
+    const p=memPlanByName(plan||'Youth Hitting');
+    m=memNew({name:name,plan:p.n,price:p.price,status:'pastdue',joined:'Oct 2026',
+      next:'Overdue',last:'2 weeks ago',phone:'(480) 555-01'+(10+MEMBERS.length%80),
+      email:name.toLowerCase().replace(/[^a-z]+/g,'.')+'@email.com',balance:p.price,
+      payments:[],sessions:[],msgs:[],touches:[{d:'Today',text:'Record created from the retention queue'}]});
+  }
+  return m;
+}
+
+function pickMember(title,cb){
+  window.__PICK=cb;
+  openModal(title,
+    '<div class="field"><label>Find the member</label><input id="pkQ" placeholder="Type a name" oninput="pkFilter()"></div>'+
+    '<div id="pkList" style="max-height:320px;overflow:auto"></div>');
+  pkFilter();
+}
+function pkFilter(){
+  const q=((document.getElementById('pkQ')||{}).value||'').toLowerCase();
+  const rows=MEMBERS.filter(m=>!q||m.name.toLowerCase().indexOf(q)>=0).slice(0,30);
+  document.getElementById('pkList').innerHTML=rows.map(m=>
+    '<div onclick="pkChoose(\''+m.id+'\')" style="display:flex;justify-content:space-between;gap:10px;padding:8px 4px;border-bottom:1px solid #EDEAE2;cursor:pointer">'+
+    '<span><b>'+m.name+'</b> <span class="tag">'+m.plan+'</span></span>'+
+    '<span class="tag">'+money(m.price+(m.family*ADDON_PRICE))+' · '+m.status+'</span></div>').join('')||'<div class="tag">No match.</div>';
+}
+function pkChoose(id){ const cb=window.__PICK; closeModal(); if(cb)cb(id); }
+
+/* revenue: a month opens its own breakdown, and money can be collected from it */
+function rvMonth(i){
+  const m=MONTHS[i];
+  const pays=MEMBERS.reduce((s,x)=>s+x.payments.filter(p=>p.ok).length,0);
+  openModal(m.m+' · '+money(m.mrr+m.one),
+    '<div class="grid2" style="gap:10px">'+
+      '<div class="kpi"><div class="k">Memberships</div><div class="v">'+m.members+'</div></div>'+
+      '<div class="kpi"><div class="k">MRR</div><div class="v">'+money(m.mrr)+'</div></div>'+
+      '<div class="kpi"><div class="k">One time</div><div class="v">'+money(m.one)+'</div></div>'+
+      '<div class="kpi"><div class="k">Target</div><div class="v">'+money(m.target)+'</div></div>'+
+    '</div>'+
+    '<table style="margin-top:10px"><tbody>'+
+      '<tr><th style="width:40%">Gap to target</th><td>'+money(m.target-(m.mrr+m.one))+'</td></tr>'+
+      '<tr><th>Average per member</th><td>'+money(m.mrr/Math.max(1,m.members))+'</td></tr>'+
+      '<tr><th>One time revenue</th><td>Assessments and camps, '+money(m.one)+'</td></tr>'+
+      '<tr><th>Payments collected to date</th><td>'+pays+' posted to member records</td></tr>'+
+    '</tbody></table>'+
+    '<div class="note" style="margin-top:9px">Every payment taken on a member record posts here. The model above is the plan, the payments are what has actually been collected.</div>'+
+    '<div class="acts" style="margin-top:10px">'+
+      '<button class="btn blue" onclick="pickMember(\'Take a payment\',function(id){payModal(id)})">Take a payment</button>'+
+      '<button class="btn ghost" onclick="pickMember(\'Send a text\',function(id){textModal(id)})">Send a text</button>'+
+      '<button class="btn ghost" onclick="targetModal()">Adjust the target</button>'+
+    '</div>');
+}
+
+/* cages: a day opens the real bookings, and a member can be booked straight in */
+const _dayModalBase = typeof dayModal==='function'?dayModal:null;
+function dayBookings(d){
+  return MEMBERS.reduce((a,m)=>{
+    m.sessions.forEach(s=>{ if(s.d.indexOf(d)===0) a.push({n:m.name,what:s.what}) });
+    return a;
+  },[]);
+}
+
+/* coaches: a gap becomes a bookable session for a real member */
+function gapBook(i){
+  pickMember('Book into '+COACHES[i].n+' open hour',function(id){
+    const m=memFind(id);
+    openModal('Book '+m.name+' with '+COACHES[i].n,
+      '<div class="grid2"><div class="field"><label>Day</label><select id="gbDay">'+DAYS.map(d=>'<option>'+d.d+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>Time</label><select id="gbTime"><option>4:00p</option><option>5:00p</option><option>6:00p</option></select></div></div>'+
+      '<div class="note">This closes one of '+COACHES[i].gaps+' open hours and adds '+money(160)+' of private revenue to '+COACHES[i].n+'.</div>'+
+      '<div class="acts"><button class="btn blue" onclick="doGapBook('+i+',\''+id+'\')">Book the hour</button></div>');
+  });
+}
+function doGapBook(i,id){
+  const m=memFind(id);
+  const day=document.getElementById('gbDay').value, time=document.getElementById('gbTime').value;
+  m.sessions.unshift({d:day+' '+time,what:'Private with '+COACHES[i].n});
+  m.touches.unshift({d:'Today',text:'Private session booked with '+COACHES[i].n});
+  COACHES[i].sessions++; COACHES[i].hours+=1; COACHES[i].rev+=160;
+  COACHES[i].load=Math.min(100,COACHES[i].load+3); COACHES[i].gaps=Math.max(0,COACHES[i].gaps-1);
+  closeModal(); renderCoaches(); renderMembers2();
+  toast(m.name+' booked with '+COACHES[i].n+' on '+day+'. '+COACHES[i].gaps+' gaps left.');
+}
+
+/* retention: reach out from the risk row, and it lands on the member record */
+function riskReach(i){
+  const r=RISK[i];
+  const m=memFor(r.n,r.plan);
+  openModal('Reach '+r.n,
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="chip a">'+r.sig+'</span><span class="chip n">'+r.plan+'</span>'+
+      (r.days?'<span class="chip r">'+r.days+' days left to act</span>':'')+'</div>'+
+    '<div class="field"><label>Approach</label><select id="rrStep" onchange="rrFill(\''+m.id+'\',\''+r.sig.replace(/'/g,"")+'\')">'+
+      '<option value="text">Text them a specific time this week</option>'+
+      '<option value="call">Call the parent today</option>'+
+      '<option value="pay">Take the payment now</option>'+
+      '<option value="plan">Move them to a plan that fits</option>'+
+    '</select></div>'+
+    '<div class="field"><label>Message</label><textarea id="rrBody" rows="3">Hey '+r.n.split(' ')[0]+', it is Kelsey at ONBASE. We noticed '+r.sig.toLowerCase()+'. Want me to hold a cage for you this week?</textarea></div>'+
+    '<div class="note">Sending writes the touch and the message to '+r.n+' member record, so retention and the record never disagree.</div>'+
+    '<div class="acts"><button class="btn blue" onclick="doRiskReach('+i+',\''+m.id+'\')">Send it</button>'+
+    '<button class="btn ghost" onclick="memberOpen(\''+m.id+'\')">Open the record first</button></div>');
+}
+function rrFill(id,sig){
+  const v=document.getElementById('rrStep').value;
+  const m=memFind(id);
+  const body=document.getElementById('rrBody');
+  if(v==='text')body.value='Hey '+m.name.split(' ')[0]+', it is Kelsey at ONBASE. We noticed '+sig.toLowerCase()+'. Want me to hold a cage for you this week?';
+  if(v==='call')body.value='Call script: confirm they are ok, ask what changed, offer one specific session time, confirm the next bill date.';
+  if(v==='pay')body.value='Payment link text: here is a fresh link for your '+money(m.balance||m.price)+' balance, takes ten seconds.';
+  if(v==='plan')body.value='Hey '+m.name.split(' ')[0]+', if the schedule is the problem we can move you to a smaller plan and keep your spot. Want me to send the options?';
+}
+function doRiskReach(i,id){
+  const r=RISK[i], m=memFind(id);
+  const how=document.getElementById('rrStep').value;
+  const body=(document.getElementById('rrBody').value||'').trim();
+  if(how==='pay'){ closeModal(); payModal(id); return }
+  if(how==='plan'){ closeModal(); planModal(id); return }
+  m.msgs.unshift({d:'Today',dir:how==='call'?'call note':'outbound · PlateOps',text:body});
+  m.touches.unshift({d:'Today',text:(how==='call'?'Call made':'Text sent')+' · '+r.sig});
+  RISK.splice(i,1);
+  closeModal(); renderRetention(); renderMembers2();
+  toast(r.n+' reached. The touch is on the record and they are off the risk list.');
+}
+
+/* recovery: an abandoned cart reaches out with the actual plan and value */
+function cartReach(i){
+  const c=CARTS[i];
+  openModal('Reach '+c.n,
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="chip n">'+c.plan+'</span><span class="chip a">'+money(c.val)+' in the cart</span>'+
+      '<span class="chip">'+c.at+'</span>'+(c.tries?'<span class="chip r">'+c.tries+' attempts</span>':'')+'</div>'+
+    '<div class="field"><label>Approach</label><select id="crStep"><option value="text">Text the checkout link back</option><option value="call">Call and answer the objection</option><option value="offer">Offer the first month at half</option></select></div>'+
+    '<div class="field"><label>Message</label><textarea id="crBody" rows="3">Hey '+c.n.split(' ')[0]+', Kelsey at ONBASE. Your '+c.plan+' is still saved, it is '+money(c.val)+' a month. Want me to send the link back over?</textarea></div>'+
+    '<div class="acts"><button class="btn blue" onclick="doCartReach('+i+')">Send it</button></div>');
+}
+function doCartReach(i){
+  const c=CARTS[i];
+  const step=document.getElementById('crStep').value;
+  const body=(document.getElementById('crBody').value||'').trim();
+  CARTS.splice(i,1);
+  closeModal(); renderRecovery();
+  toast(c.n+' reached by '+step+'. Cart moved to the recovered list.');
+}
+
+/* one place to see everything that flowed into the roster */
+function renderRosterFeed(){
+  const el=document.getElementById('mrFeed'); if(!el) return;
+  const rows=[
+    ['Waitlist converts','create the record and the Shopify membership together'],
+    ['Sell on the Memberships tab','same create path, plan price carried over'],
+    ['Recovery texts','land on the record when the cart is recovered'],
+    ['Retention touches','write the touch and the message to the record'],
+    ['Cage bookings','add a session row and move utilization'],
+    ['Payments','clear the balance and post to Revenue']
+  ];
+  el.innerHTML=rows.map(r=>'<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #EDEAE2"><b style="min-width:170px;font-size:12.5px">'+r[0]+'</b><span style="font-size:12.5px">'+r[1]+'</span></div>').join('')+
+    '<div class="acts" style="margin-top:10px"><button class="btn ghost" onclick="pickMember(\'Open a record\',function(id){memberOpen(id)})">Open any record</button></div>';
+}
+
+RENDER.roster=function(){ renderMembers2(); renderRosterFeed() };
+
+/* pay straight from a retention row */
+function riskPay(i){
+  const r=RISK[i]; const m=memFor(r.n,r.plan);
+  payModal(m.id);
+}
+
+/* revenue rows open their own month breakdown instead of a generic record */
+const _openRowBase=openRow;
+openRow=function(tab,ti,ri){
+  if(tab==='revenue'&&ti===0){ rvMonth(ri); return }
+  _openRowBase(tab,ti,ri);
+};
+
+/* cages: the day view offers a booking for a real member */
+const _dayModal2=typeof dayModal==='function'?dayModal:null;
+if(_dayModal2){
+  dayModal=function(d){
+    _dayModal2(d);
+    const body=document.getElementById('mBody');
+    if(!body) return;
+    const bk=dayBookings(d);
+    body.insertAdjacentHTML('beforeend',
+      '<div class="mk" style="margin-top:12px">Booked into this day</div>'+
+      (bk.length?bk.map(b=>'<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #EDEAE2"><b style="font-size:12.5px">'+b.n+'</b><span class="tag">'+b.what+'</span></div>').join('')
+        :'<div class="tag">No member sessions booked into this day yet.</div>')+
+      '<div class="acts" style="margin-top:10px"><button class="btn blue" onclick="pickMember(\'Book into '+d+'\',function(id){bookModal(id)})">Book a member in</button>'+
+      '<button class="btn ghost" onclick="pickMember(\'Log a touch\',function(id){touchModal(id)})">Log a touch</button></div>');
+  };
+}
 
 </script>
 </body></html>
