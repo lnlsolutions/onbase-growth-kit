@@ -191,6 +191,8 @@ tbody tr.sel{background:#FBF3EA}
     </div>
 
     <section class="view on" id="v-overview">
+      <div class="panel" id="ovWhatPanel"><div class="head"><h2>What this is</h2><div class="spacer"></div><span class="chip g">running on your server</span><span class="chip b">yours to sell</span></div>
+        <div class="body" id="ovWhat"></div></div>
       <div class="cards" id="ovKpis"></div>
       <div class="cols">
         <div>
@@ -1212,6 +1214,20 @@ function skipSync(){
 NAV.skip=['Skip integration','PlateOps is sending the texts. This is what comes back'];
 RENDER.skip=function(){renderSkip();skipBack()};
 
+/* the two sentence answer to "what am I looking at", for a first time viewer */
+function ovWhat(){
+  const el=document.getElementById('ovWhat'); if(!el) return;
+  const items=[
+    ['The growth layer','Waitlist to membership, ad spend and cost per signup, cage utilization, retention, recovery, reviews, geofencing, SEO and GTM, all on one screen, all reading the same numbers.'],
+    ['Runs on your server','Not ours. This dashboard reads your own server for records, storage and backups, and the Server tab shows what it holds and what it deliberately does not.'],
+    ['PlateOps stays the source','Texts, sequences, contacts and bookings live in PlateOps and are read live. Nothing is copied, so there is never a second inbox to disagree with theirs.'],
+    ['Yours to sell','Every record carries a tenant, so the same build runs under another gym or league name with their own login, their own data and their own billing. One foundation, many locations.']
+  ];
+  el.innerHTML='<div class="grid2" style="gap:10px">'+items.map(i=>
+    '<div><div class="mk">'+i[0]+'</div><div style="font-size:12.5px;line-height:1.5;margin-top:3px">'+i[1]+'</div></div>').join('')+'</div>'+
+    '<div class="note" style="margin-top:10px">Ask the box in the corner anything on this dashboard, or ask what it costs, what is included, and how another location would use it.</div>';
+}
+
 const _ovBase=RENDER.overview;
 RENDER.overview=function(){
   _ovBase();
@@ -1219,6 +1235,7 @@ RENDER.overview=function(){
   if(box&&box.querySelectorAll('.card').length<7){
     box.insertAdjacentHTML('beforeend',kpi('Skip attributed',money(SKIP_TOTALS.rev),SKIP_TOTALS.booked+' texted bookings','up'));
   }
+  ovWhat();
   const pace=document.getElementById('ovPaceNote');
   if(pace&&pace.innerHTML.indexOf('Skip')<0){
     pace.innerHTML+=' <b>'+SKIP_TOTALS.booked+' of those signups came from a Skip text</b>, worth '+money(SKIP_TOTALS.rev)+' in booked revenue.';
@@ -1473,18 +1490,18 @@ function askAnswer(raw){
     return {html:'<b>'+members()+'</b> memberships sold across eight plans, <b>'+money(mrr())+'</b> of MRR, <b>'+money(arpu())+'</b> average. The biggest line is <b>'+top.n+'</b> at '+top.sold+' sold and '+money(top.price*top.sold)+' a month. The highest priced is <b>'+byPrice.n+'</b> at '+money(byPrice.price)+' with only '+byPrice.sold+' sold, so that is where the mix upside sits.',tab:'members'};
   }
 
-  /* waitlist */
-  if(has(/waitlist|leads|signup|pipeline|pipeline/)){
-    const last4=WL_WEEKS.slice(-4).reduce((a,b)=>a+b,0), prev4=WL_WEEKS.slice(-8,-4).reduce((a,b)=>a+b,0);
-    const pace=Math.round((last4-prev4)/prev4*100);
-    return {html:'<b>'+WAITLIST.length+'</b> contacts on the waitlist, and the last four weeks are running <b>'+(pace>=0?'+':'')+pace+'%</b> against the four before that, about <b>'+Math.round(last4/4)+' new a week</b>. Nine have already converted. At this pace you pass 200 before opening.',tab:'waitlist'};
-  }
-
   /* spend and CAC */
   if(has(/spend|budget|ad spend|cac|cost per|acquisition|roas|channel/)){
     const best=CHANNELS.slice().sort((a,b)=>a.spend/a.signups-(b.spend/b.signups))[0];
     const worst=CHANNELS.slice().sort((a,b)=>b.spend/b.signups-(a.spend/a.signups))[0];
     return {html:'<b>'+money(spend())+'</b> of the <b>'+money(BUDGET)+'</b> budget is spent, producing <b>'+signups()+'</b> signups at <b>'+money(spend()/signups())+'</b> each. Cheapest is <b>'+best.n+'</b> at '+money(best.spend/best.signups)+'. Most expensive is <b>'+worst.n+'</b> at '+money(worst.spend/worst.signups)+', so every dollar moved from there to flyers buys about two and a half more signups.',tab:'spend'};
+  }
+
+  /* waitlist */
+  if(has(/waitlist|leads|signup|pipeline|pipeline/)){
+    const last4=WL_WEEKS.slice(-4).reduce((a,b)=>a+b,0), prev4=WL_WEEKS.slice(-8,-4).reduce((a,b)=>a+b,0);
+    const pace=Math.round((last4-prev4)/prev4*100);
+    return {html:'<b>'+WAITLIST.length+'</b> contacts on the waitlist, and the last four weeks are running <b>'+(pace>=0?'+':'')+pace+'%</b> against the four before that, about <b>'+Math.round(last4/4)+' new a week</b>. Nine have already converted. At this pace you pass 200 before opening.',tab:'waitlist'};
   }
 
   /* sessions and utilization */
@@ -1521,6 +1538,18 @@ function askAnswer(raw){
   /* sequences: definitions and switches stay in PlateOps */
   if(has(/sequence|automation|follow.?up|drip/)){
     return {html:'Five of six sequences are running in <b>PlateOps</b>, and the definitions, steps and pause switches stay there so there is one place a sequence can change. What comes back to this dashboard is the result: <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>, a <b>30%</b> reply rate and <b>2.2%</b> opt-outs. The integration tab lists every figure we read.',tab:'skip'};
+  }
+
+  /* text someone: a real action, not a read-out */
+  if(has(/^(text|sms|message|nudge|reach out to)\s+/)){
+    const nm=WAITLIST.map(w=>w.name).filter(Boolean)
+      .find(n=>q.indexOf(String(n).toLowerCase().split(' ')[0])>=0);
+    if(nm){
+      SKIP_TOTALS.sent+=1;
+      if(document.getElementById('skLog')){RENDER.skip&&RENDER.skip();}
+      return {html:'Text queued to <b>'+nm+'</b> through PlateOps from the ONBASE number. It goes out on the sequence timing, and the reply lands back in PlateOps, not here. That is '+SKIP_TOTALS.sent.toLocaleString()+' messages now.',tab:'skip'};
+    }
+    return {html:'Give me a name and I will queue the text. Try <b>text Jordan</b> or <b>text Mia</b>.'};
   }
 
   /* skip and texts */
@@ -1574,6 +1603,41 @@ function askAnswer(raw){
   if(has(/gtm|tag manager|tracking|pixel|conversion|consent|analytics|event/)){
     const open=GTM_OPTS.filter(o=>!o[3]).length;
     return {html:'Container <b>'+GTM_STATE.container+'</b> is on version <b>'+GTM_STATE.version+'</b>, published '+GTM_STATE.published+', with <b>'+GTM_TAGS.filter(t=>t.on&&!t.draft).length+' of '+GTM_TAGS.length+'</b> tags live and <b>'+gtmPlan().filter(p=>p.conv).length+'</b> conversion events carrying the measurement. The measurement plan lists every event with its trigger and parameters, and the live debug window shows what fires when you send a test event. <b>'+open+'</b> optimizations are still open and the top one matters: Meta Lead fires twice on the same submit, which inflates every cost per signup on this dashboard. Say <b>publish GTM</b> after we fix it and it ships in minutes.',tab:'gtm'};
+  }
+
+  /* the no-show rate */
+  if(has(/no.?show rate|how many no.?shows|no.?shows/)){
+    return {html:'A no show consumes the credit, and the cancel window is <b>'+CANCEL_WINDOW+' hours</b> right now, which is the rule every booking follows. I do not publish a no-show rate yet because the booking record lives in PlateOps, not here. Once the key is in, that rate comes back per day and per coach, and it becomes the number that decides whether the window should be 8 or 24 hours.',tab:'schedule'};
+  }
+
+  /* pricing, kept in the agreement */
+  if(has(/cost|price|pricing|how much|budget for the build|monthly|fee|charge/)){
+    return {html:'Two lines, and I keep the numbers in the agreement rather than in the demo. The <b>build</b> is a one time scope: this system, the server, the tracking and the integrations. The <b>monthly</b> covers hosting, storage, security and backups, and it steps as locations are added, one tier for 1 to 10, the next for 11 to 50, the next for 51 to 150. What you are buying at each step is capacity, not a new build. The signed scope is where the figures live, so nobody quotes a number that has drifted.',tab:'sources'};
+  }
+
+  /* what this is, sold as software on their own server */
+  if(has(/what (is|does) this (system|software|platform|do)|what('s| is) included|what do we get|the product|this system|this software|deliverable/)){
+    return {html:'This is the growth and tracking layer that runs on your own server, in your own accounts. Six things: the <b>waitlist to membership</b> funnel with the money against it; <b>ad spend and cost per signup</b> by channel; <b>cage and session utilization</b> plus coach load; <b>retention and recovery</b>, who is drifting and which carts are sitting; <b>geofencing, SEO and GTM</b> as one measurement spine; and the <b>Skip integration</b>, read live so there is never a second inbox. On top of that this chat box reads every number and acts on most of them, and the <b>Server</b> tab shows the records, storage and security it all sits on.',tab:'overview'};
+  }
+
+  /* white label, other locations, tenants */
+  if(has(/white.?label|other gym|another gym|other location|another location|multi.?tenant|tenant|franchis|sell (it|this)|resell|licen[cs]e it|our own brand|own brand/)){
+    return {html:'Yes, and it is the reason the build is worth more than one gym. Every record carries a tenant id with row level security, each location gets its own subdomain and admin login, its own storage prefix and keys, and its own billing with a paywall that suspends on non payment. Your team keeps a platform owner role above all of them with an audit trail. A gym buying it sees <b>their</b> numbers under <b>their</b> brand and never sees another gym, and at the top tier the database is separate per tenant rather than shared rows.',tab:'sources'};
+  }
+
+  /* minors and leagues */
+  if(has(/minor|under 18|parental|consent|kid|child|league|team|youth/)){
+    return {html:'Two things have to be right before you sell to leagues. Minors need <b>parental consent captured at signup</b> and stored against the record, not a checkbox nobody keeps, and every message about a minor has to reach the parent, which is why the consent state travels with the contact into PlateOps. Leagues need <b>per team separation</b> inside one tenant, so a coach sees their roster and not the whole league. Both are in the data model, and both are the first things a league will ask you about.',tab:'retention'};
+  }
+
+  /* scale */
+  if(has(/how many (gyms|locations|clients|customers)|scale|300|hundred|grow past|capacity of the platform/)){
+    return {html:'The foundation holds <b>300 locations</b> without a rebuild, and hosting steps rather than jumps: one tier for 1 to 10 locations, the next for 11 to 50, the next for 51 to 150. What actually breaks first is not storage, it is the assumptions: one set of tables, one login and one set of keys. Those become tenant scoped, which is the work this build already accounts for. At ten locations you would be changing plans, not rewriting the product.',tab:'server'};
+  }
+
+  /* going live, access, what is needed */
+  if(has(/go live|launch|switch (it )?on|real data|connect|access|api key|credential|what do you need|what.s needed|integrat/)){
+    return {html:'Going live is wiring, not rebuilding. The order I would connect them: <b>HubSpot</b> for the waitlist and members, <b>Shopify</b> for money and carts, the <b>PlateOps key</b> for the inbox, then <b>Meta and Google Ads</b> for spend and cost per signup, the <b>Google profile</b> for rankings and reviews, and the <b>GTM container</b> last so every conversion is measured from day one. Each one needs an admin on that account to approve read access, which is why it goes out as a single list for Steve to sign rather than six separate asks.',tab:'sources'};
   }
 
   /* help */
