@@ -125,6 +125,14 @@ tr:last-child td{border-bottom:0}
 .askIn{display:flex;gap:7px;padding:9px 11px;border-top:1px solid var(--line);background:#fff}
 .askIn input{flex:1;border:1px solid var(--line);border-radius:18px;padding:8px 11px;font:inherit;font-size:12.5px}
 @media(max-width:640px){#askPanel{right:8px;left:8px;width:auto;bottom:70px;height:calc(100vh - 96px)}#askFab{right:12px;bottom:12px}}
+.mapsplit{display:grid;grid-template-columns:1fr 250px;gap:14px;align-items:start}
+.mapside{display:flex;flex-direction:column}
+.mrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #EDEAE2;font-size:12px}
+.mrow:last-child{border-bottom:none}
+.mk{color:#8C8578;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em}
+.mv{font-weight:700;text-align:right}
+tbody tr.sel{background:#FBF3EA}
+@media(max-width:980px){.mapsplit{grid-template-columns:1fr}.mapside{margin-top:10px}}
 </style></head><body>
 <div class="gate" id="gate"><div class="box">
   <div class="mark" style="margin-bottom:10px">O</div>
@@ -289,6 +297,9 @@ tr:last-child td{border-bottom:0}
 
     <section class="view" id="v-geo">
       <div class="cards" id="geKpis"></div>
+      <div class="panel"><div class="head"><h2>Fences on the map</h2><div class="spacer"></div><span class="chip b" id="geMapChip">7 active</span></div>
+        <div class="body"><div class="mapsplit"><div id="geMap"></div><div class="mapside" id="geMapDetail"></div></div>
+        <div class="note">Each ring is the radius a device is counted in, drawn to scale. Click a fence to read it. The blue pin is the facility at 8150 E Germann. The paused four day event shows as a marker only.</div></div></div>
       <div class="cols">
         <div>
           <div class="panel"><div class="head"><h2>Geofences</h2><div class="spacer"></div><span class="chip b">30 days</span>
@@ -308,8 +319,14 @@ tr:last-child td{border-bottom:0}
 
     <section class="view" id="v-seo">
       <div class="cards" id="seKpis"></div>
+      <div class="panel"><div class="head"><h2>Where you rank</h2><div class="spacer"></div><span class="chip n" id="seMapChip"></span></div>
+        <div class="body"><div class="mapsplit"><div id="seMap"></div><div class="mapside" id="seMapDetail"></div></div>
+        <div class="note">Average position by area over the last 30 days. Mesa is the only market where ONBASE sits in the top three, which is why every landing page still points at Mesa. Click an area to read it.</div></div></div>
       <div class="cols">
         <div>
+          <div class="panel"><div class="head"><h2>Rank by city</h2><div class="spacer"></div><span class="chip b">east valley</span></div>
+            <div class="body p0"><table><thead><tr><th>City</th><th class="num">Avg position</th><th class="num">Searches</th><th class="num">Top 3</th><th>Standing</th></tr></thead><tbody id="seCity"></tbody></table></div>
+            <div class="body"><div class="note">The gap is not a ranking problem, it is a page problem. Gilbert, Chandler and Queen Creek have no page of their own, so the Mesa page competes for them and loses.</div></div></div>
           <div class="panel"><div class="head"><h2>Tracked keywords</h2><div class="spacer"></div><span class="chip n">weekly refresh</span></div>
             <div class="body p0"><table><thead><tr><th>Keyword</th><th>Intent</th><th class="num">Volume</th><th class="num">Rank</th><th class="num">Change</th><th>Landing page</th><th></th></tr></thead><tbody id="seBody"></tbody></table></div>
             <div class="body"><div class="note">Rankings are pulled weekly for the east valley. The terms that convert are the ones with a suburb in them, not the broad ones.</div></div></div>
@@ -2077,6 +2094,187 @@ function renderSources(){
 NAV.gtmplan=['GTM plan','Priority one: convert the waitlist, then 250 members at $250 ARPM by April'];
 NAV.sources=['Data sources','What each system owns, so nothing gets built twice'];
 RENDER.gtmplan=renderGtmPlan; RENDER.sources=renderSources;
+
+</script>
+<script>
+/* ============================================================
+   Maps for the geofencing and SEO tabs.
+   Hand-built SVG of the east valley so the page stays a single
+   static file with no tile server, no API key and no network call.
+   ============================================================ */
+
+const MB={n:33.485,s:33.235,w:-111.945,e:-111.545};
+const MW=1000, MH=820;
+const mx=lng=>(lng-MB.w)/(MB.e-MB.w)*MW;
+const my=lat=>(MB.n-lat)/(MB.n-MB.s)*MH;
+const MILE_PX=(1/0.01448)/(MB.n-MB.s)*MH;
+
+/* name to coordinate. Mesa and the east valley, close enough to be recognisable. */
+const GEO_POS={
+  'ONBASE Athlete HQ':[33.2768,-111.6450],
+  'AZ Dingers, Mesa':[33.3140,-111.7010],
+  'D-BAT Mesa':[33.3610,-111.7030],
+  'Extra Innings Chandler':[33.3200,-111.8760],
+  'Mountain View High School':[33.4400,-111.7700],
+  'Mesa Sports Complex':[33.4480,-111.6950],
+  'Gilbert tournament, 4 day event':[33.3000,-111.7400]
+};
+function geoPos(f,i){
+  if(GEO_POS[f.n]) return GEO_POS[f.n];
+  return [33.2768+((i%3)-1)*0.012, -111.6450+((i%4)-1.5)*0.014];
+}
+
+const CITY_RANK=[
+  {c:'Mesa',lat:33.4150,lng:-111.7200,rank:3,vol:3480,top3:4},
+  {c:'Gilbert',lat:33.3520,lng:-111.7890,rank:6,vol:1240,top3:2},
+  {c:'Chandler',lat:33.3060,lng:-111.8410,rank:8,vol:980,top3:1},
+  {c:'Queen Creek',lat:33.2480,lng:-111.6340,rank:9,vol:610,top3:1},
+  {c:'Apache Junction',lat:33.4150,lng:-111.5490,rank:12,vol:390,top3:0},
+  {c:'Tempe',lat:33.3910,lng:-111.9190,rank:14,vol:520,top3:0},
+  {c:'Scottsdale',lat:33.4620,lng:-111.8790,rank:16,vol:470,top3:0}
+];
+function rankClass(r){ return r<=3?'g':r<=7?'b':r<=12?'a':'dn' }
+function rankColor(r){ return r<=3?'#2E7D5B':r<=7?'#046DCD':r<=12?'#D98324':'#C0453B' }
+
+/* ---------- base map ---------- */
+function baseMap(){
+  const V=[-111.905,-111.845,-111.790,-111.730,-111.690,-111.635,-111.600];
+  const H=[33.445,33.395,33.345,33.295,33.250];
+  let s='';
+  s+='<rect x="0" y="0" width="'+MW+'" height="'+MH+'" fill="#F6F3EC"/>';
+  /* blocks, very faint, to give the map some texture */
+  for(let gx=0;gx<26;gx++){
+    for(let gy=0;gy<22;gy++){
+      const x=gx*38+6, y=gy*37+6;
+      const t=(gx*7+gy*11)%9;
+      s+='<rect x="'+x+'" y="'+y+'" width="30" height="28" fill="'+(t===0?'#EDE8DC':'#F1EDE3')+'" opacity="'+(t===0?0.9:0.55)+'"/>';
+    }
+  }
+  /* the Salt River, north edge */
+  s+='<path d="M -20 '+my(33.437)+' C '+mx(-111.88)+' '+my(33.452)+', '+mx(-111.78)+' '+my(33.428)+', '+mx(-111.70)+' '+my(33.448)+' S '+mx(-111.60)+' '+my(33.436)+', '+MW+20+' '+my(33.452)+'" fill="none" stroke="#CFE0E4" stroke-width="10" stroke-linecap="round" opacity="0.9"/>';
+  /* arterials */
+  V.forEach(v=>{ s+='<line x1="'+mx(v)+'" y1="0" x2="'+mx(v)+'" y2="'+MH+'" stroke="#FFFFFF" stroke-width="5"/><line x1="'+mx(v)+'" y1="0" x2="'+mx(v)+'" y2="'+MH+'" stroke="#E3DDCE" stroke-width="1" opacity="0.7"/>'; });
+  H.forEach(h=>{ s+='<line x1="0" y1="'+my(h)+'" x2="'+MW+'" y2="'+my(h)+'" stroke="#FFFFFF" stroke-width="5"/><line x1="0" y1="'+my(h)+'" x2="'+MW+'" y2="'+my(h)+'" stroke="#E3DDCE" stroke-width="1" opacity="0.7"/>'; });
+  /* freeways */
+  const fwy=(d,lab,lx,ly)=>{ s+='<path d="'+d+'" fill="none" stroke="#EBD3A0" stroke-width="11" stroke-linecap="round"/>'+
+    '<path d="'+d+'" fill="none" stroke="#D8B978" stroke-width="1.5" stroke-dasharray="6 7"/>'+
+    '<text x="'+lx+'" y="'+ly+'" font-size="12" font-weight="700" fill="#A98A46" letter-spacing="0.6">'+lab+'</text>'; };
+  fwy('M -10 '+my(33.387)+' L '+MW+10+' '+my(33.379),'US 60',40,my(33.387)-10);
+  fwy('M -10 '+my(33.291)+' L '+MW+10+' '+my(33.298),'LOOP 202 SANTAN',40,my(33.291)+20);
+  fwy('M -10 '+my(33.452)+' L '+MW+10+' '+my(33.446),'LOOP 202 RED MOUNTAIN',40,my(33.452)-10);
+  fwy('M '+mx(-111.908)+' -10 L '+mx(-111.900)+' '+MH+10,'LOOP 101',mx(-111.908)+12,26);
+  /* city labels */
+  const city=(n,lat,lng,size)=>{ s+='<text x="'+mx(lng)+'" y="'+my(lat)+'" font-size="'+(size||13)+'" font-weight="700" fill="#B4AB98" letter-spacing="1.4" text-anchor="middle">'+n.toUpperCase()+'</text>'; };
+  city('Mesa',33.4300,-111.7400,15);
+  city('Gilbert',33.3620,-111.8050,14);
+  city('Chandler',33.3180,-111.8620,14);
+  city('Tempe',33.4000,-111.9250,13);
+  city('Queen Creek',33.2400,-111.6300,12);
+  city('Apache Junction',33.4250,-111.5520,11);
+  city('Scottsdale',33.4700,-111.8880,12);
+  /* scale bar and north arrow */
+  s+='<g transform="translate(24,'+(MH-34)+')">'+
+     '<rect x="0" y="0" width="'+(5*MILE_PX)+'" height="6" fill="#2B2A26" opacity="0.75"/>'+
+     '<rect x="0" y="0" width="'+(2.5*MILE_PX)+'" height="6" fill="#FFFFFF" opacity="0.9"/>'+
+     '<text x="0" y="20" font-size="11" fill="#6B655A">0</text>'+
+     '<text x="'+(5*MILE_PX)+'" y="20" font-size="11" fill="#6B655A" text-anchor="end">5 miles</text></g>';
+  s+='<g transform="translate('+(MW-40)+',36)"><path d="M0 -14 L6 6 L0 2 L-6 6 Z" fill="#2B2A26" opacity="0.8"/>'+
+     '<text x="0" y="24" font-size="10" fill="#6B655A" text-anchor="middle" letter-spacing="1">N</text></g>';
+  return s;
+}
+function mapFrame(inner,label){
+  return '<svg viewBox="0 0 '+MW+' '+MH+'" style="width:100%;height:auto;display:block;border-radius:10px;border:1px solid #E3DDCE;background:#F6F3EC" role="img" aria-label="'+label+'">'+inner+'</svg>';
+}
+
+/* ---------- geofence map ---------- */
+let GEO_SEL=0;
+function renderGeoMap(){
+  let s=baseMap();
+  GEO_FENCES.forEach((f,i)=>{
+    const [lat,lng]=geoPos(f,i), x=mx(lng), y=my(lat);
+    const r=Math.min(f.r*MILE_PX, MH*0.9);
+    const sel=i===GEO_SEL;
+    if(f.on){
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="rgba(217,83,30,'+(sel?0.16:0.08)+')" stroke="#D9531E" stroke-width="'+(sel?2.4:1.4)+'" '+(sel?'':'stroke-dasharray="0"')+'/>';
+    }else{
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+(r)+'" fill="none" stroke="#8C8578" stroke-width="1.2" stroke-dasharray="5 6" opacity="0.5"/>';
+    }
+    s+='<g style="cursor:pointer" onclick="geoSel('+i+')">'+
+       '<circle cx="'+x+'" cy="'+y+'" r="'+(sel?8:6)+'" fill="'+(f.on?'#D9531E':'#8C8578')+'" stroke="#FFFFFF" stroke-width="2"/>'+
+       '<text x="'+(x+11)+'" y="'+(y+4)+'" font-size="12" font-weight="700" fill="'+(sel?'#2B2A26':'#6B655A')+'">'+f.n.replace(/,.*/,'')+'</text>'+
+       '</g>';
+  });
+  /* the facility itself */
+  const [hlat,hlng]=GEO_POS['ONBASE Athlete HQ'];
+  s+='<g transform="translate('+mx(hlng)+','+my(hlat)+')">'+
+     '<circle r="15" fill="rgba(27,58,107,0.12)"/>'+
+     '<path d="M0 -13 C7 -13 12 -8 12 -1 C12 8 0 17 0 17 C0 17 -12 8 -12 -1 C-12 -8 -7 -13 0 -13 Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
+     '<circle cy="-2" r="4.6" fill="#FFFFFF"/></g>'+
+     '<text x="'+mx(hlng)+'" y="'+(my(hlat)+30)+'" font-size="11" font-weight="700" fill="#1B3A6B" text-anchor="middle">8150 E GERMANN</text>';
+  document.getElementById('geMap').innerHTML=mapFrame(s,'Geofences around Mesa and the east valley');
+  const t=geoTot();
+  const f=GEO_FENCES[GEO_SEL]||GEO_FENCES[0];
+  document.getElementById('geMapChip').textContent=GEO_FENCES.filter(x=>x.on).length+' active';
+  document.getElementById('geMapDetail').innerHTML=
+    '<div class="mrow"><div class="mk">'+f.n+'</div><div class="mv">'+(f.on?'running':'paused')+' · '+f.t+' · '+f.r+' mile radius</div></div>'+
+    '<div class="mrow"><div class="mk">Devices</div><div class="mv">'+f.dev.toLocaleString()+'</div></div>'+
+    '<div class="mrow"><div class="mk">Impressions</div><div class="mv">'+f.imp.toLocaleString()+'</div></div>'+
+    '<div class="mrow"><div class="mk">Visits</div><div class="mv">'+f.vis+'</div></div>'+
+    '<div class="mrow"><div class="mk">Signups</div><div class="mv">'+f.sg+'</div></div>'+
+    '<div class="mrow"><div class="mk">All active</div><div class="mv">'+t.dev.toLocaleString()+' devices · '+t.sg+' signups</div></div>';
+}
+function geoSel(i){ GEO_SEL=i; renderGeoMap(); }
+
+/* ---------- SEO map ---------- */
+let SEO_SEL=0;
+function renderSeoMap(){
+  let s=baseMap();
+  CITY_RANK.forEach((c,i)=>{
+    const x=mx(c.lng), y=my(c.lat);
+    const rad=18+Math.sqrt(c.vol)/6;
+    const sel=i===SEO_SEL, col=rankColor(c.rank);
+    s+='<g style="cursor:pointer" onclick="seoSel('+i+')">'+
+       '<circle cx="'+x+'" cy="'+y+'" r="'+rad+'" fill="'+col+'" opacity="'+(sel?0.34:0.2)+'" stroke="'+col+'" stroke-width="'+(sel?2.4:1.2)+'"/>'+
+       '<text x="'+x+'" y="'+(y+6)+'" font-size="'+(rad>26?19:16)+'" font-weight="700" fill="'+col+'" text-anchor="middle">#'+c.rank+'</text>'+
+       '<text x="'+x+'" y="'+(y+rad+15)+'" font-size="11" font-weight="700" fill="#6B655A" text-anchor="middle">'+c.c+'</text>'+
+       '</g>';
+  });
+  const [hlat,hlng]=GEO_POS['ONBASE Athlete HQ'];
+  s+='<g transform="translate('+mx(hlng)+','+my(hlat)+')">'+
+     '<path d="M0 -13 C7 -13 12 -8 12 -1 C12 8 0 17 0 17 C0 17 -12 8 -12 -1 C-12 -8 -7 -13 0 -13 Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
+     '<circle cy="-2" r="4.6" fill="#FFFFFF"/></g>';
+  /* legend */
+  const lx=MW-232, ly=MH-118;
+  s+='<g transform="translate('+lx+','+ly+')"><rect x="0" y="0" width="216" height="100" rx="8" fill="#FFFFFF" opacity="0.94" stroke="#E3DDCE"/>'+
+     '<text x="12" y="20" font-size="10" font-weight="700" fill="#8C8578" letter-spacing="1">AVERAGE POSITION</text>'+
+     [['#2E7D5B','1 to 3'],['#046DCD','4 to 7'],['#D98324','8 to 12'],['#C0453B','13 and worse']].map((r,i)=>
+       '<circle cx="20" cy="'+(36+i*16)+'" r="6" fill="'+r[0]+'" opacity="0.85"/>'+
+       '<text x="34" y="'+(40+i*16)+'" font-size="11" fill="#6B655A">'+r[1]+'</text>').join('')+
+     '</g>';
+  document.getElementById('seMap').innerHTML=mapFrame(s,'Where ONBASE ranks across the east valley');
+  const c=CITY_RANK[SEO_SEL];
+  document.getElementById('seMapChip').textContent='Mesa first, suburbs second';
+  document.getElementById('seMapDetail').innerHTML=
+    '<div class="mrow"><div class="mk">'+c.c+'</div><div class="mv">average position '+c.rank+'</div></div>'+
+    '<div class="mrow"><div class="mk">Monthly searches</div><div class="mv">'+c.vol.toLocaleString()+'</div></div>'+
+    '<div class="mrow"><div class="mk">Top 3 keywords</div><div class="mv">'+c.top3+' of 12</div></div>'+
+    '<div class="mrow"><div class="mk">Read</div><div class="mv">'+seoCityRead(c)+'</div></div>';
+  document.getElementById('seCity').innerHTML=CITY_RANK.map((r,i)=>
+    '<tr'+(i===SEO_SEL?' class="sel"':'')+'><td><b>'+r.c+'</b></td><td class="num">#'+r.rank+'</td><td class="num">'+r.vol.toLocaleString()+'</td>'+
+    '<td class="num">'+r.top3+'</td><td style="font-size:11px;font-weight:700;color:'+rankColor(r.rank)+'">'+(r.rank<=3?'winning':r.rank<=7?'close':r.rank<=12?'behind':'absent')+'</td></tr>').join('');
+}
+function seoCityRead(c){
+  if(c.rank<=3) return 'winning the local pack, defend it';
+  if(c.rank<=7) return 'one page and a few reviews from the top three';
+  if(c.rank<=12) return 'no dedicated page for this city yet';
+  return 'not visible, needs a page before it can rank';
+}
+function seoSel(i){ SEO_SEL=i; renderSeoMap(); }
+
+/* ---------- hooks ---------- */
+const _geoBase=RENDER.geo, _seoBase=RENDER.seo;
+RENDER.geo=function(){ _geoBase(); renderGeoMap(); };
+RENDER.seo=function(){ _seoBase(); renderSeoMap(); };
 
 </script>
 </body></html>
