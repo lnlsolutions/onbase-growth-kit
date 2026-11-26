@@ -1845,6 +1845,11 @@ function geoSpendOf(f){ const t=GEO_FENCES.reduce((a,x)=>a+x.imp,0)||1; return G
 function geoCpl(f){ return f.sg?geoSpendOf(f)/f.sg:0 }
 function geoCvr(f){ return f.vis?f.sg/f.vis*100:0 }
 function geoSelValue(f){ return GEO_METRIC_DEF[GEO_METRIC].v(f) }
+function geoScaleMax(){
+  const on=geoShown().filter(o=>o.f.on);
+  const list=(on.length?on:geoShown());
+  return Math.max(1,Math.max.apply(null,list.map(o=>geoSelValue(o.f)).concat([1])));
+}
 function geoShown(){ return GEO_FENCES.map((f,i)=>({f:f,i:i})).filter(o=>!Object.keys(GEO_TYPES).length||GEO_TYPES[o.f.t]) }
 function geoWeek(f,i){
   const out=[];
@@ -1899,8 +1904,7 @@ function geoRefresh(){ renderGeo(); renderGeoMap(); }
 
 function renderGeoTools(){
   const def=GEO_METRIC_DEF[GEO_METRIC];
-  const shown=geoShown();
-  const max=Math.max(1,Math.max.apply(null,shown.map(o=>geoSelValue(o.f)).concat([1])));
+  const max=geoScaleMax();
   const sw=[[0.125,'#F2B79A'],[0.375,'#E8825A'],[0.625,'#D9531E'],[0.875,'#B23A0E']];
   document.getElementById('geTools').innerHTML=
     '<div class="grow"><span class="glab">Size and colour</span><span class="filters">'+
@@ -2529,7 +2533,7 @@ function drawGeoMap(){
   const vb=geoVB(); GEO_VB=vb;
   let s=baseMap();
   const shown=geoShown();
-  const max=Math.max(1,Math.max.apply(null,shown.map(o=>geoSelValue(o.f)).concat([1])));
+  const max=geoScaleMax();
   /* heat layer, under the rings */
   if(GEO_HEAT&&shown.length){
     s+='<defs>'+shown.map((o,k)=>{
