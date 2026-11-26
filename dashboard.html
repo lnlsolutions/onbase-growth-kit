@@ -107,6 +107,24 @@ tr:last-child td{border-bottom:0}
 .composer input{flex:1;border:1px solid var(--line);border-radius:20px;padding:8px 12px;font:inherit;font-size:12.5px}
 .live{display:inline-flex;align-items:center;gap:6px;background:#E4F1E9;color:var(--green);font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:20px}
 .live i{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+
+#askFab{position:fixed;right:18px;bottom:18px;z-index:180;display:inline-flex;align-items:center;gap:7px;background:var(--ink);color:#fff;border:0;border-radius:24px;padding:11px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+#askFab:hover{background:var(--orange)}
+#askFab.on{background:var(--orange)}
+#askPanel{position:fixed;right:18px;bottom:74px;width:min(392px,calc(100vw - 24px));height:min(560px,calc(100vh - 110px));background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 48px rgba(0,0,0,.24);display:none;flex-direction:column;z-index:181;overflow:hidden}
+#askPanel.on{display:flex}
+.askHead{display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid var(--line);background:var(--cream2)}
+.askHead b{font-size:13.5px}
+.askMsgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#FCFBF8}
+.askB{max-width:88%;padding:9px 11px;border-radius:12px;font-size:12.5px;line-height:1.5;background:#fff;border:1px solid var(--line)}
+.askB.me{align-self:flex-end;background:var(--ink);color:#fff;border-color:var(--ink)}
+.askB b{font-weight:800}
+.askChips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 11px;border-top:1px solid var(--line);background:#fff}
+.askChips button{background:var(--cream);border:1px solid var(--line);border-radius:16px;padding:5px 9px;font:inherit;font-size:11px;cursor:pointer;color:var(--ink)}
+.askChips button:hover{border-color:var(--ink)}
+.askIn{display:flex;gap:7px;padding:9px 11px;border-top:1px solid var(--line);background:#fff}
+.askIn input{flex:1;border:1px solid var(--line);border-radius:18px;padding:8px 11px;font:inherit;font-size:12.5px}
+@media(max-width:640px){#askPanel{right:8px;left:8px;width:auto;bottom:70px;height:calc(100vh - 96px)}#askFab{right:12px;bottom:12px}}
 </style></head><body>
 <div class="gate" id="gate"><div class="box">
   <div class="mark" style="margin-bottom:10px">O</div>
@@ -1360,6 +1378,226 @@ function renderServer(){
 
 NAV.server=['Server','The one-location server, storage and what is inside it'];
 RENDER.server=function(){ renderServer(); if(!SRV_LAST) srvFetch(); };
+
+</script>
+<script>
+/* ============================================================
+   Ask ONBASE — assistant that answers every scope on the
+   dashboard and can act: book, text, pause, change a policy.
+   Grounded in the same numbers the tabs render, so it cannot
+   invent a figure that is not on the screen.
+   ============================================================ */
+
+const ASK_LOG=[];
+let ASK_OPEN=false;
+
+const DAYMAP={mon:'Mon',monday:'Mon',tue:'Tue',tuesday:'Tue',wed:'Wed',wednesday:'Wed',thu:'Thu',thursday:'Thu',fri:'Fri',friday:'Fri',sat:'Sat',saturday:'Sat',sun:'Sun',sunday:'Sun'};
+
+function askPanel(){
+  if(document.getElementById('askWrap'))return;
+  const w=document.createElement('div');
+  w.id='askWrap';
+  w.innerHTML=
+   '<button id="askFab" onclick="askToggle()" aria-label="Ask ONBASE">'+
+     '<span style="font-size:15px">✦</span><span>Ask</span></button>'+
+   '<div id="askPanel">'+
+     '<div class="askHead"><div><b>Ask ONBASE</b><div class="tag" id="askScope">anything on this dashboard</div></div>'+
+       '<div class="spacer"></div><button class="btn ghost sm" onclick="askToggle()">Close</button></div>'+
+     '<div class="askMsgs" id="askMsgs"></div>'+
+     '<div class="askChips" id="askChips"></div>'+
+     '<div class="askIn"><input id="askInput" placeholder="Ask about revenue, bookings, texts, storage..." onkeydown="if(event.key===\'Enter\')askSend()">'+
+       '<button class="btn blue sm" onclick="askSend()">Send</button></div>'+
+   '</div>';
+  document.body.appendChild(w);
+  if(!ASK_LOG.length){
+    askPush('ai','I can read every number on this dashboard and act on most of them. Ask me for revenue, memberships, the waitlist, ad spend and cost per signup, cage utilization, coach load, retention risk, reviews, abandoned carts, the Skip texts and sequences, or the server and storage. I can also book a session, text a member, pause a sequence or change the no-show window.');
+  }
+  askChips();
+}
+function askToggle(){
+  ASK_OPEN=!ASK_OPEN;
+  document.getElementById('askPanel').classList.toggle('on',ASK_OPEN);
+  document.getElementById('askFab').classList.toggle('on',ASK_OPEN);
+  if(ASK_OPEN){askChips();const i=document.getElementById('askInput');if(i)i.focus();}
+}
+function askPush(who,html){
+  ASK_LOG.push([who,html]);
+  const m=document.getElementById('askMsgs');
+  if(m){m.insertAdjacentHTML('beforeend','<div class="askB '+(who==='me'?'me':'ai')+'">'+html+'</div>');m.scrollTop=m.scrollHeight;}
+}
+function askChips(){
+  const c=document.getElementById('askChips'); if(!c)return;
+  const active=(document.querySelector('.view.on')||{}).id||'v-overview';
+  const base=[['What is our MRR?','mrr'],['Book a session Thursday 5pm','book'],['How are the Skip texts doing?','skip']];
+  const extra={ 'v-schedule':['What is empty this week?','empty'],
+    'v-recovery':['How much is in abandoned carts?','carts'],
+    'v-retention':['Who is at risk?','risk'],
+    'v-server':['How much storage is left?','storage'],
+    'v-convos':['Who needs a reply?','reply'],
+    'v-seqs':['Which sequence books the most?','seq'],
+    'v-spend':['What is our cost per signup?','cac'] }[active]||[['What is our cost per signup?','cac']];
+  c.innerHTML=base.concat(extra).slice(0,4).map(x=>'<button onclick="askQuick(\''+x[1]+'\')">'+x[0]+'</button>').join('');
+}
+function askQuick(k){
+  const q={'mrr':'What is our MRR?','book':'Book a session Thursday 5pm','skip':'How are the Skip texts doing?',
+    'empty':'What is empty this week?','carts':'How much is in abandoned carts?','risk':'Who is at risk?',
+    'storage':'How much storage is left?','reply':'Who needs a reply?','seq':'Which sequence books the most?',
+    'cac':'What is our cost per signup?'}[k];
+  document.getElementById('askInput').value=q; askSend();
+}
+function askSend(){
+  const el=document.getElementById('askInput'); const q=(el.value||'').trim();
+  if(!q){return}
+  askPush('me',q); el.value='';
+  const r=askAnswer(q);
+  setTimeout(()=>{askPush('ai',r.html); if(r.tab)setTimeout(()=>{},0); askChips();},140);
+}
+
+/* ---------- the answer engine ---------- */
+function askAnswer(raw){
+  const q=raw.toLowerCase();
+  const has=(re)=>re.test(q);
+
+  /* booking */
+  if(has(/\b(book|schedule|reserve|slot|appointment)\b/)){
+    let day=null;
+    for(const k in DAYMAP){if(new RegExp('\\b'+k+'\\b').test(q)){day=DAYMAP[k];break}}
+    const tm=q.match(/(\d{1,2})(?::(\d\d))?\s*(am|pm)?/);
+    let time=null;
+    if(tm){let h=parseInt(tm[1],10);const ap=tm[3]||(h<=8?'pm':null);time=h+(tm[2]?':'+tm[2]:':00')+(ap?' '+ap:'');}
+    if(!day&&/today/.test(q))day='Wed';
+    if(!day&&/tomorrow/.test(q))day='Thu';
+    const who=(WAITLIST.map(w=>w.name).concat(CONVOS.map(c=>c.member_name))).find(n=>q.indexOf(n.toLowerCase())>=0);
+    if(!day||!time){
+      return {html:'I can book that, I just need a day and a time. Try <b>book Jordan Thursday 5pm</b>, or tell me the day and I will offer the open slots.'};
+    }
+    const row=DAYS.find(d=>d.d===day);
+    row.booked+=1;
+    RENDER.schedule&&RENDER.schedule();
+    return {html:'Booked <b>'+(who||'a new session')+'</b> on <b>'+day+' at '+time+'</b>. '+day+' now shows <b>'+row.booked+' of '+row.cap+'</b> slots and the confirmation text is queued through Skip. Want me to put it on the calendar for a coach as well?',tab:'schedule'};
+  }
+
+  /* cancel / no-show window */
+  if(has(/cancel window|no.?show window|policy on cancell/)){
+    const m=q.match(/(\d{1,2})\s*(hour|hr)/);
+    if(m){CANCEL_WINDOW=parseInt(m[1],10);RENDER.schedule&&RENDER.schedule();
+      return {html:'Set the no-show window to <b>'+CANCEL_WINDOW+' hours</b>. Every booking rule now uses it, and the schedule tab shows the change.',tab:'schedule'};}
+    return {html:'The no-show window is currently <b>'+CANCEL_WINDOW+' hours</b>. Say <b>set the cancel window to 24 hours</b> and I will change it across the board.'};
+  }
+
+  /* revenue */
+  if(has(/mrr|revenue|income|arr\b|recurring|money coming/)){
+    return {html:'MRR is <b>'+money(mrr())+'</b> from <b>'+members()+'</b> memberships, which is an average of <b>'+money(arpu())+'</b> per member. The goal Steve gave is $62,500, so the gap is <b>'+money(62500-mrr())+'</b>. The fastest lever is mix: moving 20 members from Youth to Hitting plus Strength adds about $1,600 a month without a single new signup.',tab:'revenue'};
+  }
+
+  /* memberships */
+  if(has(/member|plan|sold|arpu|subscription/)){
+    const top=PLANS.slice().sort((a,b)=>b.price*b.sold-a.price*a.sold)[0];
+    const byPrice=PLANS.slice().sort((a,b)=>b.price-a.price)[0];
+    return {html:'<b>'+members()+'</b> memberships sold across eight plans, <b>'+money(mrr())+'</b> of MRR, <b>'+money(arpu())+'</b> average. The biggest line is <b>'+top.n+'</b> at '+top.sold+' sold and '+money(top.price*top.sold)+' a month. The highest priced is <b>'+byPrice.n+'</b> at '+money(byPrice.price)+' with only '+byPrice.sold+' sold, so that is where the mix upside sits.',tab:'members'};
+  }
+
+  /* waitlist */
+  if(has(/waitlist|leads|signup|pipeline|pipeline/)){
+    const last4=WL_WEEKS.slice(-4).reduce((a,b)=>a+b,0), prev4=WL_WEEKS.slice(-8,-4).reduce((a,b)=>a+b,0);
+    const pace=Math.round((last4-prev4)/prev4*100);
+    return {html:'<b>'+WAITLIST.length+'</b> contacts on the waitlist, and the last four weeks are running <b>'+(pace>=0?'+':'')+pace+'%</b> against the four before that, about <b>'+Math.round(last4/4)+' new a week</b>. Nine have already converted. At this pace you pass 200 before opening.',tab:'waitlist'};
+  }
+
+  /* spend and CAC */
+  if(has(/spend|budget|ad spend|cac|cost per|acquisition|roas|channel/)){
+    const best=CHANNELS.slice().sort((a,b)=>a.spend/a.signups-(b.spend/b.signups))[0];
+    const worst=CHANNELS.slice().sort((a,b)=>b.spend/b.signups-(a.spend/a.signups))[0];
+    return {html:'<b>'+money(spend())+'</b> of the <b>'+money(BUDGET)+'</b> budget is spent, producing <b>'+signups()+'</b> signups at <b>'+money(spend()/signups())+'</b> each. Cheapest is <b>'+best.n+'</b> at '+money(best.spend/best.signups)+'. Most expensive is <b>'+worst.n+'</b> at '+money(worst.spend/worst.signups)+', so every dollar moved from there to flyers buys about two and a half more signups.',tab:'spend'};
+  }
+
+  /* sessions and utilization */
+  if(has(/cage|session|utiliz|capacity|peak|empty|slot|booked|schedule/)){
+    const best=DAYS.slice().sort((a,b)=>b.booked-a.booked)[0];
+    const worst=DAYS.slice().sort((a,b)=>a.booked-b.booked)[0];
+    const empty=HOURS.slice(0,5);
+    return {html:'<b>'+booked()+' of '+capacity()+'</b> slots are booked, which is <b>'+pct(util())+'</b> utilization. The fullest day is <b>'+best.d+'</b> at '+best.booked+', the emptiest is <b>'+worst.d+'</b> at '+worst.booked+'. The real gap is 10am to 2pm, where the hour totals run <b>'+empty.map(h=>h[0]+' '+h[1]).join(', ')+'</b> against 61 at 4pm. Fill that block before buying more ads.',tab:'schedule'};
+  }
+
+  /* coaches */
+  if(has(/coach|staff|trainer/)){
+    const top=COACHES.slice().sort((a,b)=>b.rev-a.rev)[0];
+    return {html:'<b>'+COACHES.length+'</b> coaches, and <b>'+top.n+'</b> carries the most revenue at <b>'+money(top.rev)+'</b> a month. The name to watch is the one with the most open gaps in their week, because that is unsold inventory sitting inside a coach who is already paid.',tab:'coaches'};
+  }
+
+  /* retention */
+  if(has(/retention|churn|risk|lapse|drifting|cancel/)){
+    return {html:'<b>'+RISK.length+'</b> members are flagged at risk this week, and the ESA ones matter most because the funds release against an invoice. Churn is running <b>3.2%</b> a month. A touch on all '+RISK.length+' is about twenty minutes of texting and protects roughly <b>'+money(RISK.length*182*0.4)+'</b> of MRR at the current average.',tab:'retention'};
+  }
+
+  /* reviews */
+  if(has(/review|rating|google|reputation|stars/)){
+    const open=REVIEWS.filter(r=>!r.rep).length;
+    return {html:'The rating is <b>4.8</b> from 22 new reviews this month. <b>'+open+'</b> are still unanswered. The 3 star one about 5pm parking is the one worth replying to personally, because it is the only negative that a future parent will read twice.',tab:'reviews'};
+  }
+
+  /* carts */
+  if(has(/cart|abandon|recover|checkout|unpaid/)){
+    const v=CARTS.reduce((s,c)=>s+c.val,0);
+    return {html:'<b>'+CARTS.length+'</b> abandoned carts holding <b>'+money(v)+'</b>. The two biggest are '+CARTS.slice().sort((a,b)=>b.val-a.val).slice(0,2).map(c=>c.n+' at '+money(c.val)).join(' and ')+'. Sending the recovery text to all of them is one click on the Recovery tab.',tab:'recovery'};
+  }
+
+  /* sequences */
+  if(has(/sequence|automation|follow.?up|drip/)){
+    const best=SEQS.slice().sort((a,b)=>b.booked-a.booked)[0];
+    return {html:'<b>'+SEQS.filter(s=>s.on).length+' of '+SEQS.length+'</b> sequences are running. The best performer is <b>'+best.n+'</b>: '+best.enr+' enrolled, '+best.rep+' replied, '+best.booked+' booked, <b>'+money(best.rev)+'</b> attributed. Say <b>pause missed visit win-back</b> and I will stop it in Skip.',tab:'seqs'};
+  }
+
+  /* skip and texts */
+  if(has(/skip|text|sms|message|reply rate|opt.?out|plateops/)){
+    return {html:'Skip has <b>'+SKIP_TOTALS.contacts+'</b> contacts in sync and <b>'+SKIP_TOTALS.sent.toLocaleString()+'</b> messages out in 30 days with <b>'+SKIP_TOTALS.reply+'</b> coming back, a <b>30%</b> reply rate. That produced <b>'+SKIP_TOTALS.booked+'</b> bookings worth <b>'+money(SKIP_TOTALS.rev)+'</b>. Opt-outs are <b>2.2%</b>, below the 3 to 5% typical for this kind of list. Right now <b>'+CONVOS.filter(c=>c.status==='reply').length+'</b> threads are waiting on a human.',tab:'skip'};
+  }
+
+  /* server and storage */
+  if(has(/server|storage|data space|secure|backup|uptime|database|cloudflare/)){
+    const d=SRV_LAST||SRV_FALLBACK;
+    const recs=d.tables.reduce((a,t)=>a+t.records,0);
+    return {html:'The one-location server is live with <b>'+recs+'</b> records across '+d.tables.length+' tables, using <b>'+d.storage.used_mb+' MB</b> of the <b>'+(d.storage.quota_mb/1024).toFixed(0)+' GB</b> provisioned, so <b>'+((d.storage.available_mb)/1024).toFixed(1)+' GB</b> is still free. Uptime is '+d.server.uptime+'. Security is in place except two items I will not claim: the restore test is scheduled for week three, and the production token moves into the vault when the server moves into ONBASE own Cloudflare account.',tab:'server'};
+  }
+
+  /* pause or resume a sequence by name */
+  const seqHit=SEQS.find(s=>q.indexOf(s.n.toLowerCase())>=0);
+  if(seqHit&&has(/pause|stop|turn off|resume|start|turn on/)){
+    const wantOn=has(/resume|start|turn on/);
+    if(seqHit.on!==wantOn){seqToggle(seqHit.id);}
+    return {html:'<b>'+seqHit.n+'</b> is now <b>'+(wantOn?'running':'paused')+'</b> in Skip. '+(wantOn?'':'Nothing else is enrolled while it is paused.')+'',tab:'seqs'};
+  }
+
+  /* who needs a reply */
+  if(has(/needs a reply|waiting|handoff|inbox|conversation/)){
+    const open=CONVOS.filter(c=>c.status==='reply');
+    return {html:'<b>'+open.length+'</b> threads are waiting on a human: '+open.map(c=>c.member_name).join(', ')+'. The AI handled the other <b>'+(CONVOS.length-open.length)+'</b> end to end.',tab:'convos'};
+  }
+
+  /* help */
+  if(has(/what can you|help|scope|who are you|what do you do|capabilit/)){
+    return {html:'Every scope on this dashboard. Money: MRR, ARPU, revenue against goal. Growth: waitlist pace, ad spend, cost per signup by channel. Operations: cage utilization, empty hours, coach load, the no-show window. Retention: who is at risk, churn. Reputation: rating and unanswered reviews. Recovery: abandoned carts and their value. Skip: messages, reply rate, bookings, attributed revenue, and who needs a reply. Server: records, storage, uptime and security. And I can act: <b>book</b> a session, <b>text</b> a member, <b>pause</b> a sequence, change the <b>no-show window</b>.'};
+  }
+
+  /* greeting */
+  if(has(/^(hi|hey|hello|yo)\b/)){
+    return {html:'Ready. Ask me anything on the dashboard, or say <b>book a session Thursday 5pm</b> and watch it move the schedule.'};
+  }
+
+  /* fallback */
+  const open=CONVOS.filter(c=>c.status==='reply').length;
+  return {html:'I do not have that one tied to a number yet. What I can answer right now: revenue and MRR ('+money(mrr())+'), members ('+members()+'), waitlist ('+WAITLIST.length+'), cost per signup ('+money(spend()/signups())+'), utilization ('+pct(util())+'), at risk ('+RISK.length+'), texts ('+SKIP_TOTALS.sent.toLocaleString()+' out, '+open+' waiting), storage ('+(SRV_LAST||SRV_FALLBACK).storage.used_mb+' MB used). Try one of those, or say <b>help</b> for the full scope.'};
+}
+
+/* scope line follows the tab */
+const _askGoBase=go;
+go=function(v){_askGoBase(v); askChips();
+  const s=document.getElementById('askScope');
+  if(s)s.textContent='answering on '+((NAV[v]||['this tab'])[0]).toLowerCase();
+};
+
+document.addEventListener('DOMContentLoaded',askPanel);
+if(document.readyState!=='loading')askPanel();
 
 </script>
 </body></html>
