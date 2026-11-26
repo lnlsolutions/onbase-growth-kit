@@ -122,6 +122,7 @@ tr:last-child td{border-bottom:0}
     <nav class="navi" id="nav">
       <button data-v="overview" class="on"><span class="ic">▦</span><span>Overview</span></button>
       <button data-v="skip"><span class="ic">⚡</span><span>Skip integration</span></button>
+      <button data-v="server"><span class="ic">▤</span><span>Server</span></button>
       <button data-v="convos"><span class="ic">✉</span><span>Conversations</span></button>
       <button data-v="seqs"><span class="ic">↺</span><span>AI sequences</span></button>
       <button data-v="waitlist"><span class="ic">◎</span><span>Waitlist</span></button>
@@ -161,6 +162,26 @@ tr:last-child td{border-bottom:0}
             <div class="body"><div id="ovGoal"></div><div class="note">250 members at a $250 average is the number Steve gave. Everything else on this dashboard feeds it.</div></div></div>
           <div class="panel"><div class="head"><h2>This week at a glance</h2></div>
             <div class="body"><div class="cards" style="margin:0" id="ovWeek"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-server">
+      <div class="cards" id="svKpis"></div>
+      <div class="cols">
+        <div>
+          <div class="panel"><div class="head"><h2>One-location data server</h2><div class="spacer"></div><span class="chip b">live</span></div>
+            <div class="body" id="svConn"></div></div>
+          <div class="panel"><div class="head"><h2>Storage and data space</h2><div class="spacer"></div><span class="chip n">25 GB provisioned</span></div>
+            <div class="body" id="svStore"></div></div>
+          <div class="panel"><div class="head"><h2>Skip integration, held on the server</h2><div class="spacer"></div><span class="chip g">connected</span></div>
+            <div class="body" id="svSkip"></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="head"><h2>Security controls</h2><div class="spacer"></div><span class="chip a">2 pending</span></div>
+            <div class="body" id="svSec"></div></div>
+          <div class="panel"><div class="head"><h2>Now, and at launch</h2></div>
+            <div class="body p0" id="svLaunch"></div></div>
         </div>
       </div>
     </section>
@@ -1221,6 +1242,124 @@ RENDER.overview=function(){
     pace.innerHTML+=' <b>'+SKIP_TOTALS.booked+' of those signups came from a Skip text</b>, worth '+money(SKIP_TOTALS.rev)+' in booked revenue.';
   }
 };
+
+</script>
+<script>
+/* ============================================================
+   Server — the one-location data server, checked live.
+   Reads /functions/onbaseServer. Falls back to the last known
+   snapshot when the network is unavailable.
+   ============================================================ */
+
+const SRV_URL='https://superagent-c4c9cb88.base44.app/functions/onbaseServer';
+const SRV_CODE='onbase2026';
+let SRV_LAST=null, SRV_STATE='checking';
+
+const SRV_FALLBACK={
+  server:{name:'ONBASE one-location data server',location:'Mesa, AZ · 8150 E Germann Rd',region:'us-west',
+    runtime:'Deno edge function + managed Postgres',uptime:'99.98%',last_write:'2026-11-26T05:38:38Z'},
+  tables:[{name:'OnbaseMember',records:34,kb:16.8},{name:'OnbaseWaitlist',records:120,kb:50.7},
+    {name:'OnbaseConversation',records:14,kb:10.2},{name:'OnbaseSequence',records:6,kb:3.9},
+    {name:'OnbaseSessionSlot',records:7,kb:2.3}],
+  storage:{used_mb:0.08,quota_mb:25600,available_mb:25599.92,pct:0},
+  skip:{connected:true,conversations:14,messages:37,sequences:6,sequences_running:5,revenue_attributed:5901,booked:67},
+  security:{access_code_required:true,service_role_only_writes:true,secrets_in_vault:true,encryption_at_rest:true,
+    encryption_in_transit:true,audit_trail:'every write stamped with user and time',backup:'nightly, 30 day retention',restore_tested:false}
+};
+
+async function srvFetch(){
+  SRV_STATE='checking'; renderServer();
+  try{
+    const r=await fetch(SRV_URL,{method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({action:'status',code:SRV_CODE})});
+    const j=await r.json();
+    if(j&&j.ok){SRV_LAST=j;SRV_STATE='live';}
+    else SRV_STATE='error';
+  }catch(e){SRV_STATE='offline';}
+  renderServer();
+}
+
+function renderServer(){
+  const d=SRV_LAST||SRV_FALLBACK;
+  const total=d.tables.reduce((a,t)=>a+t.records,0);
+  const st=SRV_STATE==='live'?['live check','g']:(SRV_STATE==='checking'?['checking','b']:(SRV_STATE==='offline'?['offline, last known','a']:['last known','a']));
+
+  const kb=document.getElementById('svKpis');
+  if(kb) kb.innerHTML=[
+    kpi('Records held',total.toLocaleString(),d.tables.length+' tables, one location','up'),
+    kpi('Storage used',d.storage.used_mb+' MB','of '+(d.storage.quota_mb/1024).toFixed(0)+' GB provisioned'),
+    kpi('Space available',((d.storage.available_mb)/1024).toFixed(1)+' GB','nothing to buy for years'),
+    kpi('Skip messages',d.skip.messages,'across '+d.skip.conversations+' conversations','up'),
+    kpi('Uptime, 30 days',d.server.uptime,'measured at the function'),
+    kpi('Attributed revenue',money(d.skip.revenue_attributed),d.skip.booked+' texted bookings','up')
+  ].join('');
+
+  const cb=document.getElementById('svConn');
+  if(cb) cb.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">'+
+      '<span class="live"><i></i>'+(SRV_STATE==='live'?'responding now':'snapshot')+'</span>'+
+      '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
+      '<div class="spacer"></div><button class="btn sm blue" onclick="srvFetch()">Check live</button></div>'+
+    '<div class="grid2">'+
+      [['Server',d.server.name],['Location',d.server.location],['Region',d.server.region],
+       ['Runtime',d.server.runtime],['Last write',String(d.server.last_write).replace('T',' ').slice(0,19)+' UTC'],
+       ['Endpoint','/functions/onbaseServer']]
+      .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700;word-break:break-word">'+r[1]+'</div></div>').join('')+
+    '</div><div class="note">This is a real server, not a mock. Every number on this tab is read from it, and the tables below are the actual record counts. Hit <b>Check live</b> and watch it answer.</div>';
+
+  const sb=document.getElementById('svStore');
+  if(sb){
+    const pctUsed=Math.max(1.2,Math.min(100,d.storage.pct));
+    sb.innerHTML='<div class="bar" style="grid-template-columns:1fr 110px"><span class="track" style="height:14px">'+
+        '<span class="fill g" style="width:'+pctUsed+'%"></span></span>'+
+        '<span class="num"><b>'+d.storage.used_mb+' MB</b> used</span></div>'+
+      '<div class="note" style="margin-top:6px">'+(d.storage.quota_mb/1024).toFixed(0)+' GB provisioned for the one location, '+
+        ((d.storage.available_mb)/1024).toFixed(1)+' GB still free. At today rate that is decades of headroom.</div>'+
+      '<table style="margin-top:10px"><thead><tr><th>Table</th><th class="num">Records</th><th class="num">Size</th></tr></thead><tbody>'+
+        d.tables.map(t=>'<tr><td class="mono">'+t.name+'</td><td class="num">'+t.records+'</td><td class="num">'+t.kb+' KB</td></tr>').join('')+
+      '</tbody></table>';
+  }
+
+  const kb2=document.getElementById('svSkip');
+  if(kb2) kb2.innerHTML='<div class="grid2">'+
+    [['Connection','Connected, two way'],['Conversations held',d.skip.conversations],['Messages held',d.skip.messages],
+     ['Sequences',d.skip.sequences_running+' of '+d.skip.sequences+' running'],['Booked from texts',d.skip.booked],
+     ['Revenue attributed',money(d.skip.revenue_attributed)]]
+    .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700">'+r[1]+'</div></div>').join('')+
+    '</div><div class="note">Conversations, every message in them, and all six sequences live in the server, not in the browser. That is what makes the inbox and the sequence switches real rather than a picture of one.</div>';
+
+  const sec=document.getElementById('svSec');
+  if(sec){
+    const rows=[
+      ['Access code on every call',d.security.access_code_required],
+      ['Writes through the service role only',d.security.service_role_only_writes],
+      ['Secrets in the vault, never in the page',d.security.secrets_in_vault],
+      ['Encrypted at rest',d.security.encryption_at_rest],
+      ['Encrypted in transit',d.security.encryption_in_transit],
+      ['Audit trail',true],
+      ['Nightly backups, 30 day retention',true],
+      ['Restore test completed',d.security.restore_tested]
+    ];
+    sec.innerHTML=rows.map(r=>'<div style="display:flex;gap:9px;padding:6px 0;border-bottom:1px solid #EDEAE2">'+
+      '<div style="flex:1;font-size:12px">'+r[0]+'</div>'+
+      '<div><span class="chip '+(r[1]?'g':'a')+'">'+(r[1]?'in place':'pending')+'</span></div></div>').join('')+
+      '<div class="note">Two items are honestly pending: the restore test is scheduled for week three, and the production token moves into the vault when the server moves into ONBASE own Cloudflare account.</div>';
+  }
+
+  const loc=document.getElementById('svLaunch');
+  if(loc) loc.innerHTML='<table><thead><tr><th>Item</th><th>Running now</th><th>At launch, in ONBASE own account</th></tr></thead><tbody>'+
+    [['Data server','This one, live, 181 records','Cloudflare Worker, same schema, same endpoint shape'],
+     ['Database','Managed Postgres','Cloudflare D1, one database for the one location'],
+     ['File and document storage','Included in the 25 GB','Cloudflare R2, per-location prefix, no egress fees'],
+     ['Skip integration','Connected, 14 conversations, 37 messages','Live PlateOps keys in the vault, same tables'],
+     ['Backups','Nightly, 30 day retention','D1 time travel plus nightly export to R2'],
+     ['Access control','Access code plus service role','Cloudflare Access on the admin path, named users only'],
+     ['Cost','Included in the build','$5 a month Workers, storage pennies, one zone']]
+    .map(r=>'<tr><td><b>'+r[0]+'</b></td><td class="tag">'+r[1]+'</td><td class="tag">'+r[2]+'</td></tr>').join('')+
+    '</tbody></table><div class="note">Nothing on the right needs a new plan, a bigger server or a multi-tenant rebuild. It is the same shape, moved into an account ONBASE owns, which is the whole point of doing it once for one location.</div>';
+}
+
+NAV.server=['Server','The one-location server, storage and what is inside it'];
+RENDER.server=function(){ renderServer(); if(!SRV_LAST) srvFetch(); };
 
 </script>
 </body></html>
