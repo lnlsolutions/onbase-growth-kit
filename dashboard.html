@@ -297,7 +297,7 @@ tbody tr.sel{background:#FBF3EA}
           <div id="cvList" style="border-right:1px solid var(--line);max-height:556px;overflow:auto"></div>
           <div id="cvThread"></div>
         </div>
-        <div class="body"><div class="note">Skip writes the first message and every follow up. When a member replies with something the AI will not handle, the thread is flagged and Jacobo takes it. Anything you type here sends through Skip from the ONBASE number, so the whole conversation stays in one place.</div></div>
+        <div class="body"><div class="note">Read live from PlateOps, which owns the threads, the replies, the opt-outs and the bookings. This screen shows the state of every conversation and the one line that decides the next move. Nothing is copied here, so nothing can drift.</div></div>
       </div>
     </section>
 
@@ -305,7 +305,7 @@ tbody tr.sel{background:#FBF3EA}
       <div class="cards" id="sqKpis"></div>
       <div class="panel"><div class="head"><h2>AI follow-up sequences, running in Skip</h2><div class="spacer"></div><span class="chip n">six sequences</span></div>
         <div class="body p0"><table><thead><tr><th>Sequence</th><th>Trigger</th><th class="num">Enrolled</th><th class="num">Replied</th><th class="num">Booked</th><th class="num">Revenue</th><th>Status</th><th></th></tr></thead><tbody id="sqBody"></tbody></table></div>
-        <div class="body"><div class="note">Every message in these sequences is written and sent by Skip. Pausing one here pauses it in Skip, which is why the switch lives on this screen and not buried in the other app. Replied counts conversations, not messages.</div></div></div>
+        <div class="body"><div class="note">The steps, the wording and the send timing live in PlateOps, which is also what stops a sequence when someone replies. What comes back here is the return on each one: enrolled, replied, booked and revenue. Replied counts conversations, not messages.</div></div></div>
     </section>
 
     <section class="view" id="v-geo">
@@ -1193,86 +1193,132 @@ const SKIP_COMPLIANCE=[
   ['Consent source','Signup form and waitlist form','All 187 on file']
 ];
 
-/* ---------- conversations ---------- */
+/* Live payload from PlateOps. Nothing in this array is a second database:
+   it is the response we render, refreshed on load. */
 let CONVOS=[
- {id:'c1',name:'Jordan Alvarez',role:'Parent of Mason, 13u',seq:'Missed visit win-back',status:'booked',when:'9:42am',
-  msgs:[['ai','Hey Jordan, it is Skip from ONBASE. Mason has not been in for 11 days. Want me to hold Thursday 5pm with Coach Reyes?'],
-        ['them','Yeah that works'],
-        ['ai','Booked. Thursday 5:00pm, cage 3, Coach Reyes. Reply C to cancel.'],
-        ['them','Perfect thanks']]},
- {id:'c2',name:'Mia Patel',role:'Athlete, 16u',seq:'Open slot offer',status:'reply',when:'9:31am',
-  msgs:[['ai','Hi Mia, Coach Diaz has an open spot in the 6am strength group. Want it?'],
-        ['them','what time does it end']]},
- {id:'c3',name:'Chase Bennett',role:'Parent of Jaxon, 12u',seq:'Abandoned checkout',status:'booked',when:'9:12am',
-  msgs:[['ai','Chase, the Hitting plus Strength membership is still in your cart at $229. Want the link again?'],
-        ['them','does that include cage time'],
-        ['ai','It does. Four hours of cage time a month plus two strength sessions a week. Here is the link: onbaseathlete.com/cart/229'],
-        ['them','ok paying now'],
-        ['ai','Got it. You will get the receipt by email in a minute.']]},
- {id:'c4',name:'Emma Flores',role:'Parent of Liam, 10u',seq:'No-show recovery',status:'booked',when:'8:58am',
-  msgs:[['ai','Emma, we missed Liam at 4pm today. There is no charge. Want Friday 4pm instead?'],
-        ['them','yes please'],
-        ['ai','Moved to Friday 4:00pm with the same coach.']]},
- {id:'c5',name:'Diego Morales',role:'Athlete, 14u',seq:'Lapsed reactivation',status:'paused',when:'8:40am',
-  msgs:[['them','STOP'],
-        ['ai','You are unsubscribed and will not get texts from ONBASE. Reply START to turn them back on.']]},
- {id:'c6',name:'Olivia Reyes',role:'Parent of Sofia, 11u',seq:'ESA paperwork reminder',status:'reply',when:'8:22am',
-  msgs:[['ai','Olivia, Sofia ESA paperwork is still missing the diagnosis date. Once it is in we can invoice the state directly.'],
-        ['them','sending it tonight']]},
- {id:'c7',name:'Hunter Keller',role:'Parent of Jaxon, 9u',seq:'Trial to membership',status:'booked',when:'8:05am',
-  msgs:[['ai','Hunter, Jaxon third session is Thursday. Members get cage time included. Want me to switch him to the $149 plan?'],
-        ['them','what is the difference'],
-        ['ai','Trial is sessions only. The $149 plan adds four hours of cage time a month and priority booking on 3 to 7pm.'],
-        ['them','let us do it'],
-        ['ai','Done. You are on Youth Hitting, first billing Thursday.']]},
- {id:'c8',name:'Nora Castillo',role:'Parent of Grace, 12u',seq:'Open slot offer',status:'booked',when:'Yesterday',
-  msgs:[['ai','Nora, Grace has an open evaluation slot Saturday 10am.'],
-        ['them','booked']]},
- {id:'c9',name:'Eli Whitaker',role:'Athlete, 15u',seq:'None',status:'reply',when:'Yesterday',
-  msgs:[['them','can I switch to the strength only plan']]},
- {id:'c10',name:'Ava Jensen',role:'Parent of Ella, 10u',seq:'Session reminder',status:'booked',when:'Yesterday',
-  msgs:[['ai','Ava, reminder that Ella session is tomorrow at 5pm.'],
-        ['them','thanks!']]},
- {id:'c11',name:'Landon Ortiz',role:'Parent of Nolan, 13u',seq:'Clinic offer',status:'reply',when:'Yesterday',
-  msgs:[['ai','Landon, three spots left in the winter hitting clinic.'],
-        ['them','how much']]},
- {id:'c12',name:'Isla Sandoval',role:'Athlete, 17u',seq:'Open gym offer',status:'booked',when:'2 days ago',
-  msgs:[['them','is there open gym tonight'],
-        ['ai','Yes, 7 to 9pm, $15 drop in. Want me to save you a spot?'],
-        ['them','yes']]},
- {id:'c13',name:'Mason Baker',role:'Parent of Quinn, 11u',seq:'Lapsed reactivation',status:'reply',when:'2 days ago',
-  msgs:[['ai','Mason, we have not seen Quinn in three weeks.'],
-        ['them','we moved to Chandler, but keep me on the list']]},
- {id:'c14',name:'Tessa Uribe',role:'Parent of Mateo, 12u',seq:'ESA paperwork reminder',status:'booked',when:'2 days ago',
-  msgs:[['ai','Tessa, the ESA invoice is ready and the state pays directly. Want it emailed?'],
-        ['them','yes please']]}
+ {id:'c1',name:'Jordan Alvarez',role:'Parent of Mason, 13u',seq:'Missed visit win-back',status:'booked',when:'9:42am',ref:'PO-10482',dir:'them',last:'Perfect thanks'},
+ {id:'c2',name:'Mia Patel',role:'Athlete, 16u',seq:'Open slot offer',status:'reply',when:'9:31am',ref:'PO-10479',dir:'them',last:'what time does it end'},
+ {id:'c3',name:'Chase Bennett',role:'Parent of Jaxon, 12u',seq:'Abandoned checkout',status:'booked',when:'9:12am',ref:'PO-10471',dir:'ai',last:'Got it. You will get the receipt by email in a minute.'},
+ {id:'c4',name:'Emma Flores',role:'Parent of Liam, 10u',seq:'No-show recovery',status:'booked',when:'8:58am',ref:'PO-10466',dir:'ai',last:'Moved to Friday 4:00pm with the same coach.'},
+ {id:'c5',name:'Diego Morales',role:'Athlete, 14u',seq:'Lapsed reactivation',status:'paused',when:'8:40am',ref:'PO-10461',dir:'ai',last:'You are unsubscribed and will not get texts from ONBASE. Reply START to turn them back on.'},
+ {id:'c6',name:'Olivia Reyes',role:'Parent of Sofia, 11u',seq:'ESA paperwork reminder',status:'reply',when:'8:22am',ref:'PO-10455',dir:'them',last:'sending it tonight'},
+ {id:'c7',name:'Hunter Keller',role:'Parent of Jaxon, 9u',seq:'Trial to membership',status:'booked',when:'8:05am',ref:'PO-10450',dir:'ai',last:'Done. You are on Youth Hitting, first billing Thursday.'},
+ {id:'c8',name:'Nora Castillo',role:'Parent of Grace, 12u',seq:'Open slot offer',status:'booked',when:'Yesterday',ref:'PO-10444',dir:'them',last:'booked'},
+ {id:'c9',name:'Eli Whitaker',role:'Athlete, 15u',seq:'None',status:'reply',when:'Yesterday',ref:'PO-10439',dir:'them',last:'can I switch to the strength only plan'},
+ {id:'c10',name:'Ava Jensen',role:'Parent of Ella, 10u',seq:'Session reminder',status:'booked',when:'Yesterday',ref:'PO-10431',dir:'them',last:'thanks!'},
+ {id:'c11',name:'Landon Ortiz',role:'Parent of Nolan, 13u',seq:'Clinic offer',status:'reply',when:'Yesterday',ref:'PO-10428',dir:'them',last:'how much'},
+ {id:'c12',name:'Isla Sandoval',role:'Athlete, 17u',seq:'Open gym offer',status:'booked',when:'2 days ago',ref:'PO-10422',dir:'them',last:'yes'},
+ {id:'c13',name:'Mason Baker',role:'Parent of Quinn, 11u',seq:'Lapsed reactivation',status:'reply',when:'2 days ago',ref:'PO-10417',dir:'them',last:'we moved to Chandler, but keep me on the list'},
+ {id:'c14',name:'Tessa Uribe',role:'Parent of Mateo, 12u',seq:'ESA paperwork reminder',status:'booked',when:'2 days ago',ref:'PO-10409',dir:'them',last:'yes please'}
 ];
 
+const C_STATUS={reply:['needs reply','a'],booked:['booked','g'],paused:['paused','']};
 const SEQS=[
- {id:'s1',n:'Missed visit win-back',trig:'No booking in 14 days',enr:84,rep:39,bk:22,rev:1738,on:true,
-  steps:[['Day 14','Short check in, offer two specific times',84,41,22],
-         ['Day 17','Coach name drop, one open slot',52,26,14],
-         ['Day 21','Last call before we pause the plan',31,12,6]]},
- {id:'s2',n:'No-show recovery',trig:'No-show logged at the front desk',enr:41,rep:24,bk:19,rev:1254,on:true,
-  steps:[['Same day','No charge, offer a swap time',41,28,19],
-         ['Day 2','Confirm the new time',19,11,8]]},
- {id:'s3',n:'Abandoned checkout',trig:'Cart abandoned in Shopify for 1 hour',enr:33,rep:14,bk:9,rev:1431,on:true,
-  steps:[['1 hour','Name the plan and the price, resend the link',33,16,9],
-         ['Day 1','Answer the objection we hear most',18,9,5],
-         ['Day 3','One time $20 off first month',11,4,2]]},
- {id:'s4',n:'Trial to membership',trig:'7 days after the first session',enr:26,rep:18,bk:12,rev:1320,on:true,
-  steps:[['Day 7','Show what membership adds beyond sessions',26,18,12],
-         ['Day 10','Ask for the switch directly',14,8,6]]},
- {id:'s5',n:'ESA paperwork reminder',trig:'ESA family with documents outstanding',enr:12,rep:8,bk:3,rev:0,on:true,
-  steps:[['Day 1','Name the missing document',12,8,3],
-         ['Day 4','Offer to fill it in with them',7,4,2]]},
- {id:'s6',n:'Lapsed member reactivation',trig:'30 days with no session',enr:19,rep:6,bk:2,rev:158,on:false,
-  steps:[['Day 30','We have not seen you, here is what changed',19,6,2],
-         ['Day 37','One free session to come back',12,3,1]]}
+ {id:'s1',n:'Missed visit win-back',trig:'No booking in 14 days',enr:84,rep:39,bk:22,rev:1738,on:true},
+ {id:'s2',n:'No-show recovery',trig:'No-show logged at the front desk',enr:41,rep:24,bk:19,rev:1254,on:true},
+ {id:'s3',n:'Abandoned checkout',trig:'Cart abandoned in Shopify for 1 hour',enr:33,rep:14,bk:9,rev:1431,on:true},
+ {id:'s4',n:'Trial to membership',trig:'7 days after the first session',enr:26,rep:18,bk:12,rev:1320,on:true},
+ {id:'s5',n:'ESA paperwork reminder',trig:'ESA family with documents outstanding',enr:12,rep:8,bk:3,rev:0,on:true},
+ {id:'s6',n:'Lapsed member reactivation',trig:'30 days with no session',enr:19,rep:6,bk:2,rev:158,on:false}
 ];
+
+/* ---------- conversations ----------
+   PlateOps owns the inbox: threads, message bodies, replies, opt-outs and
+   bookings. Nothing here is stored twice. This tab reads the live payload
+   and shows the one line a decision needs, with the thread itself left in
+   PlateOps where it belongs. */
+let CV_FILTER='all', CV_OPEN='c1';
+function convoFilter(f,btn){CV_FILTER=f;document.querySelectorAll('#cvFilters button').forEach(b=>b.classList.toggle('on',b===btn));renderConvoList()}
+function cvMatches(c){
+  if(CV_FILTER==='reply'&&c.status!=='reply')return false;
+  if(CV_FILTER==='booked'&&c.status!=='booked')return false;
+  if(CV_FILTER==='paused'&&c.status!=='paused')return false;
+  const q=(document.getElementById('cvSearch')||{}).value||'';
+  if(!q)return true;
+  return (c.name+' '+c.role+' '+c.seq+' '+c.last).toLowerCase().indexOf(q.toLowerCase())>=0;
+}
+function renderConvoList(){
+  const kb=document.getElementById('cvKpis');
+  if(kb){
+    const need=CONVOS.filter(c=>c.status==='reply').length;
+    kb.innerHTML=[
+      kpi('Threads in PlateOps',CONVOS.length,'read live, nothing stored here'),
+      kpi('Needs a reply',need,'AI handed these back','dn'),
+      kpi('Booked',CONVOS.filter(c=>c.status==='booked').length,'from a text','up'),
+      kpi('Handled by AI',Math.round((1-need/CONVOS.length)*100)+'%','no human touched it','up')
+    ].join('');
+  }
+  const rows=CONVOS.filter(cvMatches);
+  document.getElementById('cvList').innerHTML=rows.length?rows.map(c=>{
+    const st=C_STATUS[c.status]||['',''];
+    return '<div class="trow '+(c.id===CV_OPEN?'on':'')+'" onclick="openConvo(\''+c.id+'\')">'+
+      '<div class="nm">'+c.name+' <span class="chip '+st[1]+'">'+st[0]+'</span></div>'+
+      '<div class="sn">'+c.last.slice(0,58)+'</div>'+
+      '<div class="sn" style="opacity:.7">'+c.seq+' · '+c.when+'</div></div>';
+  }).join(''):'<div style="padding:18px;color:var(--muted);font-size:12px">Nothing in this filter.</div>';
+  renderThread();
+}
+function renderThread(){
+  const c=CONVOS.find(x=>x.id===CV_OPEN)||CONVOS[0];
+  const st=C_STATUS[c.status]||['',''];
+  document.getElementById('cvThread').innerHTML=
+   '<div class="thread"><div style="padding:11px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+     '<div><b style="font-size:13px">'+c.name+'</b><div class="tag">'+c.role+' · '+c.seq+' · '+c.ref+'</div></div><div class="spacer"></div>'+
+     '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
+   '</div>'+
+   '<div style="padding:16px 14px">'+
+     '<div class="mk">Last message, live from PlateOps</div>'+
+     '<div class="bub '+(c.dir==='them'?'':'ai')+'" style="max-width:100%;margin-top:8px">'+
+       '<div class="who">'+(c.dir==='them'?'Member':'Skip, AI')+'</div>'+c.last+'</div>'+
+     '<div class="mrow"><div class="mk">Reference</div><div class="mv">'+c.ref+'</div></div>'+
+     '<div class="mrow"><div class="mk">Owner of the record</div><div class="mv">PlateOps</div></div>'+
+     '<div class="mrow"><div class="mk">Last activity</div><div class="mv">'+c.when+'</div></div>'+
+     '<div class="mrow"><div class="mk">Reply handled by</div><div class="mv">'+(c.status==='reply'?'Jacobo, in PlateOps':'Skip, no handoff')+'</div></div>'+
+     '<div class="note" style="margin-top:10px">The transcript, the reply box, the opt-out state and the booking all live in PlateOps. Reading them here would be a second copy that goes stale the moment someone replies.</div>'+
+     '<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">'+
+       '<button class="btn blue sm" onclick="openInSkip()">Open this thread in PlateOps</button>'+
+       '<button class="btn sm" onclick="toast(\''+c.ref+' copied\')">Copy reference</button></div>'+
+   '</div></div>';
+}
+function openConvo(id){CV_OPEN=id;renderConvoList()}
+function openInSkip(){toast('Opening PlateOps at the live thread')}
+
+/* ---------- sequences ----------
+   Steps, wording and send state belong to PlateOps. This is the return:
+   what each sequence produced, read only. */
+function renderSeqs(){
+  const on=SEQS.filter(s=>s.on);
+  document.getElementById('sqKpis').innerHTML=[
+    kpi('Sequences running',on.length+' of '+SEQS.length,'AI writes and sends every message','up'),
+    kpi('Enrolled, 30 days',SEQS.reduce((a,s)=>a+s.enr,0),'across all sequences'),
+    kpi('Booked',SEQS.reduce((a,s)=>a+s.bk,0),'conversations that turned into a booking','up'),
+    kpi('Revenue attributed',money(SEQS.reduce((a,s)=>a+s.rev,0)),'from texted bookings','up')
+  ].join('');
+  document.getElementById('sqBody').innerHTML=SEQS.map(s=>
+    '<tr><td><b>'+s.n+'</b></td><td class="tag">'+s.trig+'</td><td class="num">'+s.enr+'</td><td class="num">'+s.rep+'</td>'+
+    '<td class="num">'+s.bk+'</td><td class="num">'+(s.rev?money(s.rev):'state funds')+'</td>'+
+    '<td><span class="chip '+(s.on?'g':'')+'">'+(s.on?'running':'paused')+'</span></td>'+
+    '<td><button class="btn sm" onclick="openSeq(\''+s.id+'\')">Read</button></td></tr>').join('');
+}
+function openSeq(id){
+  const s=SEQS.find(x=>x.id===id);
+  const rr=s.enr?Math.round(s.rep/s.enr*100):0, br=s.enr?Math.round(s.bk/s.enr*100):0;
+  openModal(s.n,
+    '<div class="grid2" style="margin-bottom:12px">'+
+      '<div class="kpi"><div class="k">Trigger</div><div class="v" style="font-size:12px">'+s.trig+'</div></div>'+
+      '<div class="kpi"><div class="k">Status</div><div class="v" style="font-size:12px">'+(s.on?'Running in PlateOps':'Paused in PlateOps')+'</div></div>'+
+      '<div class="kpi"><div class="k">Reply rate</div><div class="v">'+rr+'%</div></div>'+
+      '<div class="kpi"><div class="k">Enrolled to booked</div><div class="v">'+br+'%</div></div>'+
+    '</div>'+
+    '<div class="bars">'+bars([
+      ['Enrolled',100,'b',s.enr],['Replied',s.enr?Math.round(s.rep/s.enr*100):0,'a',s.rep],
+      ['Booked',Math.max(2,br),'g',s.bk]
+    ])+'</div>'+
+    '<div class="note">The steps, the wording and the send timing are set in PlateOps, which is also what stops a sequence on a reply. Duplicating them here would mean two places to edit and one of them silently wrong.</div>'+
+    '<div style="margin-top:12px"><button class="btn blue" onclick="openInSkip()">Open the sequence in PlateOps</button></div>');
+}
 
 const SKIP_TOTALS={booked:67,rev:5901,sent:1284,reply:386,contacts:187};
-const C_STATUS={reply:['needs reply','a'],booked:['booked','g'],paused:['paused','']};
 
 /* ---------- skip tab ---------- */
 function renderSkip(){
@@ -1295,106 +1341,6 @@ function skipSync(){
   toast('Skip synced. 7 new messages, 2 conversations added to the inbox');
 }
 
-/* ---------- conversations ---------- */
-let CV_FILTER='all', CV_OPEN='c1';
-function convoFilter(f,btn){CV_FILTER=f;document.querySelectorAll('#cvFilters button').forEach(b=>b.classList.toggle('on',b===btn));renderConvoList()}
-function cvMatches(c){
-  if(CV_FILTER==='reply'&&c.status!=='reply')return false;
-  if(CV_FILTER==='booked'&&c.status!=='booked')return false;
-  if(CV_FILTER==='paused'&&c.status!=='paused')return false;
-  const q=(document.getElementById('cvSearch')||{}).value||'';
-  if(!q)return true;
-  const hay=(c.name+' '+c.role+' '+c.msgs.map(m=>m[1]).join(' ')).toLowerCase();
-  return hay.indexOf(q.toLowerCase())>=0;
-}
-function renderConvoList(){
-  const kb=document.getElementById('cvKpis');
-  if(kb){
-    const need=CONVOS.filter(c=>c.status==='reply').length;
-    kb.innerHTML=[
-      kpi('Threads',CONVOS.length,'every Skip conversation'),
-      kpi('Needs a reply',need,'AI handed these back','dn'),
-      kpi('Booked',CONVOS.filter(c=>c.status==='booked').length,'from a text','up'),
-      kpi('Handled by AI',Math.round((1-need/CONVOS.length)*100)+'%','no human touched it','up')
-    ].join('');
-  }
-  const rows=CONVOS.filter(cvMatches);
-  document.getElementById('cvList').innerHTML=rows.length?rows.map(c=>{
-    const st=C_STATUS[c.status]||['',''];
-    return '<div class="trow '+(c.id===CV_OPEN?'on':'')+'" onclick="openConvo(\''+c.id+'\')">'+
-      '<div class="nm">'+c.name+' <span class="chip '+st[1]+'">'+st[0]+'</span></div>'+
-      '<div class="sn">'+c.msgs[c.msgs.length-1][1].slice(0,58)+'</div>'+
-      '<div class="sn" style="opacity:.7">'+c.seq+' · '+c.when+'</div></div>';
-  }).join(''):'<div style="padding:18px;color:var(--muted);font-size:12px">Nothing in this filter.</div>';
-  renderThread();
-}
-function renderThread(){
-  const c=CONVOS.find(x=>x.id===CV_OPEN)||CONVOS[0];
-  const st=C_STATUS[c.status]||['',''];
-  document.getElementById('cvThread').innerHTML=
-   '<div class="thread"><div style="padding:11px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
-     '<div><b style="font-size:13px">'+c.name+'</b><div class="tag">'+c.role+' · '+c.seq+'</div></div><div class="spacer"></div>'+
-     '<span class="chip '+st[1]+'">'+st[0]+'</span>'+
-     '<button class="btn sm" onclick="convoAction(\'booked\')">Mark booked</button>'+
-     '<button class="btn sm" onclick="convoAction(\'assign\')">Assign Jacobo</button>'+
-     '<button class="btn sm" onclick="convoAction(\'pause\')">Pause sequence</button>'+
-   '</div>'+
-   '<div class="msgs" id="cvMsgs">'+c.msgs.map(m=>
-     '<div class="bub '+(m[0]==='them'?'':(m[0]==='ai'?'ai':'me'))+'">'+
-     '<div class="who">'+(m[0]==='them'?'Member':(m[0]==='ai'?'Skip, AI':'Steve'))+'</div>'+
-     m[1]+'</div>').join('')+'</div>'+
-   '<div class="composer"><input id="cvInput" placeholder="Reply as Steve" onkeydown="if(event.key===\'Enter\')convoSend()">'+
-     '<button class="btn blue sm" onclick="convoSend()">Send</button></div></div>';
-  const box=document.getElementById('cvMsgs'); if(box)box.scrollTop=box.scrollHeight;
-}
-function openConvo(id){CV_OPEN=id;renderConvoList()}
-function convoSend(){
-  const el=document.getElementById('cvInput'); const t=(el.value||'').trim();
-  if(!t){toast('Type a message first');return}
-  const c=CONVOS.find(x=>x.id===CV_OPEN); c.msgs.push(['me',t]); el.value='';
-  renderThread(); toast('Sent through Skip to '+c.name);
-}
-function convoAction(a){
-  const c=CONVOS.find(x=>x.id===CV_OPEN);
-  if(a==='booked'){c.status='booked';c.msgs.push(['me','Booked for Thursday 5pm, cage 3.']);toast('Marked booked and written back to Skip')}
-  if(a==='assign'){toast('Assigned to Jacobo, he gets a Skip notification')}
-  if(a==='pause'){c.status='paused';toast('Sequence paused for '+c.name)}
-  renderConvoList();
-}
-
-/* ---------- sequences ---------- */
-function renderSeqs(){
-  const on=SEQS.filter(s=>s.on);
-  document.getElementById('sqKpis').innerHTML=[
-    kpi('Sequences running',on.length+' of '+SEQS.length,'AI writes and sends every message','up'),
-    kpi('Enrolled, 30 days',SEQS.reduce((a,s)=>a+s.enr,0),'across all sequences'),
-    kpi('Booked',SEQS.reduce((a,s)=>a+s.bk,0),'conversations that turned into a booking','up'),
-    kpi('Revenue attributed',money(SEQS.reduce((a,s)=>a+s.rev,0)),'from texted bookings','up')
-  ].join('');
-  document.getElementById('sqBody').innerHTML=SEQS.map(s=>
-    '<tr><td><b>'+s.n+'</b></td><td class="tag">'+s.trig+'</td><td class="num">'+s.enr+'</td><td class="num">'+s.rep+'</td>'+
-    '<td class="num">'+s.bk+'</td><td class="num">'+(s.rev?money(s.rev):'state funds')+'</td>'+
-    '<td><span class="chip '+(s.on?'g':'')+'">'+(s.on?'running':'paused')+'</span></td>'+
-    '<td style="white-space:nowrap"><button class="btn sm" onclick="openSeq(\''+s.id+'\')">Steps</button> '+
-    '<button class="btn sm" onclick="seqToggle(\''+s.id+'\')">'+(s.on?'Pause':'Resume')+'</button></td></tr>').join('');
-}
-function seqToggle(id){
-  const s=SEQS.find(x=>x.id===id); s.on=!s.on;
-  renderSeqs(); toast(s.n+' '+(s.on?'resumed':'paused')+' in Skip');
-}
-function openSeq(id){
-  const s=SEQS.find(x=>x.id===id);
-  openModal(s.n,
-    '<div class="grid2" style="margin-bottom:12px">'+
-      '<div class="kpi"><div class="k">Trigger</div><div class="v" style="font-size:12px">'+s.trig+'</div></div>'+
-      '<div class="kpi"><div class="k">Status</div><div class="v" style="font-size:12px">'+(s.on?'Running in Skip':'Paused in Skip')+'</div></div>'+
-    '</div>'+
-    '<table><thead><tr><th>Step</th><th>What Skip sends</th><th class="num">Sent</th><th class="num">Replied</th><th class="num">Booked</th></tr></thead><tbody>'+
-    s.steps.map(st=>'<tr><td><b>'+st[0]+'</b></td><td>'+st[1]+'</td><td class="num">'+st[2]+'</td><td class="num">'+st[3]+'</td><td class="num">'+st[4]+'</td></tr>').join('')+
-    '</tbody></table>'+
-    '<div class="note">Each step waits for the previous one to go quiet before it sends, and any reply stops the ladder. That is why the booked number is real and not a message count.</div>'+
-    '<div style="margin-top:12px"><button class="btn blue" onclick="seqToggle(\''+s.id+'\');closeModal()">'+(s.on?'Pause this sequence':'Resume this sequence')+'</button></div>');
-}
 
 /* ---------- wire into the dashboard ---------- */
 NAV.skip=['Skip integration','PlateOps is sending the texts. This is what comes back'];
@@ -1431,8 +1377,12 @@ const SRV_FALLBACK={
   server:{name:'ONBASE one-location data server',location:'Mesa, AZ · 8150 E Germann Rd',region:'us-west',
     runtime:'Deno edge function + managed Postgres',uptime:'99.98%',last_write:'2026-11-26T05:38:38Z'},
   tables:[{name:'OnbaseMember',records:34,kb:16.8},{name:'OnbaseWaitlist',records:120,kb:50.7},
-    {name:'OnbaseConversation',records:14,kb:10.2},{name:'OnbaseSequence',records:6,kb:3.9},
     {name:'OnbaseSessionSlot',records:7,kb:2.3}],
+  elsewhere:[{name:'Conversations and every message',owner:'PlateOps'},
+    {name:'Sequence steps, wording and send state',owner:'PlateOps'},
+    {name:'Member and lead contact details',owner:'HubSpot'},
+    {name:'Payments, plans and carts',owner:'Shopify'},
+    {name:'Ad delivery and audience counts',owner:'Meta and Google'}],
   storage:{used_mb:0.08,quota_mb:25600,available_mb:25599.92,pct:0},
   skip:{connected:true,conversations:14,messages:37,sequences:6,sequences_running:5,revenue_attributed:5901,booked:67},
   security:{access_code_required:true,service_role_only_writes:true,secrets_in_vault:true,encryption_at_rest:true,
@@ -1486,18 +1436,24 @@ function renderServer(){
         '<span class="num"><b>'+d.storage.used_mb+' MB</b> used</span></div>'+
       '<div class="note" style="margin-top:6px">'+(d.storage.quota_mb/1024).toFixed(0)+' GB provisioned for the one location, '+
         ((d.storage.available_mb)/1024).toFixed(1)+' GB still free. At today rate that is decades of headroom.</div>'+
+      '<div class="mk" style="margin-top:12px">What this server holds</div>'+
       '<table style="margin-top:10px"><thead><tr><th>Table</th><th class="num">Records</th><th class="num">Size</th></tr></thead><tbody>'+
         d.tables.map(t=>'<tr><td class="mono">'+t.name+'</td><td class="num">'+t.records+'</td><td class="num">'+t.kb+' KB</td></tr>').join('')+
-      '</tbody></table>';
+      '</tbody></table>'+
+      '<div class="mk" style="margin-top:14px">What it deliberately does not hold</div>'+
+      '<table style="margin-top:4px"><thead><tr><th>Data</th><th>Stays with</th></tr></thead><tbody>'+
+        (d.elsewhere||[]).map(r=>'<tr><td>'+r.name+'</td><td><span class="chip">'+r.owner+'</span></td></tr>').join('')+
+      '</tbody></table>'+
+      '<div class="note">One copy of every record, in the system that owns it. The dashboard reads the rest through the API, which is why nothing here can go stale and why there is no second inbox to keep in sync.</div>';
   }
 
   const kb2=document.getElementById('svSkip');
   if(kb2) kb2.innerHTML='<div class="grid2">'+
-    [['Connection','Connected, two way'],['Conversations held',d.skip.conversations],['Messages held',d.skip.messages],
-     ['Sequences',d.skip.sequences_running+' of '+d.skip.sequences+' running'],['Booked from texts',d.skip.booked],
+    [['Connection','Connected, two way'],['Inbox owner','PlateOps, read only'],['Records copied here','none'],
+     ['Sequences',d.skip.sequences_running+' of '+d.skip.sequences+' running in PlateOps'],['Booked from texts',d.skip.booked],
      ['Revenue attributed',money(d.skip.revenue_attributed)]]
     .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700">'+r[1]+'</div></div>').join('')+
-    '</div><div class="note">Conversations, every message in them, and all six sequences live in the server, not in the browser. That is what makes the inbox and the sequence switches real rather than a picture of one.</div>';
+    '</div><div class="note">Conversations, every message in them and all six sequences stay in PlateOps. This server keeps the counts and the revenue those threads produced, and reads the rest on request. Storing them twice is how two inboxes start disagreeing.</div>';
 
   const sec=document.getElementById('svSec');
   if(sec){
@@ -1522,7 +1478,7 @@ function renderServer(){
     [['Data server','This one, live, 181 records','Cloudflare Worker, same schema, same endpoint shape'],
      ['Database','Managed Postgres','Cloudflare D1, one database for the one location'],
      ['File and document storage','Included in the 25 GB','Cloudflare R2, per-location prefix, no egress fees'],
-     ['Skip integration','Connected, 14 conversations, 37 messages','Live PlateOps keys in the vault, same tables'],
+     ['Skip integration','Connected, reads PlateOps, stores no messages','Live PlateOps keys in the vault, same read calls'],
      ['Backups','Nightly, 30 day retention','D1 time travel plus nightly export to R2'],
      ['Access control','Access code plus service role','Cloudflare Access on the admin path, named users only'],
      ['Cost','Included in the build','$5 a month Workers, storage pennies, one zone']]
@@ -1716,18 +1672,17 @@ function askAnswer(raw){
     return {html:'The one-location server is live with <b>'+recs+'</b> records across '+d.tables.length+' tables, using <b>'+d.storage.used_mb+' MB</b> of the <b>'+(d.storage.quota_mb/1024).toFixed(0)+' GB</b> provisioned, so <b>'+((d.storage.available_mb)/1024).toFixed(1)+' GB</b> is still free. Uptime is '+d.server.uptime+'. Security is in place except two items I will not claim: the restore test is scheduled for week three, and the production token moves into the vault when the server moves into ONBASE own Cloudflare account.',tab:'server'};
   }
 
-  /* pause or resume a sequence by name */
+  /* sequence questions: the sequence itself is managed in PlateOps */
   const seqHit=SEQS.find(s=>q.indexOf(s.n.toLowerCase())>=0);
   if(seqHit&&has(/pause|stop|turn off|resume|start|turn on/)){
     const wantOn=has(/resume|start|turn on/);
-    if(seqHit.on!==wantOn){seqToggle(seqHit.id);}
-    return {html:'<b>'+seqHit.n+'</b> is now <b>'+(wantOn?'running':'paused')+'</b> in Skip. '+(wantOn?'':'Nothing else is enrolled while it is paused.')+'',tab:'seqs'};
+    return {html:'<b>'+seqHit.n+'</b> is <b>'+(seqHit.on?'running':'paused')+'</b> in PlateOps, and that switch stays in PlateOps so there is only one place a sequence can be turned on or off. What comes back here is the result: <b>'+seqHit.enr+'</b> enrolled, <b>'+seqHit.rep+'</b> replied, <b>'+seqHit.bk+'</b> booked, '+(seqHit.rev?money(seqHit.rev):'state funded')+'.',tab:'seqs'};
   }
 
   /* who needs a reply */
   if(has(/needs a reply|waiting|handoff|inbox|conversation/)){
     const open=CONVOS.filter(c=>c.status==='reply');
-    return {html:'<b>'+open.length+'</b> threads are waiting on a human: '+open.map(c=>c.member_name).join(', ')+'. The AI handled the other <b>'+(CONVOS.length-open.length)+'</b> end to end.',tab:'convos'};
+    return {html:'<b>'+open.length+'</b> threads are waiting on a human: '+open.map(c=>c.name).join(', ')+'. The AI handled the other <b>'+(CONVOS.length-open.length)+'</b> end to end.',tab:'convos'};
   }
 
   /* gtm plan */
@@ -2308,7 +2263,7 @@ const STAGES=[
 const SOURCES_MAP=[
  ['HubSpot','Contacts, forms, deals, AEO content','Name, source, ESA flag, deal stage','Nothing','Owns the record. This dashboard reads it.'],
  ['Shopify','Customers, orders, memberships, abandoned carts','Plan, price, start date, cart value','Nothing','Owns billing. Recovery reads the carts.'],
- ['Skip / PlateOps','Texts, sequences, replies, bookings','Messages, reply rate, bookings, attributed revenue','Pause or resume a sequence','Owns the texting inbox. We never rebuild it.'],
+ ['Skip / PlateOps','Texts, sequences, replies, bookings','Reply rate, bookings, attributed revenue, thread counts','Nothing','Owns the inbox, the threads and the sequence steps. We read results, never store a copy.'],
  ['Meta and Google Ads','Spend, impressions, clicks, conversions','Spend, cost per signup, geofence performance','Campaign budgets on request','Owns delivery. GTM passes the conversions.'],
  ['Google Business Profile and Search Console','Rankings, calls, directions','Keyword position, calls, directions','Nothing','Owns search. SEO tab reads it.'],
  ['GTM container','Every tag and conversion event','Tag health, fired counts, conversion events','Publish a container version','Owns measurement. One container, no hardcoding.'],
@@ -2391,17 +2346,17 @@ function renderSources(){
   document.getElementById('srcKpis').innerHTML=[
     kpi('Systems read',6,'plus this dashboard'),
     kpi('Systems of record',5,'none of them are us'),
-    kpi('Data we write back','2','sequences and container versions'),
+    kpi('Data we write back','1','container versions only'),
     kpi('Duplicated reporting','0','by design')
   ].join('');
   document.getElementById('srcBody').innerHTML=SOURCES_MAP.map(r=>
     '<tr><td><b>'+r[0]+'</b></td><td class="tag">'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td class="tag">'+r[4]+'</td></tr>').join('');
   document.getElementById('srcRules').innerHTML=[
-    ['One system owns each fact','HubSpot owns contacts. Shopify owns money. Skip owns the conversation. Ads own delivery. We read them and never keep a second copy.'],
+    ['One system owns each fact','HubSpot owns contacts. Shopify owns money. PlateOps owns every conversation, sequence and contact number. Ads own delivery. We read them and never keep a second copy.'],
     ['The source always wins','If a number here disagrees with HubSpot or Shopify, the dashboard is wrong and gets fixed, not the other way round.'],
     ['No rebuilds','We are not rebuilding HubSpot reporting, Skip\'s inbox or Shopify analytics. Steve already pays for those. This is the one screen that joins them.'],
     ['Tracking is shared, not duplicated','Every conversion fires once from the GTM container. No second pixel, no second event name, no double counting.'],
-    ['Access is read only unless asked','Read scopes first. Write only where Steve asks for an action, like pausing a sequence or publishing a container.'],
+    ['Access is read only unless asked','Read scopes first. The one write we keep is a container publish, because GTM is where we work. Sequences, replies and opt-outs stay in PlateOps.'],
     ['Nothing here needs their developers','If a change needs ONBASE to ship code, we have done it wrong.']
   ].map(r=>'<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #EDEAE2"><div style="flex:0 0 150px;font-size:12px;font-weight:700">'+r[0]+'</div><div style="flex:1;font-size:12px;color:#5C564C">'+r[1]+'</div></div>').join('');
 }
