@@ -2220,7 +2220,8 @@ function renderGeoMap(){
     lastX=l.x; lastY=ly;
     const anchor=l.i===0?'start':'start';
     s+='<text x="'+(l.x+14)+'" y="'+ly+'" font-size="13" font-weight="700" fill="'+(l.sel?'#2B2A26':'#6B655A')+'" '+
-       'style="paint-order:stroke" stroke="#F6F3EC" stroke-width="4" stroke-linejoin="round" text-anchor="'+anchor+'">'+l.t+'</text>';
+       'style="paint-order:stroke;cursor:pointer" stroke="#F6F3EC" stroke-width="4" stroke-linejoin="round" text-anchor="'+anchor+'" '+
+       'onclick="geoSel('+l.i+')">'+l.t+'</text>';
   });
   document.getElementById('geMap').innerHTML=mapFrame(s,'Geofences around Mesa and the east valley');
   const t=geoTot();
