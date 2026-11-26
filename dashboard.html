@@ -133,6 +133,19 @@ tr:last-child td{border-bottom:0}
 .mv{font-weight:700;text-align:right}
 tbody tr.sel{background:#FBF3EA}
 @media(max-width:980px){.mapsplit{grid-template-columns:1fr}.mapside{margin-top:10px}}
+.gtools{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.grow{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.glab{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#8C8578;min-width:104px}
+.lg{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#6B655A}
+.lg i{display:block;width:11px;height:11px;border-radius:3px}
+.feed{display:flex;flex-direction:column;max-height:270px;overflow:auto}
+.ev{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #EDEAE2;font-size:11.5px}
+.ev .t{color:#8C8578;font-variant-numeric:tabular-nums;font-size:10.5px;min-width:52px}
+.ev .f{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slider{width:100%;accent-color:#D9531E;margin:6px 0 2px}
+.spark{display:flex;gap:3px;align-items:flex-end;height:28px;margin:4px 0 2px}
+.spark i{display:block;width:8px;background:#E8825A;border-radius:2px}
+.tw{overflow-x:auto}
 </style></head><body>
 <div class="gate" id="gate"><div class="box">
   <div class="mark" style="margin-bottom:10px">O</div>
@@ -297,17 +310,28 @@ tbody tr.sel{background:#FBF3EA}
 
     <section class="view" id="v-geo">
       <div class="cards" id="geKpis"></div>
-      <div class="panel"><div class="head"><h2>Fences on the map</h2><div class="spacer"></div><span class="chip b" id="geMapChip">7 active</span></div>
-        <div class="body"><div class="mapsplit"><div id="geMap"></div><div class="mapside" id="geMapDetail"></div></div>
-        <div class="note">Each ring is the radius a device is counted in, drawn to scale. Click a fence to read it. The blue pin is the facility at 8150 E Germann. The paused four day event shows as a marker only.</div></div></div>
+      <div class="panel"><div class="head"><h2>Fences on the map</h2><div class="spacer"></div>
+        <span class="chip b" id="geMapChip">7 active</span>
+        <button class="btn sm blue" onclick="geoSimulate()">Track a device</button></div>
+        <div class="body">
+          <div class="gtools" id="geTools"></div>
+          <div class="mapsplit"><div id="geMap"></div><div class="mapside" id="geMapDetail"></div></div>
+          <div class="note">Each ring is drawn to scale at the radius a device is counted in. Colour and size follow whichever metric you pick, and the slider under the panel resizes the selected fence live. Place a fence drops a new one anywhere on the map.</div>
+        </div></div>
       <div class="cols">
         <div>
           <div class="panel"><div class="head"><h2>Geofences</h2><div class="spacer"></div><span class="chip b">30 days</span>
             <button class="btn sm blue" onclick="geoNew()">New fence</button></div>
-            <div class="body p0"><table><thead><tr><th>Fence</th><th>Type</th><th class="num">Radius</th><th class="num">Devices</th><th class="num">Impressions</th><th class="num">Visits</th><th class="num">Signups</th><th>Status</th><th></th></tr></thead><tbody id="geBody"></tbody></table></div>
+            <div class="body p0 tw"><table><thead><tr><th>Fence</th><th>Type</th><th class="num">Radius</th><th class="num">Devices</th><th class="num">Impressions</th><th class="num">Clicks</th><th class="num">Visits</th><th class="num">Signups</th><th class="num">$/signup</th><th>Status</th><th></th></tr></thead><tbody id="geBody"></tbody></table></div>
             <div class="body"><div class="note" id="geNote"></div></div></div>
         </div>
         <div>
+          <div class="panel"><div class="head"><h2>Tracking feed</h2><div class="spacer"></div><span class="chip n" id="geFeedCount"></span></div>
+            <div class="body"><div class="feed" id="geFeed"></div>
+            <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+              <button class="btn sm blue" onclick="geoSimulate()">Track a device</button>
+              <button class="btn sm" onclick="geoSimulateSignup()">Track a signup</button></div>
+            <div class="note">Every row is a device event the container receives: a fence entry, an impression, a click, a visit, then a signup. Each number on this tab is the sum of these rows, and a tracked signup writes back into GTM as a conversion.</div></div></div>
           <div class="panel"><div class="head"><h2>Fence to signup</h2></div>
             <div class="body"><div class="bars" id="geFunnel"></div>
             <div class="note">A device seen inside a fence is matched to an ad impression, then to a site visit, then to a signup. That chain is what makes a fence measurable instead of just a radius on a map.</div></div></div>
@@ -356,13 +380,24 @@ tbody tr.sel{background:#FBF3EA}
         <div>
           <div class="panel"><div class="head"><h2>Container</h2><div class="spacer"></div><span class="chip g">deployed</span></div>
             <div class="body" id="gtConn"></div></div>
-          <div class="panel"><div class="head"><h2>Tags deployed</h2><div class="spacer"></div><span class="chip n">one container</span></div>
-            <div class="body p0"><table><thead><tr><th>Tag</th><th>Platform</th><th>Trigger</th><th class="num">Fired 7d</th><th>Status</th><th></th></tr></thead><tbody id="gtBody"></tbody></table></div></div>
+          <div class="panel"><div class="head"><h2>Tags deployed</h2><div class="spacer"></div><span class="chip n">one container</span>
+            <button class="btn sm blue" onclick="gtmNew()">New tag</button></div>
+            <div class="body p0 tw"><table><thead><tr><th>Tag</th><th>Platform</th><th>Event</th><th>Trigger</th><th class="num">Fired 7d</th><th>Status</th><th></th></tr></thead><tbody id="gtBody"></tbody></table></div>
+            <div class="body"><div class="note">A tag is a destination, an event is what it listens for. Edit either one here, publish, and it ships in minutes. Nothing on the site is hardcoded.</div></div></div>
+          <div class="panel"><div class="head"><h2>Measurement plan</h2><div class="spacer"></div><span class="chip b">what we can track</span></div>
+            <div class="body p0 tw"><table><thead><tr><th>Event</th><th>Fires on</th><th>Parameters</th><th>Sent to</th><th class="num">7 days</th><th>Last seen</th><th>Conversion</th></tr></thead><tbody id="gtPlan"></tbody></table></div>
+            <div class="body"><div class="note">This is the tracking spine: every event, the parameters that make it attributable, and the platforms receiving it. Marking an event as a conversion changes what the ads optimize for.</div></div></div>
         </div>
         <div>
+          <div class="panel"><div class="head"><h2>Live debug</h2><div class="spacer"></div><span class="chip" id="gtPrevChip">preview closed</span></div>
+            <div class="body"><div class="feed" id="gtDebug"></div>
+            <div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">
+              <button class="btn sm blue" onclick="gtmTest()">Send a test event</button>
+              <button class="btn sm" onclick="gtmPreview()">Toggle preview</button></div>
+            <div class="note">Preview is the debug window. Each event shows the parameters it carried and which tags fired, which is how a duplicate or a missing conversion gets caught before it reaches the ad platform.</div></div></div>
           <div class="panel"><div class="head"><h2>Conversion events</h2></div>
             <div class="body p0"><table><thead><tr><th>Event</th><th class="num">7 days</th><th class="num">Value</th></tr></thead><tbody id="gtConv"></tbody></table></div>
-            <div class="body"><div class="note">Six events are the whole measurement spine. Every number on this dashboard traces back to one of them.</div></div></div>
+            <div class="body"><div class="note">The events the ads bid on. Every cost per signup on this dashboard traces back to one of them.</div></div></div>
           <div class="panel"><div class="head"><h2>Optimization queue</h2><div class="spacer"></div><span class="chip a">ranked</span></div>
             <div class="body p0"><table><thead><tr><th>What</th><th>Impact</th><th>Type</th><th></th></tr></thead><tbody id="gtOpts"></tbody></table></div>
             <div class="body"><div class="note">Duplicate conversions inflate every cost per signup on the dashboard, so the top two are worth fixing before any new spend.</div></div></div>
@@ -1723,7 +1758,7 @@ function askAnswer(raw){
   /* gtm */
   if(has(/gtm|tag manager|tracking|pixel|conversion|consent|analytics|event/)){
     const open=GTM_OPTS.filter(o=>!o[3]).length;
-    return {html:'Container <b>'+GTM_STATE.container+'</b> is on version <b>'+GTM_STATE.version+'</b>, published '+GTM_STATE.published+', with <b>'+GTM_TAGS.filter(t=>t[3]).length+' of '+GTM_TAGS.length+'</b> tags live. Six conversion events carry all the measurement. <b>'+open+'</b> optimizations are still open and the top one matters: Meta Lead fires twice on the same submit, which inflates every cost per signup on this dashboard. Say <b>publish GTM</b> after we fix it and it ships in minutes.',tab:'gtm'};
+    return {html:'Container <b>'+GTM_STATE.container+'</b> is on version <b>'+GTM_STATE.version+'</b>, published '+GTM_STATE.published+', with <b>'+GTM_TAGS.filter(t=>t.on&&!t.draft).length+' of '+GTM_TAGS.length+'</b> tags live and <b>'+gtmPlan().filter(p=>p.conv).length+'</b> conversion events carrying the measurement. The measurement plan lists every event with its trigger and parameters, and the live debug window shows what fires when you send a test event. <b>'+open+'</b> optimizations are still open and the top one matters: Meta Lead fires twice on the same submit, which inflates every cost per signup on this dashboard. Say <b>publish GTM</b> after we fix it and it ships in minutes.',tab:'gtm'};
   }
 
   /* help */
@@ -1792,31 +1827,44 @@ const SEO_CIT=[
  ['Yellow Pages','Consistent',''],
  ['MapQuest','Consistent','']
 ];
-let GTM_TAGS=[
- ['GA4 configuration','Google Analytics 4','All pages',true,4820],
- ['GA4 waitlist signup','Google Analytics 4','form_submit, waitlist',true,62],
- ['GA4 membership purchase','Google Analytics 4','purchase',true,18],
- ['GA4 book session','Google Analytics 4','booking_confirmed',true,34],
- ['Meta pixel base','Meta','All pages',true,4820],
- ['Meta Lead','Meta','waitlist submit',true,41],
- ['Meta Purchase','Meta','purchase',true,18],
- ['Google Ads form conversion','Google Ads','waitlist submit',true,41],
- ['Google Ads call conversion','Google Ads','phone_click',true,27],
- ['TikTok pixel base','TikTok','All pages',false,0],
- ['Microsoft Clarity','Clarity','All pages',true,4820],
- ['Scroll depth','Google Analytics 4','75% scroll',true,388]
-];
-let GTM_STATE={container:'GTM-8QK4ZP2',version:14,published:'Nov 22, 2026',env:'live',preview:false};
-let GTM_OPTS=[
- ['Meta Lead fires twice on the same submit','High','Duplicate',false],
- ['No phone_click tag on the header number','High','Missing',false],
- ['Consent mode v2 missing ad_user_data','Medium','Compliance',false],
- ['Duplicate GA4 page_view from the CMS theme','Medium','Duplicate',false],
- ['No server-side container yet','Medium','Architecture',false],
- ['Scroll depth missing on mobile','Low','Coverage',false]
-];
-
+/* ---------- geofencing: filters, metric, tracking ---------- */
+let GEO_METRIC='dev', GEO_LABELS=true, GEO_HEAT=false, GEO_PLACE=false;
+let GEO_TYPES={};
+let GEO_TRACKED=684;
+const GEO_TYPE_LIST=['Own facility','Competitor','School','Sports complex','Event'];
+const GEO_METRIC_DEF={
+  dev:{l:'Devices',v:f=>f.dev,fmt:v=>Math.round(v).toLocaleString(),inv:false},
+  imp:{l:'Impressions',v:f=>f.imp,fmt:v=>Math.round(v).toLocaleString(),inv:false},
+  clk:{l:'Clicks',v:f=>f.clk,fmt:v=>Math.round(v).toLocaleString(),inv:false},
+  vis:{l:'Visits',v:f=>f.vis,fmt:v=>Math.round(v).toLocaleString(),inv:false},
+  sg:{l:'Signups',v:f=>f.sg,fmt:v=>Math.round(v).toLocaleString(),inv:false},
+  cpl:{l:'Cost per signup',v:f=>geoCpl(f),fmt:v=>'$'+Math.round(v),inv:true}
+};
 const geoTot=()=>GEO_FENCES.filter(f=>f.on).reduce((a,f)=>({dev:a.dev+f.dev,imp:a.imp+f.imp,clk:a.clk+f.clk,vis:a.vis+f.vis,sg:a.sg+f.sg}),{dev:0,imp:0,clk:0,vis:0,sg:0});
+function geoSpendOf(f){ const t=GEO_FENCES.reduce((a,x)=>a+x.imp,0)||1; return GEO_SPEND*f.imp/t }
+function geoCpl(f){ return f.sg?geoSpendOf(f)/f.sg:0 }
+function geoCvr(f){ return f.vis?f.sg/f.vis*100:0 }
+function geoSelValue(f){ return GEO_METRIC_DEF[GEO_METRIC].v(f) }
+function geoShown(){ return GEO_FENCES.map((f,i)=>({f:f,i:i})).filter(o=>!Object.keys(GEO_TYPES).length||GEO_TYPES[o.f.t]) }
+function geoWeek(f,i){
+  const out=[];
+  for(let d=0;d<7;d++){
+    const w=0.55+0.45*Math.abs(Math.sin(i*1.7+d*0.9));
+    out.push(Math.round(f.sg/7*1.6*w*10)/10);
+  }
+  return out;
+}
+
+let GEO_EVENTS=[
+  {ago:2,f:'D-BAT Mesa',stage:'signup',dev:'d-4f2a'},
+  {ago:6,f:'ONBASE Athlete HQ',stage:'visit',dev:'d-91c7'},
+  {ago:9,f:'Mountain View High School',stage:'click',dev:'d-77be'},
+  {ago:14,f:'AZ Dingers, Mesa',stage:'visit',dev:'d-2c05'},
+  {ago:19,f:'ONBASE Athlete HQ',stage:'click',dev:'d-5a13'},
+  {ago:26,f:'Mesa Sports Complex',stage:'impression',dev:'d-8e61'},
+  {ago:31,f:'Extra Innings Chandler',stage:'click',dev:'d-3b8d'},
+  {ago:38,f:'D-BAT Mesa',stage:'visit',dev:'d-6f04'}
+];
 
 function renderGeo(){
   const t=geoTot();
@@ -1824,16 +1872,17 @@ function renderGeo(){
     kpi('Active geofences',GEO_FENCES.filter(f=>f.on).length+' of '+GEO_FENCES.length,'around Mesa and the east valley','up'),
     kpi('Devices in fence',t.dev.toLocaleString(),'30 day audience'),
     kpi('Impressions',t.imp.toLocaleString(),'inside the fences'),
+    kpi('Clicks',t.clk.toLocaleString(),pct(t.clk/t.imp*100)+' of impressions'),
     kpi('Signups from fences',t.sg,'at '+money(GEO_SPEND/t.sg)+' each','up'),
-    kpi('Fence spend',money(GEO_SPEND),'of the ad budget',''),
-    kpi('Visit rate',pct(t.vis/t.clk*100),t.vis+' of '+t.clk+' clicks')
+    kpi('Events tracked',GEO_TRACKED.toLocaleString(),'fence entries, 30 days')
   ].join('');
   document.getElementById('geBody').innerHTML=GEO_FENCES.map((f,i)=>
-    '<tr><td><b>'+f.n+'</b></td><td><span class="chip">'+f.t+'</span></td><td class="num">'+f.r+' mi</td>'+
+    '<tr'+(i===GEO_SEL?' class="sel"':'')+'><td><b>'+f.n+'</b></td><td><span class="chip">'+f.t+'</span></td><td class="num">'+f.r+' mi</td>'+
     '<td class="num">'+f.dev.toLocaleString()+'</td><td class="num">'+f.imp.toLocaleString()+'</td>'+
-    '<td class="num">'+f.vis+'</td><td class="num">'+f.sg+'</td>'+
+    '<td class="num">'+f.clk+'</td><td class="num">'+f.vis+'</td><td class="num">'+f.sg+'</td>'+
+    '<td class="num">'+(f.sg?money(geoCpl(f)):'-')+'</td>'+
     '<td><span class="chip '+(f.on?'g':'')+'">'+(f.on?'running':'paused')+'</span></td>'+
-    '<td style="white-space:nowrap"><button class="btn sm" onclick="geoModal('+i+')">Edit</button> '+
+    '<td style="white-space:nowrap"><button class="btn sm" onclick="geoSel('+i+')">Open</button> '+
     '<button class="btn sm" onclick="geoToggle('+i+')">'+(f.on?'Pause':'Resume')+'</button></td></tr>').join('');
   document.getElementById('geFunnel').innerHTML=bars([
     ['Devices seen',100,'b',t.dev.toLocaleString()],
@@ -1843,8 +1892,104 @@ function renderGeo(){
     ['Signups',Math.max(2,Math.round(t.sg/t.imp*100)),'g',t.sg.toLocaleString()]
   ]);
   document.getElementById('geNote').innerHTML='Every fence is a polygon around a real place, not a ZIP code. The competitor fences are the ones that pay: a parent standing in D-BAT is the single best audience in the east valley, and '+GEO_FENCES[2].sg+' signups came from there.';
+  renderGeoTools();
+  renderGeoFeed();
 }
-function geoToggle(i){GEO_FENCES[i].on=!GEO_FENCES[i].on;renderGeo();toast(GEO_FENCES[i].n+' '+(GEO_FENCES[i].on?'resumed':'paused'))}
+function geoRefresh(){ renderGeo(); renderGeoMap(); }
+
+function renderGeoTools(){
+  const def=GEO_METRIC_DEF[GEO_METRIC];
+  const shown=geoShown();
+  const max=Math.max(1,Math.max.apply(null,shown.map(o=>geoSelValue(o.f)).concat([1])));
+  const sw=[[0.125,'#F2B79A'],[0.375,'#E8825A'],[0.625,'#D9531E'],[0.875,'#B23A0E']];
+  document.getElementById('geTools').innerHTML=
+    '<div class="grow"><span class="glab">Size and colour</span><span class="filters">'+
+      Object.keys(GEO_METRIC_DEF).map(k=>'<button class="'+(GEO_METRIC===k?'on':'')+'" onclick="geoMetric(\''+k+'\')">'+GEO_METRIC_DEF[k].l+'</button>').join('')+
+    '</span></div>'+
+    '<div class="grow"><span class="glab">Fence type</span><span class="filters">'+
+      '<button class="'+(!Object.keys(GEO_TYPES).length?'on':'')+'" onclick="geoType(\'all\')">All</button>'+
+      GEO_TYPE_LIST.map(t=>'<button class="'+(GEO_TYPES[t]?'on':'')+'" onclick="geoType(\''+t+'\')">'+t+'</button>').join('')+
+    '</span></div>'+
+    '<div class="grow"><span class="glab">Map</span><span class="filters">'+
+      '<button class="'+(GEO_LABELS?'on':'')+'" onclick="geoLabels()">Labels</button>'+
+      '<button class="'+(GEO_HEAT?'on':'')+'" onclick="geoHeat()">Heat map</button>'+
+      '<button class="'+(GEO_ZOOM>1?'on':'')+'" onclick="geoZoom(1)">Zoom in</button>'+
+      '<button onclick="geoZoom(-1)">Zoom out</button>'+
+      '<button onclick="geoReset()">Reset view</button>'+
+      '<button class="'+(GEO_PLACE?'on':'')+'" onclick="geoPlace()">Place a fence</button>'+
+    '</span></div>'+
+    '<div class="grow"><span class="glab">'+def.l+'</span>'+
+      sw.map(s=>'<span class="lg"><i style="background:'+s[1]+'"></i>'+def.fmt(max*s[0])+'</span>').join('')+
+      (def.inv?'<span class="tag">darker means more expensive</span>':'<span class="tag">darker means more</span>')+
+    '</div>';
+}
+function geoMetric(m){ GEO_METRIC=m; geoRefresh(); }
+function geoType(t){
+  if(t==='all') GEO_TYPES={};
+  else if(GEO_TYPES[t]) delete GEO_TYPES[t];
+  else GEO_TYPES[t]=true;
+  geoRefresh();
+}
+function geoLabels(){ GEO_LABELS=!GEO_LABELS; geoRefresh(); }
+function geoHeat(){ GEO_HEAT=!GEO_HEAT; geoRefresh(); }
+function geoPlace(){ GEO_PLACE=!GEO_PLACE; if(GEO_PLACE) toast('Click anywhere on the map to drop a fence'); geoRefresh(); }
+function geoZoom(dir){
+  const steps=[1,1.8,3];
+  let k=steps.indexOf(GEO_ZOOM); if(k<0) k=0;
+  k=Math.max(0,Math.min(steps.length-1,k+dir));
+  GEO_ZOOM=steps[k]; renderGeoMap();
+  if(GEO_ZOOM===1) toast('Back to the whole valley');
+}
+function geoReset(){ GEO_ZOOM=1; GEO_PLACE=false; GEO_TYPES={}; GEO_HEAT=false; GEO_LABELS=true; GEO_METRIC='dev'; geoRefresh(); }
+function geoRadiusLive(i,v){
+  GEO_FENCES[i].r=parseFloat(v);
+  const lab=document.getElementById('geRLab'); if(lab) lab.textContent=GEO_FENCES[i].r;
+  drawGeoMap();
+}
+function geoPlaceAt(lat,lng){
+  GEO_PLACE=false;
+  openModal('New fence at this spot',
+    '<div class="field"><label>Name or address</label><input id="geNewAddr" placeholder="e.g. Red Mountain Park, Mesa"></div>'+
+    '<div class="grid2"><div class="field"><label>Radius, miles</label><input id="geNewR" value="1.5"></div>'+
+    '<div class="field"><label>Type</label><select id="geNewT">'+GEO_TYPE_LIST.map(t=>'<option'+(t==='Competitor'?' selected':'')+'>'+t+'</option>').join('')+'</select></div></div>'+
+    '<div class="note">Placed at '+lat.toFixed(4)+', '+lng.toFixed(4)+'. The audience builds as devices are seen inside the ring, usually within 24 hours.</div>'+
+    '<div style="margin-top:10px"><button class="btn blue" onclick="geoCreate('+lat+','+lng+')">Create fence</button></div>');
+}
+function geoFeedStage(stage,dev,f){
+  f.dev+=1; f.imp+=1;
+  if(stage!=='impression') f.clk+=1;
+  if(stage==='visit'||stage==='signup') f.vis+=1;
+  if(stage==='signup') f.sg+=1;
+  GEO_TRACKED+=1;
+  GEO_EVENTS.forEach(e=>e.ago+=1);
+  GEO_EVENTS.unshift({ago:0,f:f.n,stage:stage,dev:dev});
+  if(GEO_EVENTS.length>40) GEO_EVENTS.pop();
+  if(stage==='signup'&&typeof gtmLog==='function'){ gtmLog('waitlist_signup',{fence:f.n,value:250}); if(typeof renderGtm==='function') renderGtm(); }
+  else if(typeof gtmLog==='function'){ gtmLog(stage==='impression'?'geo_enter':'geo_enter',{fence:f.n,stage:stage}); if(typeof renderGtm==='function') renderGtm(); }
+}
+function geoSimulate(force){
+  const shown=geoShown();
+  if(!shown.length){ toast('No fence matches that filter'); return }
+  const o=shown[Math.floor(Math.random()*shown.length)];
+  const r=Math.random();
+  const stage=force||(r<0.45?'impression':r<0.7?'click':r<0.92?'visit':'signup');
+  const dev='d-'+Math.random().toString(16).slice(2,6);
+  geoFeedStage(stage,dev,o.f);
+  geoRefresh();
+  toast(stage==='signup'?('Signup tracked from '+o.f.n+', written back to the container'):(stage+' tracked inside '+o.f.n));
+}
+function geoSimulateSignup(){ geoSimulate('signup'); }
+function renderGeoFeed(){
+  const el=document.getElementById('geFeed'); if(!el) return;
+  el.innerHTML=GEO_EVENTS.slice(0,10).map(e=>
+    '<div class="ev"><span class="t">'+(e.ago===0?'now':e.ago+'m')+'</span>'+
+    '<span class="f">'+e.f+'</span>'+
+    '<span class="chip '+(e.stage==='signup'?'g':(e.stage==='visit'?'b':''))+'">'+e.stage+'</span>'+
+    '<span class="tag">'+e.dev+'</span></div>').join('')||'<div class="note">No events yet.</div>';
+  const c=document.getElementById('geFeedCount');
+  if(c) c.textContent=GEO_TRACKED.toLocaleString()+' events, 30 days';
+}
+function geoToggle(i){GEO_FENCES[i].on=!GEO_FENCES[i].on;geoRefresh();toast(GEO_FENCES[i].n+' '+(GEO_FENCES[i].on?'resumed':'paused'))}
 function geoModal(i){
   const f=GEO_FENCES[i];
   openModal('Edit geofence',
@@ -1852,31 +1997,36 @@ function geoModal(i){
       '<div class="field"><label>Name</label><input id="geN" value="'+f.n+'"></div>'+
       '<div class="field"><label>Radius, miles</label><input id="geR" value="'+f.r+'"></div>'+
     '</div>'+
-    '<div class="field"><label>Type</label><select id="geT">'+['Own facility','Competitor','School','Sports complex','Event'].map(x=>'<option'+(x===f.t?' selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
-    '<div class="note">Radius changes take effect on the next audience refresh. Devices are counted once per fence, so a phone that passes two competitors is counted twice here and deduped at the ad platform.</div>'+
-    '<div style="margin-top:12px;display:flex;gap:8px"><button class="btn blue" onclick="geoSave('+i+')">Save fence</button>'+
+    '<div class="field"><label>Type</label><select id="geT">'+GEO_TYPE_LIST.map(x=>'<option'+(x===f.t?' selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="note">Radius changes redraw the ring immediately. Devices are counted once per fence, so a phone that passes two competitors is counted twice here and deduped at the ad platform.</div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn blue" onclick="geoSave('+i+')">Save fence</button>'+
     '<button class="btn" onclick="geoNew()">Add a new fence</button></div>');
 }
 function geoNew(){
+  GEO_PLACE=false;
   openModal('New geofence',
     '<div class="field"><label>Address or place name</label><input id="geNewAddr" placeholder="e.g. Red Mountain Park, Mesa"></div>'+
     '<div class="grid2"><div class="field"><label>Radius, miles</label><input id="geNewR" value="1.5"></div>'+
-    '<div class="field"><label>Type</label><select id="geNewT"><option>Competitor</option><option>School</option><option>Sports complex</option><option>Event</option><option>Own facility</option></select></div></div>'+
+    '<div class="field"><label>Type</label><select id="geNewT">'+GEO_TYPE_LIST.map(t=>'<option'+(t==='Competitor'?' selected':'')+'>'+t+'</option>').join('')+'</select></div></div>'+
+    '<div class="note">Or close this and use Place a fence to drop it straight onto the map.</div>'+
     '<div style="margin-top:6px"><button class="btn blue" onclick="geoCreate()">Create fence</button></div>');
 }
-function geoCreate(){
+function geoCreate(lat,lng){
   const a=(document.getElementById('geNewAddr').value||'').trim();
   if(!a){toast('Add an address or place name');return}
-  GEO_FENCES.push({n:a,t:document.getElementById('geNewT').value,r:parseFloat(document.getElementById('geNewR').value)||1.5,
-    dev:0,imp:0,clk:0,vis:0,sg:0,on:true});
-  closeModal(); renderGeo(); toast('Fence created around '+a+'. Audience builds over the next 24 hours');
+  const f={n:a,t:document.getElementById('geNewT').value,r:parseFloat(document.getElementById('geNewR').value)||1.5,
+    dev:0,imp:0,clk:0,vis:0,sg:0,on:true};
+  if(lat!==undefined&&!isNaN(lat)){ f.lat=lat; f.lng=lng }
+  GEO_FENCES.push(f);
+  GEO_SEL=GEO_FENCES.length-1;
+  closeModal(); geoRefresh(); toast('Fence created around '+a+'. Audience builds over the next 24 hours');
 }
 function geoSave(i){
   const f=GEO_FENCES[i];
   f.n=document.getElementById('geN').value||f.n;
   f.r=parseFloat(document.getElementById('geR').value)||f.r;
   f.t=document.getElementById('geT').value||f.t;
-  closeModal(); renderGeo(); toast('Saved. '+f.n+' now at '+f.r+' miles');
+  closeModal(); geoRefresh(); toast('Saved. '+f.n+' now at '+f.r+' miles');
 }
 
 function renderSeo(){
@@ -1923,39 +2073,200 @@ function seoModal(i){
 function seoPush(i){closeModal();toast(SEO_KW[i][0]+' added to the optimization queue for '+SEO_KW[i][5])}
 function seoFix(i){SEO_CIT[i][1]='Consistent';SEO_CIT[i][2]='Corrected today';renderSeo();toast(SEO_CIT[i][0]+' updated with the current address and phone')}
 
+/* ---------- GTM deployment: tags, measurement plan, live debug ---------- */
+let GTM_TAGS=[
+ {n:'GA4 configuration',plat:'Google Analytics 4',ev:'page_view',trig:'All pages',params:['page_location','page_title','consent_state'],on:true,fired:4820,conv:false,draft:false},
+ {n:'GA4 waitlist signup',plat:'Google Analytics 4',ev:'waitlist_signup',trig:'form_submit, waitlist',params:['form_id','fence','value'],on:true,fired:62,conv:true,draft:false},
+ {n:'GA4 membership purchase',plat:'Google Analytics 4',ev:'purchase',trig:'purchase',params:['value','currency','plan','fence'],on:true,fired:18,conv:true,draft:false},
+ {n:'GA4 book session',plat:'Google Analytics 4',ev:'book_session',trig:'booking_confirmed',params:['cage','coach','session_slot'],on:true,fired:34,conv:true,draft:false},
+ {n:'Meta pixel base',plat:'Meta',ev:'page_view',trig:'All pages',params:['page_location'],on:true,fired:4820,conv:false,draft:false},
+ {n:'Meta Lead',plat:'Meta',ev:'waitlist_signup',trig:'waitlist submit',params:['fence','value','em'],on:true,fired:41,conv:true,draft:false},
+ {n:'Meta Purchase',plat:'Meta',ev:'purchase',trig:'purchase',params:['value','currency'],on:true,fired:18,conv:true,draft:false},
+ {n:'Google Ads form conversion',plat:'Google Ads',ev:'waitlist_signup',trig:'waitlist submit',params:['gclid','value'],on:true,fired:41,conv:true,draft:false},
+ {n:'Google Ads call conversion',plat:'Google Ads',ev:'phone_click',trig:'phone_click',params:['gclid','number'],on:true,fired:27,conv:true,draft:false},
+ {n:'TikTok pixel base',plat:'TikTok',ev:'page_view',trig:'All pages',params:['page_location'],on:false,fired:0,conv:false,draft:false},
+ {n:'Microsoft Clarity',plat:'Clarity',ev:'page_view',trig:'All pages',params:['project_id'],on:true,fired:4820,conv:false,draft:false},
+ {n:'Scroll depth',plat:'Google Analytics 4',ev:'scroll_depth',trig:'75% scroll',params:['percent','page_location'],on:true,fired:388,conv:false,draft:false}
+];
+let GTM_STATE={container:'GTM-8QK4ZP2',version:14,published:'Nov 22, 2026',env:'live',preview:false};
+let GTM_VERSIONS=[
+ {v:14,date:'Nov 22, 2026',note:'Meta Lead dedupe, phone_click on the header number'},
+ {v:13,date:'Nov 8, 2026',note:'Consent mode v2, GA4 purchase value'},
+ {v:12,date:'Oct 24, 2026',note:'Book session event, scroll depth'}
+];
+const GTM_EVENTS=[
+ ['page_view','Every page','page_location, page_title, consent_state'],
+ ['waitlist_signup','Waitlist form submit','form_id, fence, value'],
+ ['book_session','Booking confirmed','cage, coach, session_slot'],
+ ['purchase','Shopify order paid','value, currency, plan'],
+ ['phone_click','Number tapped in the header','gclid, number'],
+ ['text_click','Text us button tapped','fence, number'],
+ ['directions_click','Directions tapped on the profile','fence'],
+ ['scroll_depth','75% of the page','percent, page_location'],
+ ['geo_enter','A device enters a fence','fence, stage'],
+ ['geo_exit','A device leaves a fence','fence, dwell_seconds']
+];
+const GTM_VALUE={purchase:249,waitlist_signup:250,book_session:45,phone_click:12,text_click:12,directions_click:8};
+const GTM_PLATS=['Google Analytics 4','Meta','Google Ads','TikTok','Clarity','HubSpot','Custom HTML'];
+let GTM_DEBUG=[];
+let GTM_SEQ=1;
+let GTM_TESTI=0;
+let GTM_OPTS=[
+ ['Meta Lead fires twice on the same submit','High','Duplicate',false],
+ ['No phone_click tag on the header number','High','Missing',false],
+ ['Consent mode v2 missing ad_user_data','Medium','Compliance',false],
+ ['Duplicate GA4 page_view from the CMS theme','Medium','Duplicate',false],
+ ['No server-side container yet','Medium','Architecture',false],
+ ['Scroll depth missing on mobile','Low','Coverage',false]
+];
+
+function gtmPlan(){
+  const map={};
+  GTM_TAGS.forEach(t=>{
+    if(!map[t.ev]) map[t.ev]={ev:t.ev,trig:[],params:[],plats:[],fired:0,conv:false,on:false,draft:false};
+    const m=map[t.ev];
+    if(m.trig.indexOf(t.trig)<0) m.trig.push(t.trig);
+    t.params.forEach(p=>{ if(m.params.indexOf(p)<0) m.params.push(p) });
+    if(m.plats.indexOf(t.plat)<0) m.plats.push(t.plat);
+    m.fired=Math.max(m.fired,t.fired);
+    m.conv=m.conv||t.conv; m.on=m.on||t.on; m.draft=m.draft||t.draft;
+  });
+  return Object.keys(map).map(k=>map[k]);
+}
+function gtmLog(ev,params){
+  const fired=GTM_TAGS.filter(t=>t.on&&t.ev===ev);
+  fired.forEach(t=>{ t.fired+=1 });
+  const now=new Date();
+  const at=('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+  GTM_DEBUG.unshift({n:GTM_SEQ++,ev:ev,params:params||{},tags:fired.map(t=>t.n),at:at});
+  if(GTM_DEBUG.length>14) GTM_DEBUG.pop();
+  return fired;
+}
 function renderGtm(){
-  const live=GTM_TAGS.filter(t=>t[3]).length;
+  const plan=gtmPlan();
+  const live=GTM_TAGS.filter(t=>t.on&&!t.draft).length;
+  const drafts=GTM_TAGS.filter(t=>t.draft).length;
+  const convs=plan.filter(p=>p.conv);
+  const total7=plan.reduce((a,p)=>a+p.fired,0);
   document.getElementById('gtKpis').innerHTML=[
-    kpi('Tags live',live+' of '+GTM_TAGS.length,'in container '+GTM_STATE.container,'up'),
+    kpi('Tags live',live+' of '+GTM_TAGS.length,(drafts?drafts+' draft waiting to publish':'container '+GTM_STATE.container),'up'),
     kpi('Container version',GTM_STATE.version,'published '+GTM_STATE.published),
-    kpi('Conversion events',6,'firing and attributed'),
-    kpi('Events, 7 days',(GTM_TAGS[0][4]).toLocaleString(),'page views and conversions'),
+    kpi('Conversion events',convs.length,'firing and attributed'),
+    kpi('Events, 7 days',total7.toLocaleString(),'across '+plan.length+' events'),
     kpi('Optimizations open',GTM_OPTS.filter(o=>!o[3]).length,'ranked by impact','a'),
     kpi('Consent mode','v2','ad_storage granted after the banner')
   ].join('');
-  document.getElementById('gtConn').innerHTML='<div class="grid2">'+
-    [['Container',GTM_STATE.container],['Version',GTM_STATE.version],['Published',GTM_STATE.published],
-     ['Environment',GTM_STATE.env],['Preview',GTM_STATE.preview?'open, this browser only':'closed'],['Server container','planned, not live']]
-    .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700">'+r[1]+'</div></div>').join('')+
-    '</div><div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">'+
+  document.getElementById('gtConn').innerHTML=
+    '<div class="grid2">'+
+      [['Container',GTM_STATE.container],['Version',GTM_STATE.version],['Published',GTM_STATE.published],
+       ['Environment',GTM_STATE.env],['Preview',GTM_STATE.preview?'open, this browser only':'closed'],['Server container','planned, not live']]
+      .map(r=>'<div class="kpi"><div class="k">'+r[0]+'</div><div class="v" style="font-size:12.5px;font-weight:700">'+r[1]+'</div></div>').join('')+
+    '</div>'+
+    '<div style="margin-top:10px;display:flex;gap:7px;flex-wrap:wrap">'+
       '<button class="btn sm blue" onclick="gtmPublish()">Publish version '+(GTM_STATE.version+1)+'</button>'+
-      '<button class="btn sm" onclick="gtmPreview()">'+(GTM_STATE.preview?'Close preview':'Open preview')+'</button></div>'+
+      '<button class="btn sm" onclick="gtmPreview()">'+(GTM_STATE.preview?'Close preview':'Open preview')+'</button>'+
+      '<button class="btn sm" onclick="gtmNew()">New tag</button></div>'+
+    '<div class="mk" style="margin-top:12px">Version history</div>'+
+    GTM_VERSIONS.map(v=>'<div class="mrow"><div class="mk">v'+v.v+' · '+v.date+'</div><div class="mv" style="font-weight:600;max-width:60%">'+v.note+'</div></div>').join('')+
     '<div class="note">Every tag below is deployed from one container. Nothing is hardcoded on the site, which is why a change here ships in minutes and does not need a developer.</div>';
   document.getElementById('gtBody').innerHTML=GTM_TAGS.map((t,i)=>
-    '<tr><td><b>'+t[0]+'</b></td><td class="tag">'+t[1]+'</td><td class="mono">'+t[2]+'</td>'+
-    '<td class="num">'+t[4].toLocaleString()+'</td>'+
-    '<td><span class="chip '+(t[3]?'g':'')+'">'+(t[3]?'live':'paused')+'</span></td>'+
-    '<td><button class="btn sm" onclick="gtmToggle('+i+')">'+(t[3]?'Pause':'Start')+'</button></td></tr>').join('');
-  document.getElementById('gtConv').innerHTML=[['waitlist_signup',41],['book_session',34],['phone_click',27],['text_click',23],['directions_click',19],['membership_purchase',18]]
-    .map(r=>'<tr><td class="mono"><b>'+r[0]+'</b></td><td class="num">'+r[1]+'</td><td class="num">'+money(r[1]*9)+'</td></tr>').join('');
+    '<tr><td><b>'+t.n+'</b></td><td class="tag">'+t.plat+'</td><td class="mono">'+t.ev+'</td><td class="mono">'+t.trig+'</td>'+
+    '<td class="num">'+t.fired.toLocaleString()+'</td>'+
+    '<td><span class="chip '+(t.draft?'a':(t.on?'g':''))+'">'+(t.draft?'draft':(t.on?'live':'paused'))+'</span></td>'+
+    '<td style="white-space:nowrap"><button class="btn sm" onclick="gtmEdit('+i+')">Edit</button> '+
+    '<button class="btn sm" onclick="gtmToggle('+i+')">'+(t.on?'Pause':'Start')+'</button></td></tr>').join('');
+  document.getElementById('gtPlan').innerHTML=plan.map(p=>
+    '<tr><td class="mono"><b>'+p.ev+'</b></td><td class="tag">'+p.trig.join(', ')+'</td>'+
+    '<td class="tag">'+p.params.join(', ')+'</td><td class="tag">'+p.plats.join(', ')+'</td>'+
+    '<td class="num">'+p.fired.toLocaleString()+'</td>'+
+    '<td><span class="chip '+(p.fired?'g':'')+'">'+(p.fired?'today':'never')+'</span></td>'+
+    '<td><button class="btn sm '+(p.conv?'blue':'')+'" onclick="gtmConv(\''+p.ev+'\')">'+(p.conv?'conversion':'mark')+'</button></td></tr>').join('');
+  document.getElementById('gtConv').innerHTML=convs.length?convs.sort((a,b)=>b.fired-a.fired).map(p=>
+    '<tr><td class="mono"><b>'+p.ev+'</b></td><td class="num">'+p.fired.toLocaleString()+'</td><td class="num">'+money(p.fired*(GTM_VALUE[p.ev]||0))+'</td></tr>').join('')
+    :'<tr><td colspan="3" class="tag">Nothing marked as a conversion yet</td></tr>';
+  const pc=document.getElementById('gtPrevChip');
+  if(pc){ pc.textContent=GTM_STATE.preview?'preview open':'preview closed'; pc.className='chip '+(GTM_STATE.preview?'g':'') }
+  const dbg=document.getElementById('gtDebug');
+  if(dbg) dbg.innerHTML=GTM_DEBUG.length?GTM_DEBUG.map(d=>
+    '<div class="ev"><span class="t">'+d.at+'</span><span class="f mono">'+d.ev+'</span>'+
+    '<span class="tag">'+(Object.keys(d.params).length?Object.keys(d.params).map(k=>k+': '+d.params[k]).join(' · '):'no params')+'</span>'+
+    '<span class="chip '+(d.tags.length?'g':'r')+'">'+(d.tags.length?d.tags.length+' fired':'0 fired')+'</span></div>').join('')
+    :'<div class="note">No events yet. Send a test event or open preview.</div>';
   document.getElementById('gtOpts').innerHTML=GTM_OPTS.map((o,i)=>
     '<tr><td><b>'+o[0]+'</b></td><td><span class="chip '+(o[1]==='High'?'r':(o[1]==='Medium'?'a':''))+'">'+o[1]+'</span></td>'+
     '<td class="tag">'+o[2]+'</td><td>'+(o[3]?'<span class="chip g">applied</span>':'<button class="btn sm" onclick="gtmApply('+i+')">Apply</button>')+'</td></tr>').join('');
 }
-function gtmToggle(i){GTM_TAGS[i][3]=!GTM_TAGS[i][3];renderGtm();toast(GTM_TAGS[i][0]+' '+(GTM_TAGS[i][3]?'started':'paused')+', publish to push it live')}
-function gtmPublish(){GTM_STATE.version+=1;GTM_STATE.published='just now';renderGtm();toast('Published version '+GTM_STATE.version+' to '+GTM_STATE.env)}
+function gtmToggle(i){GTM_TAGS[i].on=!GTM_TAGS[i].on;renderGtm();toast(GTM_TAGS[i].n+' '+(GTM_TAGS[i].on?'started':'paused')+', publish to push it live')}
+function gtmConv(ev){
+  const tags=GTM_TAGS.filter(t=>t.ev===ev);
+  const on=!tags.every(t=>t.conv);
+  tags.forEach(t=>{t.conv=on});
+  renderGtm();
+  toast(on?(ev+' is now a conversion event'):(ev+' is no longer a conversion'));
+}
+function gtmPublish(){
+  const drafts=GTM_TAGS.filter(t=>t.draft);
+  drafts.forEach(t=>{t.draft=false});
+  GTM_STATE.version+=1;
+  GTM_STATE.published='just now';
+  GTM_VERSIONS.unshift({v:GTM_STATE.version,date:'just now',note:drafts.length?(drafts.length+' tag change'+(drafts.length>1?'s':'')+' published from the dashboard'):'republished with no tag changes'});
+  if(GTM_VERSIONS.length>5) GTM_VERSIONS.pop();
+  renderGtm();
+  toast('Published version '+GTM_STATE.version+' to '+GTM_STATE.env);
+}
 function gtmPreview(){GTM_STATE.preview=!GTM_STATE.preview;renderGtm();toast(GTM_STATE.preview?'Preview mode on for this browser':'Preview closed')}
 function gtmApply(i){GTM_OPTS[i][3]=true;renderGtm();toast('Applied. Publish version '+(GTM_STATE.version+1)+' to ship it')}
+function gtmTest(){
+  if(!GTM_STATE.preview){ GTM_STATE.preview=true }
+  const e=GTM_EVENTS[GTM_TESTI%GTM_EVENTS.length]; GTM_TESTI+=1;
+  const fences=GEO_FENCES.filter(f=>f.on);
+  const fence=fences.length?fences[GTM_TESTI%fences.length].n:'ONBASE Athlete HQ';
+  const params={};
+  e[2].split(',').forEach(p=>{
+    p=p.trim();
+    params[p]= p==='fence'?fence : p==='value'?250 : p==='page_location'?'/training' : p==='percent'?75 : p==='stage'?'enter' : 'set';
+  });
+  const fired=gtmLog(e[0],params);
+  renderGtm();
+  toast(fired.length?(e[0]+' fired '+fired.length+' tag'+(fired.length>1?'s':'')):(e[0]+' fired no tags, nothing listens for it'));
+}
+function gtmNew(){
+  gtmForm('New tag',-1,{n:'',plat:'Google Analytics 4',ev:'waitlist_signup',trig:'',params:[],on:true,conv:false});
+}
+function gtmEdit(i){
+  gtmForm('Edit tag',i,GTM_TAGS[i]);
+}
+function gtmForm(title,i,t){
+  openModal(title,
+    '<div class="field"><label>Tag name</label><input id="gtN" value="'+t.n+'" placeholder="e.g. Meta Lead, Gilbert page"></div>'+
+    '<div class="grid2">'+
+      '<div class="field"><label>Platform</label><select id="gtP">'+GTM_PLATS.map(p=>'<option'+(p===t.plat?' selected':'')+'>'+p+'</option>').join('')+'</select></div>'+
+      '<div class="field"><label>Event it listens for</label><select id="gtE">'+GTM_EVENTS.map(e=>'<option value="'+e[0]+'"'+(e[0]===t.ev?' selected':'')+'>'+e[0]+'</option>').join('')+'</select></div>'+
+    '</div>'+
+    '<div class="field"><label>Trigger</label><input id="gtT" value="'+t.trig+'" placeholder="e.g. waitlist submit, all pages"></div>'+
+    '<div class="field"><label>Parameters, comma separated</label><input id="gtX" value="'+t.params.join(', ')+'" placeholder="fence, value"></div>'+
+    '<label class="tag" style="display:flex;gap:7px;align-items:center;margin-top:6px"><input type="checkbox" id="gtC" '+(t.conv?'checked':'')+'> Count this event as a conversion</label>'+
+    '<div class="note">A tag is a destination, an event is what it listens for. Saving puts it in the container as a draft until you publish.</div>'+
+    '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+
+      '<button class="btn blue" onclick="gtmSave('+i+')">'+(i<0?'Create tag':'Save tag')+'</button>'+
+      '<button class="btn" onclick="closeModal()">Cancel</button></div>');
+}
+function gtmSave(i){
+  const name=(document.getElementById('gtN').value||'').trim();
+  if(!name){ toast('Give the tag a name'); return }
+  const obj={
+    n:name,
+    plat:document.getElementById('gtP').value,
+    ev:document.getElementById('gtE').value,
+    trig:(document.getElementById('gtT').value||'').trim()||'all pages',
+    params:(document.getElementById('gtX').value||'').split(',').map(x=>x.trim()).filter(x=>x),
+    conv:document.getElementById('gtC').checked,
+    on:true, fired:i<0?0:GTM_TAGS[i].fired, draft:true
+  };
+  if(i<0) GTM_TAGS.push(obj); else GTM_TAGS[i]=obj;
+  closeModal(); renderGtm();
+  toast(i<0?('Tag created as a draft. Publish version '+(GTM_STATE.version+1)+' to push it live'):'Tag updated as a draft. Publish to push it live');
+}
 
 NAV.geo=['Geofencing','Fences around the places that matter, and what they return'];
 NAV.seo=['SEO tracking','Rankings, the local profile and the citations behind them'];
@@ -2107,7 +2418,8 @@ const MB={n:33.485,s:33.235,w:-111.945,e:-111.545};
 const MW=1000, MH=820;
 const mx=lng=>(lng-MB.w)/(MB.e-MB.w)*MW;
 const my=lat=>(MB.n-lat)/(MB.n-MB.s)*MH;
-const MILE_PX=(1/0.01448)/(MB.n-MB.s)*MH;
+/* px per mile, so a fence radius is drawn at true size */
+const MILE_PX=(MH/(MB.n-MB.s))*0.01448;
 
 /* name to coordinate. Mesa and the east valley, close enough to be recognisable. */
 const GEO_POS={
@@ -2120,6 +2432,7 @@ const GEO_POS={
   'Gilbert tournament, 4 day event':[33.3000,-111.7400]
 };
 function geoPos(f,i){
+  if(f.lat!==undefined&&f.lng!==undefined) return [f.lat,f.lng];
   if(GEO_POS[f.n]) return GEO_POS[f.n];
   return [33.2768+((i%3)-1)*0.012, -111.6450+((i%4)-1.5)*0.014];
 }
@@ -2169,74 +2482,152 @@ function baseMap(){
   city('Queen Creek',33.2400,-111.6300,12);
   city('Apache Junction',33.4250,-111.5520,11);
   city('Scottsdale',33.4700,-111.8880,12);
-  /* scale bar and north arrow */
-  s+='<g transform="translate(24,'+(MH-34)+')">'+
-     '<rect x="0" y="0" width="'+(5*MILE_PX)+'" height="6" fill="#2B2A26" opacity="0.75"/>'+
-     '<rect x="0" y="0" width="'+(2.5*MILE_PX)+'" height="6" fill="#FFFFFF" opacity="0.9"/>'+
-     '<text x="0" y="20" font-size="11" fill="#6B655A">0</text>'+
-     '<text x="'+(5*MILE_PX)+'" y="20" font-size="11" fill="#6B655A" text-anchor="end">5 miles</text></g>';
-  s+='<g transform="translate('+(MW-40)+',36)"><path d="M0 -14 L6 6 L0 2 L-6 6 Z" fill="#2B2A26" opacity="0.8"/>'+
+  return s;
+}
+/* scale bar and north arrow, drawn against whatever the visible box is so
+   they stay on screen when the map is zoomed in */
+function chrome(vb){
+  const miles=5, w=miles*MILE_PX;
+  const x=vb.x+22, y=vb.y+vb.h-30;
+  let s='<g transform="translate('+x+','+y+')">'+
+    '<rect x="0" y="0" width="'+w+'" height="6" fill="#2B2A26" opacity="0.75"/>'+
+    '<rect x="0" y="0" width="'+(w/2)+'" height="6" fill="#FFFFFF" opacity="0.9"/>'+
+    '<text x="0" y="19" font-size="11" fill="#6B655A">0</text>'+
+    '<text x="'+w+'" y="19" font-size="11" fill="#6B655A" text-anchor="end">'+miles+' miles</text></g>';
+  s+='<g transform="translate('+(vb.x+vb.w-40)+','+(vb.y+34)+')"><path d="M0 -14 L6 6 L0 2 L-6 6 Z" fill="#2B2A26" opacity="0.8"/>'+
      '<text x="0" y="24" font-size="10" fill="#6B655A" text-anchor="middle" letter-spacing="1">N</text></g>';
   return s;
 }
-function mapFrame(inner,label){
-  return '<svg viewBox="0 0 '+MW+' '+MH+'" style="width:100%;height:auto;display:block;border-radius:10px;border:1px solid #E3DDCE;background:#F6F3EC" role="img" aria-label="'+label+'">'+inner+'</svg>';
+function mapFrame(inner,label,vb){
+  const box=vb||{x:0,y:0,w:MW,h:MH};
+  return '<svg viewBox="'+box.x+' '+box.y+' '+box.w+' '+box.h+'" style="width:100%;height:auto;display:block;border-radius:10px;border:1px solid #E3DDCE;background:#F6F3EC" role="img" aria-label="'+label+'">'+inner+'</svg>';
 }
 
 /* ---------- geofence map ---------- */
-let GEO_SEL=0;
-function renderGeoMap(){
+let GEO_SEL=0, GEO_ZOOM=1, GEO_VB={x:0,y:0,w:MW,h:MH};
+
+function geoVB(){
+  const z=Math.max(1,GEO_ZOOM);
+  if(z===1) return {x:0,y:0,w:MW,h:MH};
+  const f=GEO_FENCES[GEO_SEL]||GEO_FENCES[0];
+  const p=geoPos(f,GEO_SEL);
+  const w=MW/z, h=MH/z;
+  const x=Math.min(MW-w,Math.max(0,mx(p[1])-w/2));
+  const y=Math.min(MH-h,Math.max(0,my(p[0])-h/2));
+  return {x:x,y:y,w:w,h:h};
+}
+function geoRamp(t,inv){
+  const u=inv?1-t:t;
+  if(u>0.75) return '#B23A0E';
+  if(u>0.5) return '#D9531E';
+  if(u>0.25) return '#E8825A';
+  return '#F2B79A';
+}
+function geoRadiusPx(f){ return Math.min(f.r*MILE_PX, MH*1.2) }
+
+function drawGeoMap(){
+  const vb=geoVB(); GEO_VB=vb;
   let s=baseMap();
+  const shown=geoShown();
+  const max=Math.max(1,Math.max.apply(null,shown.map(o=>geoSelValue(o.f)).concat([1])));
+  /* heat layer, under the rings */
+  if(GEO_HEAT&&shown.length){
+    s+='<defs>'+shown.map((o,k)=>{
+      const t=Math.min(1,geoSelValue(o.f)/max);
+      return '<radialGradient id="gh'+k+'"><stop offset="0%" stop-color="'+geoRamp(t,GEO_METRIC_DEF[GEO_METRIC].inv)+'" stop-opacity="'+(0.16+0.34*t).toFixed(2)+'"/>'+
+        '<stop offset="100%" stop-color="'+geoRamp(t,GEO_METRIC_DEF[GEO_METRIC].inv)+'" stop-opacity="0"/></radialGradient>';
+    }).join('')+'</defs>';
+    shown.forEach((o,k)=>{
+      const p=geoPos(o.f,o.i), x=mx(p[1]), y=my(p[0]);
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+Math.max(38,geoRadiusPx(o.f))+'" fill="url(#gh'+k+')"/>';
+    });
+  }
   const labels=[];
-  GEO_FENCES.forEach((f,i)=>{
-    const [lat,lng]=geoPos(f,i), x=mx(lng), y=my(lat);
-    const r=Math.min(f.r*MILE_PX, MH*0.95);
-    const sel=i===GEO_SEL;
+  shown.forEach(o=>{
+    const f=o.f, i=o.i, p=geoPos(f,i), x=mx(p[1]), y=my(p[0]);
+    const r=geoRadiusPx(f), sel=i===GEO_SEL;
     if(f.on){
-      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="rgba(217,83,30,'+(sel?0.18:0.08)+')" stroke="#D9531E" stroke-width="'+(sel?2.6:1.5)+'"'+(sel?'':' opacity="0.95"')+'/>';
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="rgba(217,83,30,'+(sel?0.16:0.07)+')" stroke="'+(sel?'#B23A0E':'#D9531E')+'" stroke-width="'+(sel?2.6:1.4)+'"/>';
     }else{
-      s+='<circle cx="'+x+'" cy="'+y+'" r="'+Math.min(r,MH*0.75)+'" fill="none" stroke="#8C8578" stroke-width="1.2" stroke-dasharray="6 8" opacity="0.35"/>';
+      s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="none" stroke="#8C8578" stroke-width="1.2" stroke-dasharray="6 8" opacity="0.4"/>';
     }
     if(i>0){
+      const t=Math.min(1,geoSelValue(f)/max);
       s+='<g style="cursor:pointer" onclick="geoSel('+i+')">'+
-         '<circle cx="'+x+'" cy="'+y+'" r="'+(sel?8:6.5)+'" fill="'+(f.on?'#D9531E':'#8C8578')+'" stroke="#FFFFFF" stroke-width="2"/>'+
+         '<circle cx="'+x+'" cy="'+y+'" r="'+(5+18*Math.sqrt(t)).toFixed(1)+'" fill="'+(f.on?geoRamp(t,GEO_METRIC_DEF[GEO_METRIC].inv):'#8C8578')+'" stroke="#FFFFFF" stroke-width="2"/>'+
          '</g>';
     }
-    labels.push({x:x,y:y,t:f.n.replace(/,.*/,''),sel:sel,i:i});
+    labels.push({x:x,y:y,t:f.n.replace(/,.*/,''),sel:sel,i:i,val:GEO_METRIC_DEF[GEO_METRIC].fmt(geoSelValue(f))});
   });
   /* facility pin sits on the HQ fence, so it is the HQ marker */
-  const [hlat,hlng]=GEO_POS['ONBASE Athlete HQ'];
-  const hx=mx(hlng), hy=my(hlat);
+  const hp=GEO_POS['ONBASE Athlete HQ'];
+  const hx=mx(hp[1]), hy=my(hp[0]);
   s+='<g style="cursor:pointer" onclick="geoSel(0)">'+
-     '<circle cx="'+hx+'" cy="'+hy+'" r="16" fill="rgba(27,58,107,0.14)"/>'+
+     '<circle cx="'+hx+'" cy="'+hy+'" r="15" fill="rgba(27,58,107,0.14)"/>'+
      '<path d="M'+hx+' '+(hy-14)+' C'+(hx+7)+' '+(hy-14)+' '+(hx+13)+' '+(hy-8)+' '+(hx+13)+' '+hy+' C'+(hx+13)+' '+(hy+10)+' '+hx+' '+(hy+19)+' '+hx+' '+(hy+19)+' C'+hx+' '+(hy+19)+' '+(hx-13)+' '+(hy+10)+' '+(hx-13)+' '+hy+' C'+(hx-13)+' '+(hy-8)+' '+(hx-7)+' '+(hy-14)+' '+hx+' '+(hy-14)+' Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
-     '<circle cx="'+hx+'" cy="'+(hy-2)+'" r="4.6" fill="#FFFFFF"/></g>';
+     '<circle cx="'+hx+'" cy="'+(hy-2)+'" r="4.4" fill="#FFFFFF"/></g>';
   /* labels, nudged so none collide */
-  labels.sort((a,b)=>a.x-b.x);
-  let lastX=-999,lastY=-999;
-  labels.forEach(l=>{
-    let ly=l.y+4;
-    if(Math.abs(l.x-lastX)<170 && Math.abs(ly-lastY)<17) ly=lastY+18;
-    lastX=l.x; lastY=ly;
-    const anchor=l.i===0?'start':'start';
-    s+='<text x="'+(l.x+14)+'" y="'+ly+'" font-size="13" font-weight="700" fill="'+(l.sel?'#2B2A26':'#6B655A')+'" '+
-       'style="paint-order:stroke;cursor:pointer" stroke="#F6F3EC" stroke-width="4" stroke-linejoin="round" text-anchor="'+anchor+'" '+
-       'onclick="geoSel('+l.i+')">'+l.t+'</text>';
-  });
-  document.getElementById('geMap').innerHTML=mapFrame(s,'Geofences around Mesa and the east valley');
-  const t=geoTot();
+  if(GEO_LABELS){
+    labels.sort((a,b)=>a.x-b.x);
+    let lastX=-999,lastY=-999;
+    labels.forEach(l=>{
+      let ly=l.y+4;
+      if(Math.abs(l.x-lastX)<170 && Math.abs(ly-lastY)<17) ly=lastY+18;
+      lastX=l.x; lastY=ly;
+      s+='<text x="'+(l.x+13)+'" y="'+ly+'" font-size="12.5" font-weight="700" fill="'+(l.sel?'#2B2A26':'#6B655A')+'" '+
+         'style="paint-order:stroke;cursor:pointer" stroke="#F6F3EC" stroke-width="4" stroke-linejoin="round" '+
+         'onclick="geoSel('+l.i+')">'+l.t+'</text>';
+      s+='<text x="'+(l.x+13)+'" y="'+(ly+13)+'" font-size="11" font-weight="700" fill="'+(l.sel?'#D9531E':'#A39A88')+'" '+
+         'style="paint-order:stroke" stroke="#F6F3EC" stroke-width="3.5" stroke-linejoin="round">'+l.val+'</text>';
+    });
+  }
+  if(GEO_PLACE){
+    s+='<rect x="'+vb.x+'" y="'+vb.y+'" width="'+vb.w+'" height="'+vb.h+'" fill="rgba(217,83,30,0.05)" style="cursor:crosshair" onclick="geoMapClick(event)"/>';
+    s+='<text x="'+(vb.x+vb.w/2)+'" y="'+(vb.y+26)+'" font-size="13" font-weight="700" fill="#B23A0E" text-anchor="middle" style="pointer-events:none">Click the map to place a fence</text>';
+  }
+  s+=chrome(vb);
+  document.getElementById('geMap').innerHTML=mapFrame(s,'Geofences around Mesa and the east valley',vb);
+}
+
+function renderGeoMap(){
+  drawGeoMap();
   const f=GEO_FENCES[GEO_SEL]||GEO_FENCES[0];
-  document.getElementById('geMapChip').textContent=GEO_FENCES.filter(x=>x.on).length+' active';
+  const t=geoTot();
+  const wk=geoWeek(f,GEO_SEL), wmax=Math.max.apply(null,wk.concat([1]));
+  document.getElementById('geMapChip').textContent=GEO_FENCES.filter(x=>x.on).length+' active · '+geoShown().length+' shown';
   document.getElementById('geMapDetail').innerHTML=
-    '<div class="mrow"><div class="mk">'+f.n+'</div><div class="mv">'+(f.on?'running':'paused')+' · '+f.t+'</div></div>'+
-    '<div class="mrow"><div class="mk">Radius</div><div class="mv">'+f.r+' miles</div></div>'+
+    '<div class="mrow"><div class="mk">Fence</div><div class="mv">'+f.n+'</div></div>'+
+    '<div class="mrow"><div class="mk">Type</div><div class="mv">'+f.t+'</div></div>'+
+    '<div class="mrow"><div class="mk">Status</div><div class="mv">'+(f.on?'running':'paused')+'</div></div>'+
+    '<div class="mrow"><div class="mk">Radius</div><div class="mv"><span id="geRLab">'+f.r+'</span> miles</div></div>'+
+    '<input class="slider" type="range" min="0.25" max="25" step="0.25" value="'+f.r+'" oninput="geoRadiusLive('+GEO_SEL+',this.value)" onchange="renderGeo()">'+
     '<div class="mrow"><div class="mk">Devices</div><div class="mv">'+f.dev.toLocaleString()+'</div></div>'+
     '<div class="mrow"><div class="mk">Impressions</div><div class="mv">'+f.imp.toLocaleString()+'</div></div>'+
+    '<div class="mrow"><div class="mk">Clicks</div><div class="mv">'+f.clk.toLocaleString()+'</div></div>'+
     '<div class="mrow"><div class="mk">Visits</div><div class="mv">'+f.vis+'</div></div>'+
     '<div class="mrow"><div class="mk">Signups</div><div class="mv">'+f.sg+'</div></div>'+
-    '<div class="mrow"><div class="mk">All active</div><div class="mv">'+t.dev.toLocaleString()+' devices · '+t.sg+' signups</div></div>';
+    '<div class="mrow"><div class="mk">Cost per signup</div><div class="mv">'+(f.sg?money(geoCpl(f)):'no signups yet')+'</div></div>'+
+    '<div class="mrow"><div class="mk">Visit to signup</div><div class="mv">'+pct(geoCvr(f))+'</div></div>'+
+    '<div class="mk" style="margin-top:8px">Signups, last 7 days</div>'+
+    '<div class="spark">'+wk.map(v=>'<i style="height:'+Math.max(2,Math.round(v/wmax*26))+'px"></i>').join('')+'</div>'+
+    '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'+
+      '<button class="btn sm" onclick="geoModal('+GEO_SEL+')">Edit</button>'+
+      '<button class="btn sm" onclick="geoToggle('+GEO_SEL+')">'+(f.on?'Pause':'Resume')+'</button>'+
+      '<button class="btn sm" onclick="geoZoomTo('+GEO_SEL+')">Zoom to</button></div>'+
+    '<div class="note" style="margin-top:8px">All active: '+t.dev.toLocaleString()+' devices, '+t.sg+' signups.</div>';
 }
 function geoSel(i){ GEO_SEL=i; renderGeoMap(); }
+function geoZoomTo(i){ GEO_SEL=i; GEO_ZOOM=1.8; renderGeoMap(); }
+function geoMapClick(ev){
+  const svg=document.getElementById('geMap').querySelector('svg');
+  if(!svg) return;
+  const r=svg.getBoundingClientRect(), vb=GEO_VB;
+  const px=(ev.clientX-r.left)/r.width*vb.w+vb.x;
+  const py=(ev.clientY-r.top)/r.height*vb.h+vb.y;
+  const lng=MB.w+px/MW*(MB.e-MB.w);
+  const lat=MB.n-py/MH*(MB.n-MB.s);
+  geoPlaceAt(lat,lng);
+}
 
 /* ---------- SEO map ---------- */
 let SEO_SEL=0;
@@ -2252,8 +2643,8 @@ function renderSeoMap(){
        '<text x="'+x+'" y="'+(y+rad+15)+'" font-size="11" font-weight="700" fill="#6B655A" text-anchor="middle">'+c.c+'</text>'+
        '</g>';
   });
-  const [hlat,hlng]=GEO_POS['ONBASE Athlete HQ'];
-  s+='<g transform="translate('+mx(hlng)+','+my(hlat)+')">'+
+  const hp=GEO_POS['ONBASE Athlete HQ'];
+  s+='<g transform="translate('+mx(hp[1])+','+my(hp[0])+')">'+
      '<path d="M0 -13 C7 -13 12 -8 12 -1 C12 8 0 17 0 17 C0 17 -12 8 -12 -1 C-12 -8 -7 -13 0 -13 Z" fill="#1B3A6B" stroke="#FFFFFF" stroke-width="2"/>'+
      '<circle cy="-2" r="4.6" fill="#FFFFFF"/></g>';
   /* legend */
@@ -2264,6 +2655,7 @@ function renderSeoMap(){
        '<circle cx="20" cy="'+(36+i*16)+'" r="6" fill="'+r[0]+'" opacity="0.85"/>'+
        '<text x="34" y="'+(40+i*16)+'" font-size="11" fill="#6B655A">'+r[1]+'</text>').join('')+
      '</g>';
+  s+=chrome({x:0,y:0,w:MW,h:MH});
   document.getElementById('seMap').innerHTML=mapFrame(s,'Where ONBASE ranks across the east valley');
   const c=CITY_RANK[SEO_SEL];
   document.getElementById('seMapChip').textContent='Mesa first, suburbs second';
