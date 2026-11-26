@@ -1152,9 +1152,9 @@ const SKIP_LOG=[
 const SKIP_MAP=[
   ['contact.phone','Member mobile','Read'],
   ['contact.tags','ONBASE segment','Read and write'],
-  ['conversation.messages','Conversation log','Read'],
+  ['conversation.messages','Thread count only','Read, not stored'],
   ['booking.completed_at','Session attended','Read'],
-  ['sequence.status','Follow-up state','Read'],
+  ['sequence.status','Running or paused','Read only'],
   ['outcome (booked, not interested)','Skip tag','Write'],
   ['member stage','Skip audience','Write']
 ];
